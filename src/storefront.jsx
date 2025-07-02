@@ -4,17 +4,35 @@ import { Link, useNavigate } from 'react-router-dom';
 export default function BusinessDashboard() {
   const navigate = useNavigate();
   const [businessInfo, setBusinessInfo] = useState({
-    storeId:'',
     name: '',
     phone: '',
     email: '',
     description: '',
     address: ''
   });
-
-  const [progress, setProgress] = useState(0);
+  const [storeId, setStoreId] = useState('');
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('Setup');
+
+  // Load storeId from localStorage on component mount
+  useEffect(() => {
+    const savedStoreId = localStorage.getItem('storeId');
+    if (savedStoreId) {
+      setStoreId(savedStoreId);
+      fetchBusinessInfo(savedStoreId);
+    }
+  }, []);
+
+  const fetchBusinessInfo = (storeId) => {
+    fetch(`https://bizzysite.onrender.com/api/business?storeId=${storeId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data?.business) {
+          setBusinessInfo({ ...data.business });
+        }
+      })
+      .catch(err => console.error('Failed to fetch business info:', err));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,7 +53,11 @@ export default function BusinessDashboard() {
       const res = await fetch('https://bizzysite.onrender.com/api/business', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'business', data: { ...businessInfo } })
+        body: JSON.stringify({ 
+          type: 'business', 
+          data: { ...businessInfo },
+          storeId // Include storeId in request
+        })
       });
   
       const result = await res.json();
@@ -45,28 +67,18 @@ export default function BusinessDashboard() {
       }
   
       if (result.storeId) {
-        setBusinessInfo(prev => ({ ...prev, storeId: result.storeId }));
+        // Save storeId to localStorage and state
+        localStorage.setItem('storeId', result.storeId);
+        setStoreId(result.storeId);
       }
   
       console.log("✅ Saved business info:", result);
       setSaved(true);
-      setProgress(1);
     } catch (err) {
       console.error('❌ Failed to save business info:', err);
       alert('Failed to save. Please try again.');
     }
   };
-  
-  useEffect(() => {
-    fetch('https://bizzysite.onrender.com/api/business')
-      .then(res => res.json())
-      .then(data => {
-        if (data?.business) {
-          setBusinessInfo({ ...data.business, storeId: data.storeId || '' });
-        }
-      })
-      .catch(err => console.error('Failed to fetch business info:', err));
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
@@ -75,7 +87,7 @@ export default function BusinessDashboard() {
           <div className="flex items-center space-x-4">
             <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">BizzySite</Link>
             {/* Storefront action buttons */}
-            <ViewSiteButtons />
+            <ViewSiteButtons storeId={storeId} />
           </div>
         </div>
         <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">Welcome to your business dashboard</h2>
@@ -252,48 +264,106 @@ export default function BusinessDashboard() {
           </form>
         </div>
 
-        {/* Progress Section */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Setup Progress</h3>
-          <p className="text-gray-600 mb-6">Complete these steps to launch your store</p>
-
-          <div className="mb-6">
-            <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">
-                Progress {progress}/4 steps
-              </span>
-              <span className="text-sm font-medium text-indigo-600">
-                {Math.round((progress / 4) * 100)}% complete
-              </span>
+        {/* Store ID Indicator */}
+        {storeId && (
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Your Store ID</h3>
+            <div className="flex items-center">
+              <code className="bg-gray-100 p-2 rounded-md font-mono text-sm sm:text-base break-all">
+                {storeId}
+              </code>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(storeId);
+                  alert('Store ID copied to clipboard!');
+                }}
+                className="ml-2 px-3 py-1 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Copy
+              </button>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div
-                className="bg-indigo-300 h-2.5 rounded-full transition-all duration-700 ease-in-out"
-                style={{ width: `${(progress / 4) * 100}%` }}
-              ></div>
+            <p className="mt-3 text-sm text-gray-600">
+              This is your unique store identifier. You'll need this when managing your store.
+            </p>
+          </div>
+        )}
+
+        {/* Setup Status */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Setup Status</h3>
+          
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                businessInfo.name ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+              }`}>
+                {businessInfo.name ? '✓' : '1'}
+              </div>
+              <div>
+                <h4 className="font-medium">Business Information</h4>
+                <p className="text-sm text-gray-600">
+                  {businessInfo.name ? 'Completed' : 'Add your business details'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-gray-200 text-gray-500">
+                2
+              </div>
+              <div>
+                <h4 className="font-medium">Add Products</h4>
+                <p className="text-sm text-gray-600">
+                  Add items to your store inventory
+                </p>
+                <Link 
+                  to="/products" 
+                  className="text-indigo-600 text-sm hover:underline mt-1 inline-block"
+                  onClick={() => setActiveTab('Products')}
+                >
+                  Go to Products →
+                </Link>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-gray-200 text-gray-500">
+                3
+              </div>
+              <div>
+                <h4 className="font-medium">Configure Payments</h4>
+                <p className="text-sm text-gray-600">
+                  Set up how you'll receive payments
+                </p>
+                <Link 
+                  to="/payment" 
+                  className="text-indigo-600 text-sm hover:underline mt-1 inline-block"
+                  onClick={() => setActiveTab('Payments')}
+                >
+                  Set up Payments →
+                </Link>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-gray-200 text-gray-500">
+                4
+              </div>
+              <div>
+                <h4 className="font-medium">Customize Store</h4>
+                <p className="text-sm text-gray-600">
+                  Personalize your store's appearance
+                </p>
+                <Link 
+                  to="/customize" 
+                  className="text-indigo-600 text-sm hover:underline mt-1 inline-block"
+                  onClick={() => setActiveTab('Customize')}
+                >
+                  Customize Store →
+                </Link>
+              </div>
             </div>
           </div>
-
-          <ul className="space-y-3">
-            {[
-              { id: 1, name: 'Business Info', completed: progress >= 1 },
-              { id: 2, name: 'Products Added', completed: progress >= 2 },
-              { id: 3, name: 'Payment Setup', completed: progress >= 3 },
-              { id: 4, name: 'Site Customized', completed: progress >= 4 }
-            ].map((step) => (
-              <li key={step.id} className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={step.completed}
-                  readOnly
-                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                />
-                <span className={`ml-3 ${step.completed ? 'text-gray-500 line-through' : 'text-gray-700'}`}>
-                  {step.name}
-                </span>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
 
@@ -331,16 +401,9 @@ export default function BusinessDashboard() {
     </div>
   );
 }
+
 // --- ViewSiteButtons Component ---
-
-function ViewSiteButtons() {
-  const [storeId, setStoreId] = useState("");
-  useEffect(() => {
-    fetch("https://bizzysite.onrender.com/api/business")
-      .then((res) => res.json())
-      .then((data) => setStoreId(data.storeId || ""));
-  }, []);
-
+{/*function ViewSiteButtons({ storeId }) {
   return (
     <div className="flex items-center space-x-2">
       <button
@@ -352,7 +415,7 @@ function ViewSiteButtons() {
               "_blank"
             );
           } else {
-            alert("Store ID not available. Please complete setup.");
+            alert("Please save your business information first");
           }
         }}
       >
@@ -365,9 +428,9 @@ function ViewSiteButtons() {
             navigator.clipboard.writeText(
               `https://bizzysite-frontend.onrender.com/store/${storeId}`
             );
-            alert("🔗 Link copied!");
+            alert("🔗 Store link copied to clipboard!");
           } else {
-            alert("Store ID not available. Please complete setup.");
+            alert("Please save your business information first");
           }
         }}
       >
@@ -375,4 +438,4 @@ function ViewSiteButtons() {
       </button>
     </div>
   );
-}
+}*/}

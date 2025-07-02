@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 const ViewSite = () => {
   const [businessData, setBusinessData] = useState(null);
@@ -10,23 +10,26 @@ const ViewSite = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [cart, setCart] = useState([]);
   const { storeId } = useParams();
+  const navigate = useNavigate();
 
-  // Fetch business data
+  // Fetch business data using storeId from URL
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await fetch(
-          `http://localhost:5050/api/business/${storeId}`,
+          `https://bizzysite.onrender.com/api/business/${storeId}`,
           {
-            cache: "no-store",
             headers: {
               "Content-Type": "application/json",
             },
           }
         );
 
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Failed to load store: ${response.status}`);
+        }
+        
         const data = await response.json();
         setBusinessData(data);
       } catch (err) {
@@ -37,18 +40,23 @@ const ViewSite = () => {
       }
     };
 
-    fetchData();
+    if (storeId) {
+      fetchData();
+    } else {
+      setError("Store ID is missing in URL");
+      setLoading(false);
+    }
   }, [storeId]);
 
   // Add to cart function
   const addToCart = (product) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(
-        (item) => (item.id || item._id) === (product.id || product._id)
+        (item) => item._id === product._id
       );
       if (existingItem) {
         return prevCart.map((item) =>
-          (item.id || item._id) === (product.id || product._id)
+          item._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -64,7 +72,7 @@ const ViewSite = () => {
 
     setCart((prevCart) =>
       prevCart.map((item) =>
-        (item.id || item._id) === productId
+        item._id === productId
           ? { ...item, quantity: newQuantity }
           : item
       )
@@ -74,7 +82,7 @@ const ViewSite = () => {
   // Remove from cart function
   const removeFromCart = (productId) => {
     setCart((prevCart) =>
-      prevCart.filter((item) => (item.id || item._id) !== productId)
+      prevCart.filter((item) => item._id !== productId)
     );
   };
 
@@ -83,7 +91,7 @@ const ViewSite = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your website...</p>
+          <p className="mt-4 text-gray-600">Loading your store...</p>
         </div>
       </div>
     );
@@ -94,7 +102,7 @@ const ViewSite = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center p-6 bg-white rounded-lg shadow-md max-w-md">
           <h3 className="text-lg font-medium text-red-600">
-            Error loading website
+            Error loading store
           </h3>
           <p className="mt-2 text-gray-600">{error}</p>
           <button
@@ -113,17 +121,16 @@ const ViewSite = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center p-6 bg-white rounded-lg shadow-md max-w-md">
           <h3 className="text-lg font-medium text-gray-800">
-            No website data found
+            Store not found
           </h3>
           <p className="mt-2 text-gray-600">
-            Please set up your business information, add products, and customize
-            your site.
+            The store ID <code>{storeId}</code> does not exist.
           </p>
           <Link
-            to="/storefront"
+            to="/"
             className="inline-block mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
-            Go to Dashboard
+            Return Home
           </Link>
         </div>
       </div>
@@ -168,19 +175,34 @@ const ViewSite = () => {
         <nav className="p-4">
           <ul className="space-y-3">
             <li>
-              <Link to="/preview" className="block py-2 hover:text-indigo-600">
+              <button 
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
+                }} 
+                className="block py-2 hover:text-indigo-600 w-full text-left"
+              >
                 Home
-              </Link>
+              </button>
             </li>
             <li>
-              <Link to="#products" className="block py-2 hover:text-indigo-600">
+              <button 
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+                }} 
+                className="block py-2 hover:text-indigo-600 w-full text-left"
+              >
                 Products
-              </Link>
+              </button>
             </li>
             <li>
               <button
-                onClick={() => setIsContactModalOpen(true)}
-                className="block py-2 hover:text-indigo-600"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsContactModalOpen(true);
+                }}
+                className="block py-2 hover:text-indigo-600 w-full text-left"
               >
                 Contact
               </button>
@@ -261,25 +283,31 @@ const ViewSite = () => {
             <ul className="space-y-4">
               {cart.map((item) => (
                 <li
-                  key={item.id || item._id}
+                  key={item._id}
                   className="flex items-center space-x-4 border-b border-gray-100 pb-4"
                 >
-                  <img
-                    src={item.images?.[0] || "https://via.placeholder.com/150"}
-                    alt={item.name}
-                    className="w-16 h-16 object-cover rounded"
-                  />
+                  {item.images?.length > 0 ? (
+                    <img
+                      src={item.images[0]}
+                      alt={item.name}
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                      <span className="text-xs text-gray-500">No Image</span>
+                    </div>
+                  )}
                   <div className="flex-1">
                     <h4 className="font-medium">{item.name}</h4>
                     <p className="text-sm text-gray-600">
-                      {item.currency}
+                      {item.currency || "$"}
                       {item.price}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() =>
-                        updateQuantity(item.id || item._id, item.quantity - 1)
+                        updateQuantity(item._id, item.quantity - 1)
                       }
                       className="w-6 h-6 flex items-center justify-center border rounded"
                     >
@@ -288,7 +316,7 @@ const ViewSite = () => {
                     <span>{item.quantity}</span>
                     <button
                       onClick={() =>
-                        updateQuantity(item.id || item._id, item.quantity + 1)
+                        updateQuantity(item._id, item.quantity + 1)
                       }
                       className="w-6 h-6 flex items-center justify-center border rounded"
                     >
@@ -296,7 +324,7 @@ const ViewSite = () => {
                     </button>
                   </div>
                   <button
-                    onClick={() => removeFromCart(item.id || item._id)}
+                    onClick={() => removeFromCart(item._id)}
                     className="text-red-500 hover:text-red-700"
                   >
                     ✕
@@ -310,27 +338,31 @@ const ViewSite = () => {
           <div className="flex justify-between mb-4">
             <span className="font-semibold">Total:</span>
             <span className="font-semibold">
-              {cart.length > 0 ? cart[0].currency : "$"}
+              {cart.length > 0 ? cart[0].currency || "$" : "$"}
               {cart
-                .reduce((total, item) => total + item.price * item.quantity, 0)
+                .reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0)
                 .toFixed(2)}
             </span>
           </div>
 
-          <Link
-            to={`/shop/${storeId}/orderform`}
-            state={{
-              cart,
-              total: cart.reduce(
-                (total, item) => total + item.price * item.quantity,
-                0
-              ),
+          <button
+            onClick={() => {
+              setIsCartOpen(false);
+              navigate(`/store/${storeId}/orderform`, {
+                state: {
+                  cart,
+                  total: cart.reduce(
+                    (total, item) => total + (parseFloat(item.price) * item.quantity),
+                    0
+                  ),
+                },
+              });
             }}
-            className="w-full py-2 text-white rounded-md font-medium text-center block"
+            className="w-full py-2 text-white rounded-md font-medium text-center"
             style={{ backgroundColor: primaryColor }}
           >
             Checkout
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -364,12 +396,18 @@ const ViewSite = () => {
             </h1>
           </div>
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="#home" className="hover:opacity-80">
+            <button 
+              onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })}
+              className="hover:opacity-80"
+            >
               Home
-            </Link>
-            <Link to="#products" className="hover:opacity-80">
+            </button>
+            <button 
+              onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+              className="hover:opacity-80"
+            >
               Products
-            </Link>
+            </button>
             <button
               onClick={() => setIsContactModalOpen(true)}
               className="hover:opacity-80"
@@ -414,11 +452,11 @@ const ViewSite = () => {
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              strokeWidth={2}
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
               />
             </svg>
@@ -436,11 +474,11 @@ const ViewSite = () => {
 
       {/* Hero Section */}
       <section
+        id="home"
         className="py-8 md:py-12 px-4 text-center"
         style={{
           backgroundColor: secondaryColor,
         }}
-        id="home"
       >
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-2xl md:text-4xl font-bold mb-4">
@@ -477,14 +515,14 @@ const ViewSite = () => {
                 No products available
               </h3>
               <p className="mt-1 text-sm text-gray-500">
-                Please add products in your dashboard to display them here.
+                Please check back later for our products.
               </p>
             </div>
           ) : (
             <div
               className={`grid ${
                 productLayout === "Grid"
-                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3"
+                  ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
                   : productLayout === "List"
                   ? "grid-cols-1"
                   : "grid-cols-1 md:grid-cols-2"
@@ -492,26 +530,26 @@ const ViewSite = () => {
             >
               {products.map((product) => {
                 const cartItem = cart.find(
-                  (item) =>
-                    (item.id || item._id) === (product.id || product._id)
+                  (item) => item._id === product._id
                 );
 
                 return (
                   <div
-                    key={product.id || product._id}
+                    key={product._id}
                     className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
                     style={{
                       border:
                         productLayout === "Card"
                           ? `2px solid ${secondaryColor}`
                           : "none",
-                      display: productLayout === "List" ? "flex" : "block",
+                      display: productLayout === "List" ? "flex flex-col sm:flex-row" : "block",
                     }}
                   >
-                    <Link
-                      to={`/shop/${storeId}/product/${
-                        product.id || product._id
-                      }`}
+                    <button
+                      onClick={() => 
+                        navigate(`/store/${storeId}/product/${product._id}`)
+                      }
+                      className="w-full text-left"
                     >
                       {product.images && product.images.length > 0 ? (
                         <img
@@ -519,24 +557,24 @@ const ViewSite = () => {
                           alt={product.name}
                           className={`${
                             productLayout === "List"
-                              ? "w-1/3 h-auto object-cover"
+                              ? "w-full h-48 sm:w-1/3 sm:h-auto object-cover"
                               : "w-full h-48 object-cover"
                           }`}
                         />
                       ) : (
                         <div
                           className={`${
-                            productLayout === "List" ? "w-1/3" : "w-full"
-                          } bg-gray-200 flex items-center justify-center`}
+                            productLayout === "List" ? "sm:w-1/3" : "w-full"
+                          } h-48 bg-gray-200 flex items-center justify-center`}
                         >
                           <span className="text-gray-500">No image</span>
                         </div>
                       )}
-                    </Link>
+                    </button>
 
                     <div
                       className={`p-4 ${
-                        productLayout === "List" ? "w-2/3" : ""
+                        productLayout === "List" ? "sm:w-2/3" : ""
                       }`}
                     >
                       <h3 className="text-lg font-semibold mb-2">
@@ -560,12 +598,13 @@ const ViewSite = () => {
                           cartItem ? (
                             <div className="flex items-center space-x-2">
                               <button
-                                onClick={() =>
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   updateQuantity(
-                                    product.id || product._id,
+                                    product._id,
                                     cartItem.quantity - 1
-                                  )
-                                }
+                                  );
+                                }}
                                 className="w-8 h-8 flex items-center justify-center border rounded"
                                 style={{ borderColor: primaryColor }}
                               >
@@ -573,12 +612,13 @@ const ViewSite = () => {
                               </button>
                               <span>{cartItem.quantity}</span>
                               <button
-                                onClick={() =>
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   updateQuantity(
-                                    product.id || product._id,
+                                    product._id,
                                     cartItem.quantity + 1
-                                  )
-                                }
+                                  );
+                                }}
                                 className="w-8 h-8 flex items-center justify-center border rounded"
                                 style={{ borderColor: primaryColor }}
                               >
@@ -587,7 +627,10 @@ const ViewSite = () => {
                             </div>
                           ) : (
                             <button
-                              onClick={() => addToCart(product)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCart(product);
+                              }}
                               className="px-3 py-1 text-sm rounded-md text-white font-medium hover:opacity-90 md:px-4 md:py-2 md:text-base"
                               style={{ backgroundColor: primaryColor }}
                             >
@@ -621,35 +664,40 @@ const ViewSite = () => {
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">BizzySite</h3>
+              <h3 className="text-xl font-bold mb-4">{business.name || "Our Store"}</h3>
               <p className="text-opacity-80">
-                Empowering small businesses to succeed online with simple,
-                powerful tools.
+                {business.description || "Quality products for our customers"}
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">Contact</h4>
-              <p className="mb-2">+91 7086758292</p>
-              <p className="mb-2">rhythmsarma66@gmail.com</p>
+              <p className="mb-2">{business.phone || "Phone not provided"}</p>
+              <p className="mb-2">{business.email || "Email not provided"}</p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link to="#home" className="hover:underline">
+                  <button 
+                    onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="hover:underline"
+                  >
                     Home
-                  </Link>
+                  </button>
                 </li>
                 <li>
-                  <Link to="#products" className="hover:underline">
+                  <button 
+                    onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="hover:underline"
+                  >
                     Products
-                  </Link>
+                  </button>
                 </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-opacity-20 mt-8 pt-8 text-center">
-            <p>© 2025 BizzySite. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} {business.name || "Our Store"}. All rights reserved.</p>
           </div>
         </div>
       </footer>
