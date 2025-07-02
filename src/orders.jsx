@@ -9,7 +9,7 @@ export default function OrderManagement() {
   const [orderToDelete, setOrderToDelete] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5050/api/orders")
+    fetch("https://bizzysite.onrender.com/api/orders")
       .then(res => res.json())
       .then(data => {
         const formatted = data.map((order, i) => {
@@ -64,7 +64,7 @@ export default function OrderManagement() {
   const handleDeleteOrder = (orderId) => {
     const updatedOrders = orders.filter(order => order.id !== orderId);
     setOrders(updatedOrders);
-    fetch(`http://localhost:5050/api/orders/${orderId}`, {
+    fetch(`https://bizzysite.onrender.com/api/orders/${orderId}`, {
       method: 'DELETE',
     })
       .then((res) => {

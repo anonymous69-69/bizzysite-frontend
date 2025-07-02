@@ -32,7 +32,7 @@ export default function BusinessDashboard() {
     }
   
     try {
-      const res = await fetch('http://localhost:5050/api/business', {
+      const res = await fetch('https://bizzysite.onrender.com/api/business', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'business', data: { ...businessInfo } })
@@ -58,7 +58,7 @@ export default function BusinessDashboard() {
   };
   
   useEffect(() => {
-    fetch('http://localhost:5050/api/business')
+    fetch('https://bizzysite.onrender.com/api/business')
       .then(res => res.json())
       .then(data => {
         if (data?.business) {

@@ -7,7 +7,7 @@ export default function NavView() {
   const [storeId, setStoreId] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:5050/api/business')
+    fetch('https://bizzysite.onrender.com/api/business')
       .then((res) => res.json())
       .then((data) => {
         if (data?.storeId) setStoreId(data.storeId);
@@ -17,15 +17,14 @@ export default function NavView() {
 
   const handleCopyLink = () => {
     if (!storeId) return;
-    const link = `http://localhost:3000/shop/${storeId}`;
+    const link = `https://bizzysite-frontend.onrender.com/shop/${storeId}`;
     navigator.clipboard.writeText(link);
     alert('Store link copied to clipboard!');
   };
 
   const handleViewSite = () => {
     if (!storeId) return;
-    const origin = window.location.origin;
-    window.open(`${origin}/shop/${storeId}`, '_blank');
+    window.open(`https://bizzysite-frontend.onrender.com/shop/${storeId}`, '_blank');
   };
   
 

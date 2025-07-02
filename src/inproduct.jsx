@@ -20,7 +20,7 @@ const InProduct = () => {
   // Extracted fetchProducts function
   const fetchProducts = async () => {
     try {
-      const response = await fetch(`http://localhost:5050/api/business/${storeId}`, { 
+      const response = await fetch(`https://bizzysite.onrender.com/api/business/${storeId}`, { 
         cache: "no-store",
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ const InProduct = () => {
     setError(null);
 
     console.log("Fetching product with ID:", id);
-    const res = await fetch(`http://localhost:5050/api/products/${id}`);
+    const res = await fetch(`https://bizzysite.onrender.com/api/products/${id}`);
 
     if (!res.ok) {
       throw new Error(`Product not found (status: ${res.status})`);

@@ -19,7 +19,7 @@ export default function LoginPage() {
     };
 
     try {
-      const response = await fetch(`http://localhost:5050/api/${isLogin ? 'login' : 'signup'}`, {
+      const response = await fetch(`https://bizzysite.onrender.com/api/${isLogin ? 'login' : 'signup'}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

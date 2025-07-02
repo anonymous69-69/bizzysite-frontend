@@ -18,7 +18,7 @@ export default function PaymentMethodForm() {
   useEffect(() => {
     const fetchPaymentSettings = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/business`);
+        const response = await fetch(`https://bizzysite.onrender.com/api/business`);
         if (response.ok) {
           const data = await response.json();
           if (data.payments) {
@@ -69,7 +69,7 @@ export default function PaymentMethodForm() {
         data: payload
       });
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/business`, {
+      const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

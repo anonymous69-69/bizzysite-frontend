@@ -18,7 +18,7 @@ export default function CustomizeStore() {
     formData.append('image', file);
 
     try {
-      const res = await fetch(`${window.location.protocol}//localhost:5050/api/upload`, {
+      const res = await fetch(`https://bizzysite.onrender.com/api/upload`, {
         method: 'POST',
         body: formData
       });
@@ -33,7 +33,7 @@ export default function CustomizeStore() {
   useEffect(() => {
     const fetchCustomization = async () => {
       try {
-        const response = await fetch(`${window.location.protocol}//localhost:5050/api/business`);
+        const response = await fetch(`https://bizzysite.onrender.com/api/business`);
         if (response.ok) {
           const data = await response.json();
           const c = data?.customize;
@@ -119,7 +119,7 @@ export default function CustomizeStore() {
     };
 
     try {
-      const response = await fetch(`${window.location.protocol}//localhost:5050/api/business`, {
+      const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ _id: 'singleton-site', type: 'customize', data: settings }),

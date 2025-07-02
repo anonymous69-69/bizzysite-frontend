@@ -69,7 +69,7 @@ const OrderForm = () => {
 
     try {
       // Step 1: Create Razorpay Order
-      const createOrderRes = await fetch("http://localhost:5050/api/create-order", {
+      const createOrderRes = await fetch("https://bizzysite.onrender.com/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -119,7 +119,7 @@ const OrderForm = () => {
             storeId: storeId,
           };
 
-          const saveRes = await fetch('http://localhost:5050/api/orders', {
+          const saveRes = await fetch('https://bizzysite.onrender.com/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(order)
