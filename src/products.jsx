@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function ProductCatalog() {
+  const BASE_URL = "https://bizzysite.onrender.com/api";
   const [products, setProducts] = useState([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [currentProduct, setCurrentProduct] = useState({
@@ -132,7 +133,7 @@ export default function ProductCatalog() {
       ? products.map(p => p._id === currentProduct._id ? productData : p)
       : [...products, productData];
 
-    fetch('http://localhost:5050/api/business', {
+    fetch(`${BASE_URL}/business`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: 'products', data: updatedProducts })
@@ -149,7 +150,7 @@ export default function ProductCatalog() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:5050/api/business')
+    fetch(`${BASE_URL}/business`)
       .then(res => res.json())
       .then(data => {
         if (data && Array.isArray(data.products)) {
@@ -162,7 +163,7 @@ export default function ProductCatalog() {
   const handleDeleteProduct = (productId) => {
     const updatedProducts = products.filter(product => product._id !== productId);
 
-    fetch('http://localhost:5050/api/business', {
+    fetch(`${BASE_URL}/business`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: 'products', data: updatedProducts })
@@ -184,12 +185,6 @@ export default function ProductCatalog() {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-purple-600 transition-colors">BizzySite</Link>
-           { /*<Link
-              to="/preview"
-              className="px-3 py-1 sm:px-4 sm:py-2 border border-purple-300 text-purple-500 bg-white rounded-md font-medium hover:bg-purple-50 text-sm sm:text-base"
-            >
-              View Site
-            </Link>*/}
           </div>
           <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">Welcome to your business dashboard</h2>
           <p className="text-gray-700 mb-6 sm:mb-8 text-sm sm:text-base">Set up your online store in minutes and start selling today</p>
@@ -200,20 +195,21 @@ export default function ProductCatalog() {
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
             <div className="flex space-x-2 sm:space-x-6 px-2 py-2 bg-gray-50 rounded-lg min-w-max">
               {[
-            { name: 'Setup', icon: '📊', path: '/storefront' },
-            { name: 'Products', icon: '📦', path: '/products' },
-            { name: 'Orders', icon: '🛒', path: '/orders' },
-            { name: 'Customize', icon: '🎨', path: '/customize' },
-            { name: 'Preview', icon: '🌐', path: '/navview' }, // ✅ FIXED
-            { name: 'Payments', icon: '💳', path: '/payment' }
+                { name: 'Setup', icon: '📊', path: '/storefront' },
+                { name: 'Products', icon: '📦', path: '/products' },
+                { name: 'Orders', icon: '🛒', path: '/orders' },
+                { name: 'Customize', icon: '🎨', path: '/customize' },
+                { name: 'Preview', icon: '🌐', path: '/navview' },
+                { name: 'Payments', icon: '💳', path: '/payment' }
               ].map((tab) => (
                 <Link
                   to={tab.path}
                   key={tab.name}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${activeTab === tab.name
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
+                    activeTab === tab.name
                       ? 'bg-purple-100 text-indigo-700'
                       : 'text-gray-500 hover:text-indigo-600'
-                    }`}
+                  }`}
                   onClick={() => setActiveTab(tab.name)}
                 >
                   <span className="text-lg">{tab.icon}</span>
@@ -281,7 +277,6 @@ export default function ProductCatalog() {
                       e.target.src = 'https://placehold.co/300x200?text=No+Image';
                     }}
                   />
-
                 ) : (
                   <div className="w-full h-32 sm:h-40 md:h-48 bg-gray-200 flex items-center justify-center">
                     <span className="text-gray-500 text-sm">No image</span>
@@ -380,7 +375,6 @@ export default function ProductCatalog() {
                           name="price"
                           value={currentProduct.price}
                           onChange={(e) => {
-                            // Only allow numbers and empty string
                             if (e.target.value === '' || /^[0-9]*\.?[0-9]*$/.test(e.target.value)) {
                               handleInputChange(e);
                             }

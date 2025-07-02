@@ -3,30 +3,55 @@ import { Link, useNavigate } from 'react-router-dom';
 
 export default function NavView() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('View Site');
+  const [activeTab, setActiveTab] = useState('Preview');
   const [storeId, setStoreId] = useState('');
+  const [businessName, setBusinessName] = useState('');
 
   useEffect(() => {
     fetch('https://bizzysite.onrender.com/api/business')
       .then((res) => res.json())
       .then((data) => {
         if (data?.storeId) setStoreId(data.storeId);
+        if (data?.business?.name) {
+          // Generate URL-friendly business name
+          const urlFriendlyName = data.business.name
+            .toLowerCase()
+            .replace(/\s+/g, '-') // Replace spaces with hyphens
+            .replace(/[^a-z0-9-]/g, ''); // Remove special characters
+          setBusinessName(urlFriendlyName);
+        }
       })
       .catch((err) => console.error('Failed to fetch storeId:', err));
   }, []);
 
   const handleCopyLink = () => {
-    if (!storeId) return;
-    const link = `https://bizzysite-frontend.onrender.com/shop/${storeId}`;
-    navigator.clipboard.writeText(link);
-    alert('Store link copied to clipboard!');
+    if (!storeId || !businessName) {
+      alert('Please save your business information first');
+      return;
+    }
+    
+    const link = `https://bizzysite-frontend.onrender.com/shop/${businessName}-${storeId}`;
+    navigator.clipboard.writeText(link)
+      .then(() => {
+        alert('Store link copied to clipboard!');
+      })
+      .catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy link. Please try again.');
+      });
   };
 
   const handleViewSite = () => {
-    if (!storeId) return;
-    window.open(`https://bizzysite-frontend.onrender.com/shop/${storeId}`, '_blank');
+    if (!storeId || !businessName) {
+      alert('Please save your business information first');
+      return;
+    }
+    
+    window.open(
+      `https://bizzysite-frontend.onrender.com/shop/${businessName}-${storeId}`, 
+      '_blank'
+    );
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
@@ -34,19 +59,6 @@ export default function NavView() {
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center space-x-4">
             <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">BizzySite</Link>
-            {/*<Link
-              to={`/shop/${storeId}`}
-              className="px-3 py-1 sm:px-4 sm:py-2 border border-purple-300 text-purple-500 bg-white rounded-md font-medium hover:bg-purple-50 text-sm sm:text-base"
-            >
-              view site
-            </Link>
-
-            <button
-              onClick={handleCopyLink}
-              className="px-3 py-1 sm:px-4 sm:py-2 border border-purple-300 text-purple-500 bg-white rounded-md font-medium hover:bg-purple-50 text-sm sm:text-base"
-            >
-              Copy Your Link
-            </button>*/}
           </div>
         </div>
         <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">Website Preview</h2>
@@ -57,21 +69,15 @@ export default function NavView() {
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
             <div className="flex space-x-2 sm:space-x-6 px-2 py-2 bg-gray-50 rounded-lg min-w-max">
               {[
-                { name: 'Setup', icon: '📊' },
-                { name: 'Products', icon: '📦' },
-                { name: 'Orders', icon: '🛒' },
-                { name: 'Customize', icon: '🎨' },
-                { name: 'Preview', icon: '🌐' },
-                { name: 'Payments', icon: '💳' }
+                { name: 'Setup', icon: '📊', path: '/storefront' },
+                { name: 'Products', icon: '📦', path: '/products' },
+                { name: 'Orders', icon: '🛒', path: '/orders' },
+                { name: 'Customize', icon: '🎨', path: '/customize' },
+                { name: 'Preview', icon: '🌐', path: '/navview' },
+                { name: 'Payments', icon: '💳', path: '/payment' }
               ].map((tab) => (
                 <Link
-                  to={
-                    tab.name === 'Products' ? '/products' :
-                    tab.name === 'Orders' ? '/orders' :
-                    tab.name === 'Customize' ? '/customize' :
-                    tab.name === 'Setup' ? '/storefront' :
-                    tab.name === 'Payments' ? '/payment' : '/navview'
-                  }
+                  to={tab.path}
                   key={tab.name}
                   onClick={() => setActiveTab(tab.name)}
                   className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
@@ -99,7 +105,10 @@ export default function NavView() {
               <p className="text-gray-500 text-sm mb-4">See how your store looks to customers</p>
               <button
                 onClick={handleViewSite}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                className={`px-4 py-2 text-white rounded-md hover:bg-indigo-700 transition-colors ${
+                  !storeId ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600'
+                }`}
+                disabled={!storeId}
               >
                 View Site
               </button>
@@ -110,16 +119,26 @@ export default function NavView() {
               <p className="text-gray-500 text-sm mb-4">Copy your store link to share with customers</p>
               <button
                 onClick={handleCopyLink}
-                className="px-4 py-2 border border-indigo-300 text-indigo-600 bg-white rounded-md hover:bg-indigo-50 transition-colors"
+                className={`px-4 py-2 border rounded-md ${
+                  !storeId 
+                    ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
+                    : 'border-indigo-300 text-indigo-600 bg-white hover:bg-indigo-50'
+                }`}
+                disabled={!storeId}
               >
                 Copy Link
               </button>
+              {storeId && businessName && (
+                <p className="mt-3 text-xs text-gray-500 break-words">
+                  Your store URL: https://bizzysite-frontend.onrender.com/shop/{businessName}-{storeId}
+                </p>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer - Same as storefront.jsx */}
+      {/* Footer */}
       <footer className="bg-gray-800 text-white py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">

@@ -15,7 +15,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Storefront />} />
+        {/* Changed root path to Signup page */}
+        <Route path="/" element={<Signup />} />
         <Route path="/storefront" element={<Storefront />} />
         <Route path="/products" element={<Products />} />
         <Route path="/orders" element={<Orders />} />
