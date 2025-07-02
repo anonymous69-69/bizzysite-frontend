@@ -5,32 +5,23 @@ export default function NavView() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Preview');
   const [storeId, setStoreId] = useState('');
-  const [businessName, setBusinessName] = useState('');
 
   useEffect(() => {
     fetch('https://bizzysite.onrender.com/api/business')
       .then((res) => res.json())
       .then((data) => {
         if (data?.storeId) setStoreId(data.storeId);
-        if (data?.business?.name) {
-          // Generate URL-friendly business name
-          const urlFriendlyName = data.business.name
-            .toLowerCase()
-            .replace(/\s+/g, '-') // Replace spaces with hyphens
-            .replace(/[^a-z0-9-]/g, ''); // Remove special characters
-          setBusinessName(urlFriendlyName);
-        }
       })
       .catch((err) => console.error('Failed to fetch storeId:', err));
   }, []);
 
   const handleCopyLink = () => {
-    if (!storeId || !businessName) {
+    if (!storeId) {
       alert('Please save your business information first');
       return;
     }
     
-    const link = `https://bizzysite-frontend.onrender.com/shop/${businessName}-${storeId}`;
+    const link = `https://bizzysite-frontend.onrender.com/store/${storeId}`;
     navigator.clipboard.writeText(link)
       .then(() => {
         alert('Store link copied to clipboard!');
@@ -42,13 +33,13 @@ export default function NavView() {
   };
 
   const handleViewSite = () => {
-    if (!storeId || !businessName) {
+    if (!storeId) {
       alert('Please save your business information first');
       return;
     }
     
     window.open(
-      `https://bizzysite-frontend.onrender.com/shop/${businessName}-${storeId}`, 
+      `https://bizzysite-frontend.onrender.com/store/${storeId}`, 
       '_blank'
     );
   };
@@ -128,9 +119,9 @@ export default function NavView() {
               >
                 Copy Link
               </button>
-              {storeId && businessName && (
+              {storeId && (
                 <p className="mt-3 text-xs text-gray-500 break-words">
-                  Your store URL: https://bizzysite-frontend.onrender.com/shop/{businessName}-{storeId}
+                  Your store URL: https://bizzysite-frontend.onrender.com/store/{storeId}
                 </p>
               )}
             </div>

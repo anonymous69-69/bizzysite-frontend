@@ -74,28 +74,8 @@ export default function BusinessDashboard() {
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center space-x-4">
             <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">BizzySite</Link>
-            {/*<Link
-              to={`/shop/${businessInfo.storeId}`}
-              className="px-3 py-1 sm:px-4 sm:py-2 border border-purple-300 text-purple-500 bg-white rounded-md font-medium hover:bg-purple-50 text-sm sm:text-base"
-            >
-              View Site
-            </Link>*/}
-
-            {/*<button
-              onClick={() => {
-                if (businessInfo.storeId) {
-                  navigator.clipboard.writeText(
-                    `http://localhost:3000/shop/${businessInfo.storeId}`
-                  );
-                  alert("Store link copied to clipboard!");
-                } else {
-                  alert("Please save business information first");
-                }
-              }}
-              className="px-3 py-1 sm:px-4 sm:py-2 border border-purple-300 text-purple-500 bg-white rounded-md font-medium hover:bg-purple-50 text-sm sm:text-base"
-            >
-              Copy Your Link
-            </button>*/}
+            {/* Storefront action buttons */}
+            <ViewSiteButtons />
           </div>
         </div>
         <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">Welcome to your business dashboard</h2>
@@ -348,6 +328,52 @@ export default function BusinessDashboard() {
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+// --- ViewSiteButtons Component ---
+import React, { useState, useEffect } from "react";
+
+function ViewSiteButtons() {
+  const [storeId, setStoreId] = useState("");
+  useEffect(() => {
+    fetch("https://bizzysite.onrender.com/api/business")
+      .then((res) => res.json())
+      .then((data) => setStoreId(data.storeId || ""));
+  }, []);
+
+  return (
+    <div className="flex items-center space-x-2">
+      <button
+        className="px-3 py-1 sm:px-4 sm:py-2 border border-purple-300 text-purple-500 bg-white rounded-md font-medium hover:bg-purple-50 text-sm sm:text-base"
+        onClick={() => {
+          if (storeId) {
+            window.open(
+              `https://bizzysite-frontend.onrender.com/store/${storeId}`,
+              "_blank"
+            );
+          } else {
+            alert("Store ID not available. Please complete setup.");
+          }
+        }}
+      >
+        View Site
+      </button>
+      <button
+        className="px-3 py-1 sm:px-4 sm:py-2 border border-purple-300 text-purple-500 bg-white rounded-md font-medium hover:bg-purple-50 text-sm sm:text-base"
+        onClick={() => {
+          if (storeId) {
+            navigator.clipboard.writeText(
+              `https://bizzysite-frontend.onrender.com/store/${storeId}`
+            );
+            alert("🔗 Link copied!");
+          } else {
+            alert("Store ID not available. Please complete setup.");
+          }
+        }}
+      >
+        Copy Link
+      </button>
     </div>
   );
 }
