@@ -1,23 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
 export default function ProductCatalog() {
-  const BASE_URL = "https://bizzysite.onrender.com/api";
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bizzysite.onrender.com/api';
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [currentProduct, setCurrentProduct] = useState({
     _id: uuidv4(),
     name: '',
-    price: '0',
+    price: 0, // ✅ Number
+    currency: '$',
     description: '',
     images: [],
-    inStock: true,
-    currency: '$'
+    inStock: true
   });
   const [imagePreviews, setImagePreviews] = useState([]);
   const [activeTab, setActiveTab] = useState('Products');
   const [storeId, setStoreId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
 
   const currencies = [
     { symbol: '$', name: 'USD' },
@@ -36,17 +41,21 @@ export default function ProductCatalog() {
     }
   }, []);
 
-  const fetchProducts = async (storeId) => {
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-      const response = await fetch(`${BASE_URL}/business?storeId=${storeId}`);
-      const data = await response.json();
-      if (data && Array.isArray(data.products)) {
-        setProducts(data.products);
-      }
+      const response = await api.get('/store');
+      setProducts(response.data?.products || []);
+      setStoreId(response.data?.storeId || '');
     } catch (err) {
-      console.error('Failed to fetch products:', err);
+      setError(err.response?.data?.message || 'Failed to load products');
+      if (err.response?.status === 401) navigate('/login');
+    } finally {
+      setIsLoading(false);
     }
   };
+  
 
   const handleAddProductClick = () => {
     setCurrentProduct({
@@ -109,7 +118,7 @@ export default function ProductCatalog() {
 
     const newPreviews = files.map(file => URL.createObjectURL(file));
     setImagePreviews(prev => [...prev, ...newPreviews]);
-  };
+  
 
   const handleRemoveImage = (index) => {
     const newImages = [...currentProduct.images];
@@ -125,65 +134,53 @@ export default function ProductCatalog() {
     setImagePreviews(newPreviews);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!currentProduct.name.trim()) {
-      alert('Product name is required');
-      return;
-    }
-
-    if (isNaN(parseFloat(currentProduct.price)) || parseFloat(currentProduct.price) < 0) {
-      alert('Please enter a valid price');
-      return;
-    }
-
-    if (!storeId) {
-      alert("Please complete your business setup first to get a Store ID");
-      return;
-    }
-
-    const productData = {
-      _id: currentProduct._id,
-      name: currentProduct.name,
-      price: currentProduct.price,
-      currency: currentProduct.currency,
-      description: currentProduct.description,
-      images: imagePreviews,
-      inStock: currentProduct.inStock,
-      createdAt: new Date().toISOString()
-    };
-
-    const isExistingProduct = products.some(p => p._id === currentProduct._id);
-    const updatedProducts = isExistingProduct
-      ? products.map(p => p._id === currentProduct._id ? productData : p)
-      : [...products, productData];
-
-    fetch(`${BASE_URL}/business`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        type: 'products', 
-        data: updatedProducts,
-        storeId 
-      })
-    })
-      .then(res => res.json())
-      .then(() => {
-        setProducts(updatedProducts);
-        handleCloseModal();
-      })
-      .catch(err => {
-        console.error('Failed to save product:', err);
-        alert('Failed to save product');
+    setIsLoading(true);
+  
+    try {
+      const productData = {
+        ...currentProduct,
+        price: Number(currentProduct.price) // Force numeric
+      };
+  
+      const updatedProducts = products.some(p => p._id === currentProduct._id)
+        ? products.map(p => p._id === currentProduct._id ? productData : p)
+        : [...products, productData];
+  
+      await api.put('/products', updatedProducts, {
+        headers: {
+          'X-Store-ID': storeId
+        }
       });
+  
+      setProducts(updatedProducts);
+      setShowProductModal(false);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to save product');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteProduct = (productId) => {
-    if (!storeId) {
-      alert("Please complete your business setup first to get a Store ID");
-      return;
+  const handleDeleteProduct = async (productId) => {
+    if (!window.confirm('Delete this product permanently?')) return;
+  
+    setIsLoading(true);
+    try {
+      const updatedProducts = products.filter(p => p._id !== productId);
+      await api.put('/products', updatedProducts, {
+        headers: {
+          'X-Store-ID': storeId
+        }
+      });
+      setProducts(updatedProducts);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete product');
+    } finally {
+      setIsLoading(false);
     }
+  };
 
     const updatedProducts = products.filter(product => product._id !== productId);
 
@@ -205,6 +202,14 @@ export default function ProductCatalog() {
         alert('Failed to delete product');
       });
   };
+
+  const api = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
