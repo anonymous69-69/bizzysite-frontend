@@ -74,22 +74,19 @@ export default function LoginPage() {
       <div className="bg-white py-16 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4">BizzySite</h1>
-          <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-            Build Your Online Store in Minutes, Not Months
-          </h2>
+          <p className="text-2xl font-semibold text-gray-700 mb-6">Build your online store with ease</p>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
-            Perfect for small business owners who want to sell online without the complexity. 
-            No coding, no hassle, just results.
+            Empower your small business with a beautiful ecommerce website, fast checkout, and integrated payments.
           </p>
           <div className="flex justify-center space-x-4">
-            <button
+            <button 
               onClick={() => openModal(false)}
               className="px-6 py-3 bg-[#fa6da4] text-white font-medium rounded-md hover:bg-pink-700 transition-colors"
             >
-              Start Building Free →
+              Sign Up
             </button>
             <button className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 transition-colors">
-              Watch Demo
+              Login
             </button>
           </div>
         </div>
@@ -97,14 +94,11 @@ export default function LoginPage() {
 
       {/* Features Section */}
       <div className="bg-gray-50 py-16 px-4 sm:px-6 lg:px-8 flex-grow">
-        <div className="max-w-7xl mx-auto">
-          <h3 className="text-2xl font-semibold text-center text-gray-900 mb-12">
-            Everything You Need to Succeed Online
-          </h3>
-          <p className="text-lg text-gray-600 text-center mb-12">
-            We've built the simplest way for small businesses to create professional online stores
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Features</h2>
+          <p className="text-lg text-gray-600 mb-8">
+            Everything you need to get started is built in – no coding required.
           </p>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             <div className="bg-[#f9d3e0] p-6 rounded-lg shadow-sm">
               <div className="text-pink-800 text-3xl mb-4">⚡</div>
@@ -134,20 +128,9 @@ export default function LoginPage() {
               Why Small Businesses Choose BizzySite
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              {[
-                'No technical knowledge required',
-                'Mobile-friendly stores',
-                'Multiple payment options (UPI, Bank Transfer)',
-                'Real-time order management',
-                'Professional design templates',
-                'SEO-optimized for better visibility'
-              ].map((feature, index) => (
-                <div key={index} className="flex items-start">
-                  <div className="flex-shrink-0 h-6 w-6 text-pink-800 mt-0.5">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
+              {["All-in-one ecommerce platform", "No hidden fees or locked-in contracts", "24/7 customer support", "Free SSL and hosting"].map((feature, idx) => (
+                <div key={idx} className="flex items-center mb-4">
+                  <div className="text-pink-800 text-3xl mr-3">✓</div>
                   <p className="ml-2 text-gray-700">{feature}</p>
                 </div>
               ))}
@@ -157,7 +140,7 @@ export default function LoginPage() {
                 onClick={() => openModal(false)}
                 className="inline-block px-6 py-3 bg-[#fa6da4] text-white font-medium rounded-md hover:bg-pink-700 transition-colors"
               >
-                Start Your Free Store →
+                Get Started
               </button>
             </div>
           </div>
@@ -194,8 +177,8 @@ export default function LoginPage() {
               <h4 className="text-lg font-semibold mb-4">Resources</h4>
               <ul className="space-y-2 text-gray-300">
                 <li><Link to="#" className="hover:text-white">Blog</Link></li>
-                <li><Link to="#" className="hover:text-white">Help Center</Link></li>
-                <li><Link to="#" className="hover:text-white">Community</Link></li>
+                <li><Link to="#" className="hover:text-white">FAQs</Link></li>
+                <li><Link to="#" className="hover:text-white">Support</Link></li>
               </ul>
             </div>
           </div>
@@ -215,11 +198,8 @@ export default function LoginPage() {
             className="bg-white rounded-lg shadow-xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                {isLogin ? 'Welcome back!' : 'Create your store'}
-              </h2>
-              
+            <div className="px-6 py-4">
+              <h2 className="text-2xl font-bold mb-4">{isLogin ? 'Login' : 'Create Account'}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
                   <div>
@@ -271,49 +251,49 @@ export default function LoginPage() {
                 <div>
                   <button
                     type="submit"
-                    className="w-full px-4 py-2 bg-[#fa6da4] text-white rounded-md hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fa6da4] transition-colors"
+                    className="w-full px-4 py-2 bg-[#fa6da4] text-white font-medium rounded-md hover:bg-pink-700 focus:ring-2 focus:ring-offset-2 focus:ring-[#fa6da4] transition-colors"
                   >
                     {isLogin ? 'Sign in' : 'Create account'}
                   </button>
                 </div>
-              </form>
-              
-              <div className="mt-6">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
+
+                <div className="mt-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">
+                        Or continue with
+                      </span>
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">
-                      Or continue with
-                    </span>
+                  
+                  <div className="mt-6 grid grid-cols-1 gap-3">
+                    <button
+                      type="button"
+                      className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fa6da4]"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.545 10.239v3.821h5.445c-0.261 1.353-1.126 2.471-2.381 3.229l3.845 2.979c2.246-2.071 3.538-5.116 3.538-8.579 0-0.741-0.071-1.457-0.202-2.155h-8.245z" />
+                      </svg>
+                      <span className="ml-2">Google</span>
+                    </button>
                   </div>
                 </div>
-                
-                <div className="mt-6 grid grid-cols-1 gap-3">
+
+                <div className="mt-6 text-center">
                   <button
                     type="button"
-                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fa6da4]"
+                    onClick={() => setIsLogin(!isLogin)}
+                    className="text-[#fa6da4] hover:text-pink-700 text-sm font-medium transition-colors"
                   >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814c-1.784-1.664-4.146-2.675-6.735-2.675-5.522 0-10 4.479-10 10s4.478 10 10 10c8.396 0 10-7.496 10-10 0-0.67-0.069-1.325-0.189-1.961h-9.811z" />
-                    </svg>
-                    <span className="ml-2">Google</span>
+                    {isLogin 
+                      ? "Don't have an account? Sign up" 
+                      : "Already have an account? Sign in"}
                   </button>
                 </div>
-              </div>
-              
-              <div className="mt-6 text-center">
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-[#fa6da4] hover:text-pink-700 text-sm font-medium transition-colors"
-                >
-                  {isLogin 
-                    ? "Don't have an account? Sign up" 
-                    : "Already have an account? Sign in"}
-                </button>
-              </div>
+              </form>
             </div>
           </div>
         </div>
