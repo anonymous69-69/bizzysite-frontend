@@ -70,6 +70,7 @@ export default function BusinessDashboard() {
         // Save storeId to localStorage and state
         localStorage.setItem('storeId', result.storeId);
         setStoreId(result.storeId);
+        console.log("✅ Saved storeId:", result.storeId); 
       }
   
       console.log("✅ Saved business info:", result);
