@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProductCatalog() {
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bizzysite.onrender.com/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 
+  'https://bizzysite.onrender.com/api';
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [showProductModal, setShowProductModal] = useState(false);
@@ -118,7 +120,7 @@ export default function ProductCatalog() {
 
     const newPreviews = files.map(file => URL.createObjectURL(file));
     setImagePreviews(prev => [...prev, ...newPreviews]);
-  
+  };
 
   const handleRemoveImage = (index) => {
     const newImages = [...currentProduct.images];
@@ -180,27 +182,6 @@ export default function ProductCatalog() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-    const updatedProducts = products.filter(product => product._id !== productId);
-
-    fetch(`${BASE_URL}/business`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        type: 'products', 
-        data: updatedProducts,
-        storeId 
-      })
-    })
-      .then(res => res.json())
-      .then(() => {
-        setProducts(updatedProducts);
-      })
-      .catch(err => {
-        console.error('Failed to delete product:', err);
-        alert('Failed to delete product');
-      });
   };
 
   const api = axios.create({
@@ -278,7 +259,8 @@ export default function ProductCatalog() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+                  d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2
+  0 01-2 2H5a2 2 0 01-2-2z"
                 />
               </svg>
               <h3 className="mt-2 text-lg font-medium text-gray-900">No products yet</h3>
@@ -321,8 +303,9 @@ export default function ProductCatalog() {
                     {product.description || 'No description'}
                   </p>
                   <div className="flex items-center mt-2 md:mt-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${product.inStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                      product.inStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
                       {product.inStock ? 'In Stock' : 'Out of Stock'}
                     </span>
                   </div>
@@ -450,7 +433,9 @@ export default function ProductCatalog() {
                             aria-hidden="true"
                           >
                             <path
-                              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 
+01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 
+32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
                               strokeWidth={2}
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -477,7 +462,6 @@ export default function ProductCatalog() {
                           <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                         </div>
                       </div>
-
                       {imagePreviews.length > 0 && (
                         <div className="mt-4 grid grid-cols-3 gap-2">
                           {imagePreviews.map((preview, index) => (
@@ -543,6 +527,7 @@ export default function ProductCatalog() {
             </div>
           </div>
         )}
+
       </div>
 
       <footer className="bg-gray-800 text-white py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
