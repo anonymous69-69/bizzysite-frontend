@@ -12,6 +12,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Prepare payload: include name only for signup
     const payload = {
       email,
       password,
@@ -22,7 +23,7 @@ export default function LoginPage() {
       const response = await fetch(`https://bizzysite.onrender.com/api/${isLogin ? 'login' : 'signup'}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json',  // ensure JSON body
         },
         body: JSON.stringify(payload),
       });
@@ -30,6 +31,7 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        // On HTTP error status, throw with server's message
         throw new Error(data.message || 'Something went wrong');
       }
 
