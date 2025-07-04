@@ -82,6 +82,11 @@ export default function BusinessDashboard() {
         localStorage.setItem('storeId', result.storeId);
         setStoreId(result.storeId);
         console.log("✅ Saved storeId:", result.storeId);
+      } else if (result.data && result.data.storeId) {
+        // Handle update case
+        localStorage.setItem('storeId', result.data.storeId);
+        setStoreId(result.data.storeId);
+        console.log("✅ Updated storeId:", result.data.storeId);
       }
 
       console.log("✅ Saved business info:", result);
