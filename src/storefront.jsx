@@ -58,13 +58,23 @@ export default function BusinessDashboard() {
 
     try {
       const userId = localStorage.getItem('userId');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Only include x-store-id header if we have a storeId
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userId}`
+      };
+      
+      if (storeId) {
+        headers['x-store-id'] = storeId;
+      }
+
       const res = await fetch('https://bizzysite.onrender.com/api/business', {
         method: storeId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userId}`,
-          'x-store-id': storeId
-        },
+        headers,
         body: JSON.stringify({
           type: 'business',
           data: { ...businessInfo }
@@ -74,26 +84,30 @@ export default function BusinessDashboard() {
       const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.message || "Failed to save");
+        throw new Error(result.message || "Failed to save business information");
       }
 
-      if (result.storeId) {
-        // Save storeId to localStorage and state
-        localStorage.setItem('storeId', result.storeId);
-        setStoreId(result.storeId);
-        console.log("✅ Saved storeId:", result.storeId);
-      } else if (result.data && result.data.storeId) {
-        // Handle update case
-        localStorage.setItem('storeId', result.data.storeId);
-        setStoreId(result.data.storeId);
-        console.log("✅ Updated storeId:", result.data.storeId);
+      // Handle storeId consistently regardless of method
+      const newStoreId = result.storeId || (result.data && result.data.storeId);
+      if (newStoreId) {
+        localStorage.setItem('storeId', newStoreId);
+        setStoreId(newStoreId);
+        console.log("✅ Store ID set:", newStoreId);
       }
 
-      console.log("✅ Saved business info:", result);
+      console.log("✅ Business info saved:", result);
       setSaved(true);
+      alert('Business information saved successfully!');
+      
+      // Refresh business info after save
+      if (newStoreId) {
+        fetchBusinessInfo(newStoreId);
+      } else if (storeId) {
+        fetchBusinessInfo(storeId);
+      }
     } catch (err) {
       console.error('❌ Failed to save business info:', err);
-      alert('Failed to save. Please try again.');
+      alert(`Save failed: ${err.message}`);
     }
   };
 
