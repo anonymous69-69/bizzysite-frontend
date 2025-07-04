@@ -120,6 +120,11 @@ export default function CustomizeStore() {
       return;
     }
 
+    const userId = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('userId='))
+      ?.split('=')[1];
+
     const settings = {
       primaryColor,
       secondaryColor,
@@ -131,11 +136,14 @@ export default function CustomizeStore() {
     try {
       const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userId}`,
+          'x-store-id': storeId
+        },
         body: JSON.stringify({ 
           type: 'customize', 
-          data: settings,
-          storeId 
+          data: settings
         }),
       });
 

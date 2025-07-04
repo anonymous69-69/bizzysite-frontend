@@ -48,31 +48,35 @@ export default function BusinessDashboard() {
       alert('Business name is required');
       return;
     }
-  
+
     try {
+      const userId = localStorage.getItem('userId');
       const res = await fetch('https://bizzysite.onrender.com/api/business', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          type: 'business', 
-          data: { ...businessInfo },
-          storeId // Include storeId in request
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userId}`,
+          'x-store-id': storeId
+        },
+        body: JSON.stringify({
+          type: 'business',
+          data: { ...businessInfo }
         })
       });
-  
+
       const result = await res.json();
-  
+
       if (!res.ok) {
         throw new Error(result.message || "Failed to save");
       }
-  
+
       if (result.storeId) {
         // Save storeId to localStorage and state
         localStorage.setItem('storeId', result.storeId);
         setStoreId(result.storeId);
-        console.log("✅ Saved storeId:", result.storeId); 
+        console.log("✅ Saved storeId:", result.storeId);
       }
-  
+
       console.log("✅ Saved business info:", result);
       setSaved(true);
     } catch (err) {
