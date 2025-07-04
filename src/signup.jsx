@@ -35,6 +35,7 @@ export default function LoginPage() {
         throw new Error(data.message || 'Something went wrong');
       }
 
+      localStorage.setItem('userId', data.userId);
       alert(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
       setShowModal(false);
       navigate('/storefront');

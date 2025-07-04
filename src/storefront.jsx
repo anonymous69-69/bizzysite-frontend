@@ -24,7 +24,14 @@ export default function BusinessDashboard() {
   }, []);
 
   const fetchBusinessInfo = (storeId) => {
-    fetch(`https://bizzysite.onrender.com/api/business?storeId=${storeId}`)
+    const userId = localStorage.getItem("userId");
+    fetch(`https://bizzysite.onrender.com/api/store`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${userId}`,
+        'x-store-id': storeId
+      }
+    })
       .then(res => res.json())
       .then(data => {
         if (data?.business) {
@@ -52,7 +59,7 @@ export default function BusinessDashboard() {
     try {
       const userId = localStorage.getItem('userId');
       const res = await fetch('https://bizzysite.onrender.com/api/business', {
-        method: 'POST',
+        method: storeId ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${userId}`,
