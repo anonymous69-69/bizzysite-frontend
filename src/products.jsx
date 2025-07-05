@@ -139,6 +139,13 @@ export default function ProductCatalog() {
         toast.warn(`Only ${availableSlots} images can be added`);
       }
 
+      // Guard: skip if no files are left after slicing
+      if (filesToUpload.length === 0) {
+        toast.warn("Image limit reached (max 5)");
+        setIsUploading(false);
+        return;
+      }
+
       // Check for oversized images before converting to Base64
       const MAX_IMAGE_SIZE_MB = 1.5;
       const oversizedFiles = filesToUpload.filter(file => file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024);
@@ -152,7 +159,10 @@ export default function ProductCatalog() {
       const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onloadend = () => resolve(reader.result);
+        reader.onloadend = () => {
+          console.log('Converted to base64:', reader.result.slice(0, 30)); // Debug output
+          resolve(reader.result);
+        };
         reader.onerror = reject;
       });
 
