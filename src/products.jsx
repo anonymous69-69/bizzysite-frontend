@@ -5,10 +5,6 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-// Cloudinary configuration (replace with your own credentials)
-const CLOUD_NAME = 'your-cloudinary-cloud-name';
-const UPLOAD_PRESET = 'your-upload-preset';
-
 export default function ProductCatalog() {
   const API_BASE_URL = 'https://bizzysite.onrender.com/api';
   const navigate = useNavigate();
@@ -126,62 +122,44 @@ export default function ProductCatalog() {
     }));
   };
 
-  const uploadToCloudinary = async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', UPLOAD_PRESET);
-    
-    try {
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-      
-      const data = await response.json();
-      return data.secure_url;
-    } catch (error) {
-      console.error('Cloudinary upload error:', error);
-      throw error;
-    }
-  };
-
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
-    
+
     setImageUploadError('');
     setIsUploading(true);
-    
+
     try {
       // Limit to 5 images
       const maxImages = 5;
       const availableSlots = maxImages - currentProduct.images.length;
       const filesToUpload = files.slice(0, availableSlots);
-      
+
       if (files.length > availableSlots) {
         toast.warn(`Only ${availableSlots} images can be added`);
       }
-      
-      const uploadPromises = filesToUpload.map(file => uploadToCloudinary(file));
-      const imageUrls = await Promise.all(uploadPromises);
-      
+
+      // Convert files to Base64 strings
+      const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+      });
+
+      const base64Promises = filesToUpload.map(file => toBase64(file));
+      const base64Results = await Promise.all(base64Promises);
+
       setCurrentProduct(prev => ({
         ...prev,
-        images: [...prev.images, ...imageUrls]
+        images: [...prev.images, ...base64Results]
       }));
-      
-      setImagePreviews(prev => [...prev, ...imageUrls]);
-      toast.success('Images uploaded successfully!');
+
+      setImagePreviews(prev => [...prev, ...base64Results]);
+      toast.success('Images added successfully!');
     } catch (err) {
       console.error('Image upload error:', err);
-      setImageUploadError('Failed to upload images');
+      setImageUploadError('Failed to add images');
       toast.error('Image upload failed');
     } finally {
       setIsUploading(false);
@@ -206,7 +184,7 @@ export default function ProductCatalog() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-  
+
     try {
       // Create product data
       const productData = {
@@ -262,7 +240,7 @@ export default function ProductCatalog() {
 
   const handleDeleteProduct = async (productId) => {
     if (!window.confirm('Delete this product permanently?')) return;
-  
+
     setIsLoading(true);
     try {
       const updatedProducts = products.filter(p => p._id !== productId);
@@ -369,69 +347,46 @@ export default function ProductCatalog() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2
-  0 01-2 2H5a2 2 0 01-2-2z"
                 />
               </svg>
-              <h3 className="mt-2 text-lg font-medium text-gray-900">No products yet</h3>
-              <p className="mt-1 text-sm text-gray-500 mb-4">
-                Add your first product to start building your catalog
-              </p>
-              <button
-                onClick={handleAddProductClick}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm sm:text-base"
-              >
-                Add Your First Product
-              </button>
+              <p className="mt-4 text-gray-500">No products yet.</p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-            {products.map(product => (
-              <div key={product._id} className="bg-white rounded-lg shadow overflow-hidden">
-                {product.images.length > 0 ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://placehold.co/300x200?text=No+Image';
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-500">No image</span>
-                  </div>
-                )}
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">{product.name}</h3>
-                  <p className="text-indigo-600 font-medium mt-1">
-                    {product.currency}{product.price.toFixed(2)}
-                  </p>
-                  <p className="text-gray-600 mt-2 text-sm line-clamp-2">
-                    {product.description || 'No description'}
-                  </p>
-                  <div className="flex items-center mt-3">
-                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${product.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                      }`}>
-                      {product.inStock ? "In Stock" : "Out of Stock"}
-                    </span>
-                  </div>
-                  <div className="mt-4 flex justify-between">
-                    <button
-                      onClick={() => handleEditProduct(product)}
-                      className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(product._id)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Delete
-                    </button>
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <div key={product._id} className="bg-white rounded-lg shadow p-4">
+                <div className="h-40 mb-4">
+                  {product.images.length > 0 ? (
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="h-full w-full object-cover rounded"
+                      onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/300x200?text=Image+Error'; }}
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center bg-gray-100 rounded">
+                      <span className="text-gray-500">No Image</span>
+                    </div>
+                  )}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
+                <p className="text-gray-600">{product.description}</p>
+                <p className="text-gray-800 font-bold mt-2">{product.currency}{product.price}</p>
+                <p className="text-gray-500 text-sm">Status: {product.inStock ? 'In Stock' : 'Out of Stock'}</p>
+                <div className="mt-4 flex justify-between">
+                  <button
+                    onClick={() => handleEditProduct(product)}
+                    className="px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteProduct(product._id)}
+                    className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
@@ -439,214 +394,150 @@ export default function ProductCatalog() {
         )}
 
         {showProductModal && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-              <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={handleCloseModal}></div>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">{products.some(p => p._id === currentProduct._id) ? 'Edit Product' : 'Add New Product'}</h2>
+                <button
+                  onClick={handleCloseModal}
+                  className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                >
+                  ×
+                </button>
               </div>
-              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
-                    {products.some(p => p._id === currentProduct._id) ? 'Edit Product' : 'Add New Product'}
-                  </h2>
-                  <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                    {products.some(p => p._id === currentProduct._id) ? 'Update your product details' : 'Add a new product to your catalog'}
-                  </p>
-
-                  <form onSubmit={handleSubmit}>
-                    <div className="mb-4 sm:mb-6">
-                      <label htmlFor="product-name" className="block text-sm font-medium text-gray-700 mb-1">
-                        Product Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="product-name"
-                        name="name"
-                        value={currentProduct.name}
-                        onChange={handleInputChange}
-                        placeholder="Enter product name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
-                        required
-                      />
-                    </div>
-
-                    <div className="border-t border-gray-200 my-4 sm:my-6"></div>
-
-                    <div className="mb-4 sm:mb-6">
-                      <label htmlFor="product-price" className="block text-sm font-medium text-gray-700 mb-1">
-                        Price <span className="text-red-500">*</span>
-                      </label>
-                      <div className="flex">
-                        <select
-                          name="currency"
-                          value={currentProduct.currency}
-                          onChange={handleInputChange}
-                          className="px-3 py-2 border border-gray-300 rounded-l-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
-                        >
-                          {currencies.map(currency => (
-                            <option key={currency.symbol} value={currency.symbol}>
-                              {currency.symbol} ({currency.name})
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          type="number"
-                          id="product-price"
-                          name="price"
-                          value={currentProduct.price}
-                          onChange={(e) => {
-                            if (e.target.value === '' || /^[0-9]*\.?[0-9]*$/.test(e.target.value)) {
-                              handleInputChange(e);
-                            }
-                          }}
-                          placeholder="0"
-                          className="flex-1 px-3 py-2 border-t border-b border-r border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
-                          required
-                          min="0"
-                          step="0.01"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="border-t border-gray-200 my-4 sm:my-6"></div>
-
-                    <div className="mb-4 sm:mb-6">
-                      <label htmlFor="product-description" className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
-                      </label>
-                      <textarea
-                        id="product-description"
-                        name="description"
-                        value={currentProduct.description}
-                        onChange={handleInputChange}
-                        rows={3}
-                        placeholder="Describe your product..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
-                      />
-                    </div>
-
-                    <div className="border-t border-gray-200 my-4 sm:my-6"></div>
-
-                    <div className="mb-4 sm:mb-6">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Product Images (max 5)
-                      </label>
-                      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                        <div className="space-y-1 text-center">
-                          <svg
-                            className="mx-auto h-12 w-12 text-gray-400"
-                            stroke="currentColor"
-                            fill="none"
-                            viewBox="0 0 48 48"
-                            aria-hidden="true"
-                          >
-                            <path
-                              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 
-  01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 
-  32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                          <div className="flex text-sm text-gray-600 flex-wrap justify-center">
-                            <label
-                              htmlFor="file-upload"
-                              className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                            >
-                              <span>Upload images</span>
-                              <input
-                                id="file-upload"
-                                name="file-upload"
-                                type="file"
-                                className="sr-only"
-                                multiple
-                                accept="image/*"
-                                onChange={handleImageUpload}
-                              />
-                            </label>
-                            <p className="pl-1">or drag and drop</p>
-                          </div>
-                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB per image</p>
-                        </div>
-                      </div>
-                      
-                      {isUploading && (
-                        <div className="mt-2 text-center">
-                          <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-indigo-500 mr-2"></div>
-                          <span className="text-sm text-gray-600">Uploading images...</span>
-                        </div>
-                      )}
-                      
-                      {imageUploadError && (
-                        <p className="mt-2 text-sm text-red-600">{imageUploadError}</p>
-                      )}
-                      
-                      {imagePreviews.length > 0 && (
-                        <div className="mt-4 grid grid-cols-3 gap-2">
-                          {imagePreviews.map((preview, index) => (
-                            <div key={index} className="relative">
-                              <img
-                                src={preview}
-                                alt={`Preview ${index}`}
-                                className="h-24 w-full object-cover rounded"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = 'https://via.placeholder.com/150?text=Image+Error';
-                                }}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveImage(index)}
-                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="border-t border-gray-200 my-4 sm:my-6"></div>
-
-                    <div className="mb-4 sm:mb-6">
-                      <label className="inline-flex items-center">
-                        <input
-                          type="checkbox"
-                          name="inStock"
-                          checked={currentProduct.inStock}
-                          onChange={() => setCurrentProduct(prev => ({
-                            ...prev,
-                            inStock: !prev.inStock
-                          }))}
-                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-gray-700 text-sm sm:text-base">In Stock</span>
-                      </label>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={handleCloseModal}
-                        className="mr-3 px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
-                        disabled={isLoading || isUploading}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
-                        disabled={isLoading || isUploading}
-                      >
-                        {isLoading ? 'Saving...' : (products.some(p => p._id === currentProduct._id) ? 'Update Product' : 'Add Product')}
-                      </button>
-                    </div>
-                  </form>
+              <form onSubmit={handleSubmit}>
+                <div className="mb-4 sm:mb-6">
+                  <label className="block text-gray-700 text-sm sm:text-base mb-1">Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={currentProduct.name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+                  />
                 </div>
-              </div>
+
+                <div className="mb-4 sm:mb-6">
+                  <label className="block text-gray-700 text-sm sm:text-base mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={currentProduct.description}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+                  />
+                </div>
+
+                <div className="mb-4 sm:mb-6">
+                  <label className="block text-gray-700 text-sm sm:text-base mb-1">Price</label>
+                  <div className="flex">
+                    <select
+                      name="currency"
+                      value={currentProduct.currency}
+                      onChange={handleInputChange}
+                      className="px-3 py-2 border border-r-0 border-gray-300 bg-white rounded-l focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+                    >
+                      {currencies.map(curr => (
+                        <option key={curr.symbol} value={curr.symbol}>{curr.name}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      name="price"
+                      value={currentProduct.price}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 border-l-0 rounded-r focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4 sm:mb-6">
+                  <label className="block text-gray-700 text-sm sm:text-base mb-1">Product Images (up to 5)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+                    file:rounded file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-indigo-50 file:text-indigo-700
+                    hover:file:bg-indigo-100"
+                  />
+                  {isUploading && (
+                    <div className="mt-2 text-center">
+                      <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-indigo-500 mr-2"></div>
+                      <span className="text-sm text-gray-600">Uploading images...</span>
+                    </div>
+                  )}
+                  
+                  {imageUploadError && (
+                    <p className="mt-2 text-sm text-red-600">{imageUploadError}</p>
+                  )}
+                  
+                  {imagePreviews.length > 0 && (
+                    <div className="mt-4 grid grid-cols-3 gap-2">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={preview}
+                            alt={`Preview ${index}`}
+                            className="h-24 w-full object-cover rounded"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'https://via.placeholder.com/150?text=Image+Error';
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-gray-200 my-4 sm:my-6"></div>
+
+                <div className="mb-4 sm:mb-6">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="checkbox"
+                      name="inStock"
+                      checked={currentProduct.inStock}
+                      onChange={() => setCurrentProduct(prev => ({
+                        ...prev,
+                        inStock: !prev.inStock
+                      }))}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-gray-700 text-sm sm:text-base">In Stock</span>
+                  </label>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="mr-3 px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
+                    disabled={isLoading || isUploading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
+                    disabled={isLoading || isUploading}
+                  >
+                    {isLoading ? 'Saving...' : (products.some(p => p._id === currentProduct._id) ? 'Update Product' : 'Add Product')}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
