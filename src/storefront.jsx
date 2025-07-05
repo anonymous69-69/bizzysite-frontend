@@ -33,7 +33,7 @@ export default function BusinessDashboard() {
   }, []);
 
   const fetchBusinessInfo = (storeId) => {
-    console.log(`Fetching business info for store: ${storeId}`);
+    console.log(`[DEBUG] Fetching business info for store: ${storeId}`);
     const userId = localStorage.getItem("userId");
     
     fetch(`https://bizzysite.onrender.com/api/store`, {
@@ -44,22 +44,28 @@ export default function BusinessDashboard() {
       }
     })
       .then(res => {
-        console.log(`API Response Status: ${res.status}`);
+        console.log(`[DEBUG] API Response Status: ${res.status}`);
         if (!res.ok) {
+          if (res.status === 404) {
+            console.warn(`[WARN] Store not found: ${storeId}`);
+            // Clear invalid store ID
+            localStorage.removeItem('storeId');
+            setStoreId('');
+          }
           throw new Error(`Server responded with ${res.status}`);
         }
         return res.json();
       })
       .then(data => {
-        console.log('Received business data:', data);
+        console.log('[DEBUG] Received business data:', data);
         if (data?.business) {
           setBusinessInfo({ ...data.business });
         } else {
-          console.warn('Business data not found in response');
+          console.warn('[WARN] Business data not found in response');
         }
       })
       .catch(err => {
-        console.error('Failed to fetch business info:', err);
+        console.error('[ERROR] Failed to fetch business info:', err);
         setError(`Failed to load business info: ${err.message}`);
       });
   };
@@ -101,7 +107,7 @@ export default function BusinessDashboard() {
       const method = storeId ? 'PUT' : 'POST';
       const url = 'https://bizzysite.onrender.com/api/business';
       
-      console.log('Saving business info:', {
+      console.log('[DEBUG] Saving business info:', {
         method,
         url,
         headers,
@@ -111,6 +117,7 @@ export default function BusinessDashboard() {
         }
       });
 
+      const startTime = Date.now();
       const res = await fetch(url, {
         method,
         headers,
@@ -120,17 +127,29 @@ export default function BusinessDashboard() {
         })
       });
 
+      const responseTime = Date.now() - startTime;
+      console.log(`[DEBUG] Response received in ${responseTime}ms`);
+
       const result = await res.json();
-      console.log('Save response:', result);
+      console.log('[DEBUG] Save response:', result);
 
       if (!res.ok) {
-        throw new Error(result.message || `Server responded with ${res.status}`);
+        let errorMessage = result.message || `Server responded with ${res.status}`;
+        
+        // Handle specific error cases
+        if (res.status === 404) {
+          errorMessage = "Store not found. Creating a new store instead.";
+          // Retry as a POST request to create a new store
+          return await handleSaveAsNewStore();
+        }
+        
+        throw new Error(errorMessage);
       }
 
       // Handle storeId from response
       const newStoreId = result.storeId || (result.data && result.data.storeId);
       if (newStoreId) {
-        console.log('Setting new store ID:', newStoreId);
+        console.log('[DEBUG] Setting new store ID:', newStoreId);
         localStorage.setItem('storeId', newStoreId);
         setStoreId(newStoreId);
       }
@@ -140,19 +159,106 @@ export default function BusinessDashboard() {
                              (result.data && result.data.data && result.data.data.business);
       
       if (updatedBusiness) {
-        console.log('Updating business info from response');
+        console.log('[DEBUG] Updating business info from response');
         setBusinessInfo(updatedBusiness);
       }
 
       setSaved(true);
       alert('Business information saved successfully!');
     } catch (err) {
-      console.error('❌ Failed to save business info:', err);
+      console.error('[ERROR] Failed to save business info:', err);
       setError(`Save failed: ${err.message}`);
       alert(`Save failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSaveAsNewStore = async () => {
+    console.log('[DEBUG] Attempting to create new store');
+    try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        navigate('/login');
+        return;
+      }
+      
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userId}`
+      };
+
+      // Remove store ID to force new store creation
+      localStorage.removeItem('storeId');
+      setStoreId('');
+
+      const url = 'https://bizzysite.onrender.com/api/business';
+      
+      console.log('[DEBUG] Creating new store:', {
+        method: 'POST',
+        url,
+        headers,
+        body: {
+          type: 'business',
+          data: businessInfo
+        }
+      });
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          type: 'business',
+          data: { ...businessInfo }
+        })
+      });
+
+      const result = await res.json();
+      console.log('[DEBUG] New store creation response:', result);
+
+      if (!res.ok) {
+        throw new Error(result.message || `Server responded with ${res.status}`);
+      }
+
+      // Handle storeId from response
+      const newStoreId = result.storeId || (result.data && result.data.storeId);
+      if (newStoreId) {
+        console.log('[DEBUG] Setting new store ID:', newStoreId);
+        localStorage.setItem('storeId', newStoreId);
+        setStoreId(newStoreId);
+      }
+
+      // Update businessInfo from response if available
+      const updatedBusiness = (result.data && result.data.business) || 
+                             (result.data && result.data.data && result.data.data.business);
+      
+      if (updatedBusiness) {
+        console.log('[DEBUG] Updating business info from response');
+        setBusinessInfo(updatedBusiness);
+      }
+
+      setSaved(true);
+      alert('New store created successfully!');
+    } catch (err) {
+      console.error('[ERROR] Failed to create new store:', err);
+      setError(`Create failed: ${err.message}`);
+      alert(`Create failed: ${err.message}`);
+    }
+  };
+
+  const resetStore = () => {
+    console.log('[DEBUG] Resetting store data');
+    localStorage.removeItem('storeId');
+    setStoreId('');
+    setBusinessInfo({
+      name: '',
+      phone: '',
+      email: '',
+      description: '',
+      address: ''
+    });
+    setError('');
+    alert('Store data has been reset. You can now create a new store.');
   };
 
   return (
@@ -161,13 +267,31 @@ export default function BusinessDashboard() {
         {/* Debugging Info Banner */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            <strong>Error:</strong> {error}
-            <button 
-              className="ml-4 text-sm underline"
-              onClick={() => setError('')}
-            >
-              Dismiss
-            </button>
+            <div className="flex justify-between items-start">
+              <div>
+                <strong>Error:</strong> {error}
+              </div>
+              <button 
+                className="ml-4 text-sm underline"
+                onClick={() => setError('')}
+              >
+                Dismiss
+              </button>
+            </div>
+            <div className="mt-2">
+              <button 
+                className="text-sm bg-red-200 px-2 py-1 rounded mr-2"
+                onClick={resetStore}
+              >
+                Reset Store Data
+              </button>
+              <button 
+                className="text-sm bg-red-200 px-2 py-1 rounded"
+                onClick={handleSaveAsNewStore}
+              >
+                Try Creating New Store
+              </button>
+            </div>
           </div>
         )}
 
@@ -336,19 +460,37 @@ export default function BusinessDashboard() {
             <div><strong>User ID:</strong> {localStorage.getItem('userId') || 'Not found'}</div>
             <div><strong>Store ID:</strong> {storeId || 'Not set'}</div>
             <div><strong>Business Name:</strong> {businessInfo.name || 'Not set'}</div>
-            <button 
-              className="mt-2 text-sm text-yellow-800 underline"
-              onClick={() => {
-                console.log('Current State:', {
-                  storeId,
-                  businessInfo,
-                  userId: localStorage.getItem('userId')
-                });
-                alert('State logged to console');
-              }}
-            >
-              Log State to Console
-            </button>
+            <div><strong>Last Error:</strong> {error || 'None'}</div>
+            <div className="flex space-x-2 mt-2">
+              <button 
+                className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs"
+                onClick={() => {
+                  console.log('Current State:', {
+                    storeId,
+                    businessInfo,
+                    userId: localStorage.getItem('userId')
+                  });
+                  alert('State logged to console');
+                }}
+              >
+                Log State to Console
+              </button>
+              <button 
+                className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs"
+                onClick={() => {
+                  localStorage.clear();
+                  alert('Local storage cleared. Please refresh the page.');
+                }}
+              >
+                Clear Local Storage
+              </button>
+              <button 
+                className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs"
+                onClick={resetStore}
+              >
+                Reset Store Data
+              </button>
+            </div>
           </div>
         </div>
 
