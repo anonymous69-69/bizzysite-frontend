@@ -11,12 +11,10 @@ export default function BusinessDashboard() {
     address: ''
   });
   const [storeId, setStoreId] = useState('');
-  const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('Setup');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Enhanced loading with user authentication check
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
     const userId = localStorage.getItem('userId');
@@ -33,7 +31,6 @@ export default function BusinessDashboard() {
   }, []);
 
   const fetchBusinessInfo = (storeId) => {
-    console.log(`[DEBUG] Fetching business info for store: ${storeId}`);
     const userId = localStorage.getItem("userId");
     
     fetch(`https://bizzysite.onrender.com/api/store`, {
@@ -43,31 +40,13 @@ export default function BusinessDashboard() {
         'x-store-id': storeId
       }
     })
-      .then(res => {
-        console.log(`[DEBUG] API Response Status: ${res.status}`);
-        if (!res.ok) {
-          if (res.status === 404) {
-            console.warn(`[WARN] Store not found: ${storeId}`);
-            // Clear invalid store ID
-            localStorage.removeItem('storeId');
-            setStoreId('');
-          }
-          throw new Error(`Server responded with ${res.status}`);
-        }
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
-        console.log('[DEBUG] Received business data:', data);
         if (data?.business) {
           setBusinessInfo({ ...data.business });
-        } else {
-          console.warn('[WARN] Business data not found in response');
         }
       })
-      .catch(err => {
-        console.error('[ERROR] Failed to fetch business info:', err);
-        setError(`Failed to load business info: ${err.message}`);
-      });
+      .catch(err => console.error('Failed to fetch business info:', err));
   };
 
   const handleChange = (e) => {
@@ -99,7 +78,6 @@ export default function BusinessDashboard() {
         'Authorization': `Bearer ${userId}`
       };
 
-      // Only include x-store-id if we have one
       if (storeId) {
         headers['x-store-id'] = storeId;
       }
@@ -107,17 +85,6 @@ export default function BusinessDashboard() {
       const method = storeId ? 'PUT' : 'POST';
       const url = 'https://bizzysite.onrender.com/api/business';
       
-      console.log('[DEBUG] Saving business info:', {
-        method,
-        url,
-        headers,
-        body: {
-          type: 'business',
-          data: businessInfo
-        }
-      });
-
-      const startTime = Date.now();
       const res = await fetch(url, {
         method,
         headers,
@@ -127,46 +94,21 @@ export default function BusinessDashboard() {
         })
       });
 
-      const responseTime = Date.now() - startTime;
-      console.log(`[DEBUG] Response received in ${responseTime}ms`);
-
       const result = await res.json();
-      console.log('[DEBUG] Save response:', result);
 
       if (!res.ok) {
-        let errorMessage = result.message || `Server responded with ${res.status}`;
-        
-        // Handle specific error cases
-        if (res.status === 404) {
-          errorMessage = "Store not found. Creating a new store instead.";
-          // Retry as a POST request to create a new store
-          return await handleSaveAsNewStore();
-        }
-        
-        throw new Error(errorMessage);
+        throw new Error(result.message || "Failed to save business information");
       }
 
-      // Handle storeId from response
       const newStoreId = result.storeId || (result.data && result.data.storeId);
       if (newStoreId) {
-        console.log('[DEBUG] Setting new store ID:', newStoreId);
         localStorage.setItem('storeId', newStoreId);
         setStoreId(newStoreId);
       }
 
-      // Update businessInfo from response if available
-      const updatedBusiness = (result.data && result.data.business) || 
-                             (result.data && result.data.data && result.data.data.business);
-      
-      if (updatedBusiness) {
-        console.log('[DEBUG] Updating business info from response');
-        setBusinessInfo(updatedBusiness);
-      }
-
-      setSaved(true);
+      setBusinessInfo(result.data?.business || businessInfo);
       alert('Business information saved successfully!');
     } catch (err) {
-      console.error('[ERROR] Failed to save business info:', err);
       setError(`Save failed: ${err.message}`);
       alert(`Save failed: ${err.message}`);
     } finally {
@@ -174,124 +116,18 @@ export default function BusinessDashboard() {
     }
   };
 
-  const handleSaveAsNewStore = async () => {
-    console.log('[DEBUG] Attempting to create new store');
-    try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        navigate('/login');
-        return;
-      }
-      
-      const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userId}`
-      };
-
-      // Remove store ID to force new store creation
-      localStorage.removeItem('storeId');
-      setStoreId('');
-
-      const url = 'https://bizzysite.onrender.com/api/business';
-      
-      console.log('[DEBUG] Creating new store:', {
-        method: 'POST',
-        url,
-        headers,
-        body: {
-          type: 'business',
-          data: businessInfo
-        }
-      });
-
-      const res = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          type: 'business',
-          data: { ...businessInfo }
-        })
-      });
-
-      const result = await res.json();
-      console.log('[DEBUG] New store creation response:', result);
-
-      if (!res.ok) {
-        throw new Error(result.message || `Server responded with ${res.status}`);
-      }
-
-      // Handle storeId from response
-      const newStoreId = result.storeId || (result.data && result.data.storeId);
-      if (newStoreId) {
-        console.log('[DEBUG] Setting new store ID:', newStoreId);
-        localStorage.setItem('storeId', newStoreId);
-        setStoreId(newStoreId);
-      }
-
-      // Update businessInfo from response if available
-      const updatedBusiness = (result.data && result.data.business) || 
-                             (result.data && result.data.data && result.data.data.business);
-      
-      if (updatedBusiness) {
-        console.log('[DEBUG] Updating business info from response');
-        setBusinessInfo(updatedBusiness);
-      }
-
-      setSaved(true);
-      alert('New store created successfully!');
-    } catch (err) {
-      console.error('[ERROR] Failed to create new store:', err);
-      setError(`Create failed: ${err.message}`);
-      alert(`Create failed: ${err.message}`);
-    }
-  };
-
-  const resetStore = () => {
-    console.log('[DEBUG] Resetting store data');
-    localStorage.removeItem('storeId');
-    setStoreId('');
-    setBusinessInfo({
-      name: '',
-      phone: '',
-      email: '',
-      description: '',
-      address: ''
-    });
-    setError('');
-    alert('Store data has been reset. You can now create a new store.');
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
       <div className="max-w-6xl mx-auto p-4 sm:p-6 flex-grow w-full">
-        {/* Debugging Info Banner */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <strong>Error:</strong> {error}
-              </div>
-              <button 
-                className="ml-4 text-sm underline"
-                onClick={() => setError('')}
-              >
-                Dismiss
-              </button>
-            </div>
-            <div className="mt-2">
-              <button 
-                className="text-sm bg-red-200 px-2 py-1 rounded mr-2"
-                onClick={resetStore}
-              >
-                Reset Store Data
-              </button>
-              <button 
-                className="text-sm bg-red-200 px-2 py-1 rounded"
-                onClick={handleSaveAsNewStore}
-              >
-                Try Creating New Store
-              </button>
-            </div>
+            <strong>Error:</strong> {error}
+            <button 
+              className="ml-4 text-sm underline"
+              onClick={() => setError('')}
+            >
+              Dismiss
+            </button>
           </div>
         )}
 
@@ -304,7 +140,6 @@ export default function BusinessDashboard() {
         <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">Welcome to your business dashboard</h2>
         <p className="text-gray-700 mb-6 sm:mb-8 text-sm sm:text-base">Set up your online store in minutes and start selling today</p>
 
-        {/* Navigation Tabs */}
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
             <div className="flex space-x-2 sm:space-x-6 px-2 py-2 bg-gray-50 rounded-lg min-w-max">
@@ -326,13 +161,7 @@ export default function BusinessDashboard() {
                     tab.name === 'Preview' ? '/navview' :
                     tab.name === 'Payments' ? '/payment' : '#'
                   }
-                  onClick={() => {
-                    setActiveTab(tab.name);
-                    if (tab.name === 'Setup') {
-                      const el = document.getElementById('business-info');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
+                  onClick={() => setActiveTab(tab.name)}
                   className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
                     activeTab === tab.name
                       ? 'bg-purple-100 text-indigo-700'
@@ -347,7 +176,6 @@ export default function BusinessDashboard() {
           </div>
         </div>
 
-        {/* Business Information Form */}
         <div id="business-info" className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Business Information</h3>
           <p className="text-gray-600 mb-6">Tell us about your business to get started</p>
@@ -437,11 +265,7 @@ export default function BusinessDashboard() {
               />
             </div>
 
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-500">
-                {storeId && `Store ID: ${storeId}`}
-                {!storeId && 'No store ID yet - will be created on save'}
-              </div>
+            <div className="flex justify-end">
               <button
                 type="submit"
                 disabled={loading}
@@ -453,48 +277,29 @@ export default function BusinessDashboard() {
           </form>
         </div>
 
-        {/* Debug Information Panel */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-          <h3 className="font-medium text-yellow-800 mb-2">Debug Information</h3>
-          <div className="text-sm text-yellow-700 space-y-1">
-            <div><strong>User ID:</strong> {localStorage.getItem('userId') || 'Not found'}</div>
-            <div><strong>Store ID:</strong> {storeId || 'Not set'}</div>
-            <div><strong>Business Name:</strong> {businessInfo.name || 'Not set'}</div>
-            <div><strong>Last Error:</strong> {error || 'None'}</div>
-            <div className="flex space-x-2 mt-2">
-              <button 
-                className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs"
+        {storeId && (
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Your Store ID</h3>
+            <div className="flex items-center">
+              <code className="bg-gray-100 p-2 rounded-md font-mono text-sm sm:text-base break-all">
+                {storeId}
+              </code>
+              <button
                 onClick={() => {
-                  console.log('Current State:', {
-                    storeId,
-                    businessInfo,
-                    userId: localStorage.getItem('userId')
-                  });
-                  alert('State logged to console');
+                  navigator.clipboard.writeText(storeId);
+                  alert('Store ID copied to clipboard!');
                 }}
+                className="ml-2 px-3 py-1 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
               >
-                Log State to Console
-              </button>
-              <button 
-                className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs"
-                onClick={() => {
-                  localStorage.clear();
-                  alert('Local storage cleared. Please refresh the page.');
-                }}
-              >
-                Clear Local Storage
-              </button>
-              <button 
-                className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs"
-                onClick={resetStore}
-              >
-                Reset Store Data
+                Copy
               </button>
             </div>
+            <p className="mt-3 text-sm text-gray-600">
+              This is your unique store identifier. You'll need this when managing your store.
+            </p>
           </div>
-        </div>
+        )}
 
-        {/* Setup Status */}
         <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Setup Status</h3>
           
@@ -573,7 +378,6 @@ export default function BusinessDashboard() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-gray-800 text-white py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
@@ -608,7 +412,6 @@ export default function BusinessDashboard() {
   );
 }
 
-// ViewSiteButtons Component
 function ViewSiteButtons({ storeId }) {
   return (
     <div className="flex items-center space-x-2">
