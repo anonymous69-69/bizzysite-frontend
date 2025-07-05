@@ -115,17 +115,17 @@ export default function ProductCatalog() {
     }));
   };
 
-  const handleAddImageUrl = () => {
-    const imageUrlInput = document.getElementById('image-url-input');
-    const url = imageUrlInput.value.trim();
-    if (url) {
-      setCurrentProduct(prev => ({
-        ...prev,
-        images: [...prev.images, url]
-      }));
-      setImagePreviews(prev => [...prev, url]);
-      imageUrlInput.value = '';
-    }
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const newImages = [...currentProduct.images, ...files];
+
+    setCurrentProduct(prev => ({
+      ...prev,
+      images: newImages
+    }));
+
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setImagePreviews(prev => [...prev, ...newPreviews]);
   };
 
   const handleRemoveImage = (index) => {
@@ -147,6 +147,31 @@ export default function ProductCatalog() {
     setIsLoading(true);
   
     try {
+      // Convert images to Base64 strings
+      const imageConversionPromises = currentProduct.images.map(file => {
+        return new Promise((resolve) => {
+          if (typeof file === 'string') {
+            // If it's already a string (URL), keep it as is
+            resolve(file);
+          } else {
+            // Convert File objects to Base64
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+          }
+        });
+      });
+
+      // Wait for all images to convert
+      const convertedImages = await Promise.all(imageConversionPromises);
+      
+      // Prepare product data with converted images
+      const productData = {
+        ...currentProduct,
+        price: Number(currentProduct.price),
+        images: convertedImages
+      };
+
       // Create updated products array
       let updatedProducts;
       const existingIndex = products.findIndex(p => p._id === currentProduct._id);
@@ -154,19 +179,10 @@ export default function ProductCatalog() {
       if (existingIndex >= 0) {
         // Update existing product
         updatedProducts = [...products];
-        updatedProducts[existingIndex] = {
-          ...currentProduct,
-          price: Number(currentProduct.price)
-        };
+        updatedProducts[existingIndex] = productData;
       } else {
         // Add new product
-        updatedProducts = [
-          ...products,
-          {
-            ...currentProduct,
-            price: Number(currentProduct.price)
-          }
-        ];
+        updatedProducts = [...products, productData];
       }
 
       // Send to backend
@@ -465,24 +481,47 @@ export default function ProductCatalog() {
 
                     <div className="mb-4 sm:mb-6">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Product Images (URLs)
+                        Product Images
                       </label>
-                      <div className="flex mb-2">
-                        <input
-                          type="text"
-                          id="image-url-input"
-                          placeholder="Enter image URL"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddImageUrl}
-                          className="px-3 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 text-sm sm:text-base"
-                        >
-                          Add URL
-                        </button>
+                      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                        <div className="space-y-1 text-center">
+                          <svg
+                            className="mx-auto h-12 w-12 text-gray-400"
+                            stroke="currentColor"
+                            fill="none"
+                            viewBox="0 0 48 48"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 
+  01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 
+  32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                              strokeWidth={2}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          <div className="flex text-sm text-gray-600 flex-wrap justify-center">
+                            <label
+                              htmlFor="file-upload"
+                              className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                            >
+                              <span>Upload images</span>
+                              <input
+                                id="file-upload"
+                                name="file-upload"
+                                type="file"
+                                className="sr-only"
+                                multiple
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                              />
+                            </label>
+                            <p className="pl-1">or drag and drop</p>
+                          </div>
+                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                        </div>
                       </div>
-                      
                       {imagePreviews.length > 0 && (
                         <div className="mt-4 grid grid-cols-3 gap-2">
                           {imagePreviews.map((preview, index) => (
