@@ -24,6 +24,7 @@ export default function ProductCatalog() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState('');
+  const [imageUploadError, setImageUploadError] = useState('');
 
   const currencies = [
     { symbol: '$', name: 'USD' },
@@ -41,14 +42,14 @@ export default function ProductCatalog() {
       setUserId(savedUserId);
       if (savedStoreId) {
         setStoreId(savedStoreId);
-        fetchProducts();
+        fetchProducts(savedStoreId, savedUserId);
       }
     } else {
       navigate('/login');
     }
   }, [navigate]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (storeId, userId) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -82,6 +83,7 @@ export default function ProductCatalog() {
       currency: '$'
     });
     setImagePreviews([]);
+    setImageUploadError('');
     setShowProductModal(true);
   };
 
@@ -91,6 +93,7 @@ export default function ProductCatalog() {
       price: Number(product.price)
     });
     setImagePreviews([...product.images]);
+    setImageUploadError('');
     setShowProductModal(true);
   };
 
@@ -106,6 +109,7 @@ export default function ProductCatalog() {
       currency: '$'
     });
     setImagePreviews([]);
+    setImageUploadError('');
   };
 
   const handleInputChange = (e) => {
@@ -118,14 +122,34 @@ export default function ProductCatalog() {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = [...currentProduct.images, ...files];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const validFiles = [];
+    const invalidFiles = [];
 
+    // Validate file sizes
+    files.forEach(file => {
+      if (file.size <= maxSize) {
+        validFiles.push(file);
+      } else {
+        invalidFiles.push(file.name);
+      }
+    });
+
+    if (invalidFiles.length > 0) {
+      setImageUploadError(
+        `The following files exceed 5MB: ${invalidFiles.join(', ')}`
+      );
+    } else {
+      setImageUploadError('');
+    }
+
+    const newImages = [...currentProduct.images, ...validFiles];
     setCurrentProduct(prev => ({
       ...prev,
       images: newImages
     }));
 
-    const newPreviews = files.map(file => URL.createObjectURL(file));
+    const newPreviews = validFiles.map(file => URL.createObjectURL(file));
     setImagePreviews(prev => [...prev, ...newPreviews]);
   };
 
@@ -156,18 +180,19 @@ export default function ProductCatalog() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
   
     try {
       // Process images: convert File objects to base64 strings
-      const processedImages = await Promise.all(
-        currentProduct.images.map(async (img) => {
-          if (typeof img === 'string') {
-            return img; // Already a string (URL or base64)
-          } else {
-            return await convertImageToBase64(img);
-          }
-        })
-      );
+      const imageConversionPromises = currentProduct.images.map(img => {
+        if (typeof img === 'string') {
+          return Promise.resolve(img);
+        } else {
+          return convertImageToBase64(img);
+        }
+      });
+
+      const processedImages = await Promise.all(imageConversionPromises);
 
       // Create product data with processed images
       const productData = {
@@ -198,9 +223,21 @@ export default function ProductCatalog() {
       alert('Product saved successfully!');
     } catch (err) {
       console.error('Save product error:', err);
-      const errorMsg = err.response?.data?.message || 
-                      err.response?.data?.error?.message || 
-                      'Failed to save product. Please try again.';
+      let errorMsg = 'Failed to save product. Please try again.';
+      
+      if (err.response) {
+        if (err.response.status === 401) {
+          navigate('/login');
+          return;
+        }
+        
+        errorMsg = err.response.data?.message || 
+                   err.response.data?.error?.message || 
+                   `Server error: ${err.response.status}`;
+      } else if (err.request) {
+        errorMsg = 'Network error. Please check your connection.';
+      }
+      
       setError(errorMsg);
       alert(errorMsg);
     } finally {
@@ -516,9 +553,12 @@ export default function ProductCatalog() {
                             </label>
                             <p className="pl-1">or drag and drop</p>
                           </div>
-                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
                         </div>
                       </div>
+                      {imageUploadError && (
+                        <p className="mt-2 text-sm text-red-600">{imageUploadError}</p>
+                      )}
                       {imagePreviews.length > 0 && (
                         <div className="mt-4 grid grid-cols-3 gap-2">
                           {imagePreviews.map((preview, index) => (
