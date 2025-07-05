@@ -87,7 +87,7 @@ export default function ProductCatalog() {
   const handleEditProduct = (product) => {
     setCurrentProduct({
       ...product,
-      price: Number(product.price) // Ensure price is number
+      price: Number(product.price)
     });
     setImagePreviews([...product.images]);
     setShowProductModal(true);
@@ -115,17 +115,17 @@ export default function ProductCatalog() {
     }));
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const newImages = [...currentProduct.images, ...files];
-
-    setCurrentProduct(prev => ({
-      ...prev,
-      images: newImages
-    }));
-
-    const newPreviews = files.map(file => URL.createObjectURL(file));
-    setImagePreviews(prev => [...prev, ...newPreviews]);
+  const handleAddImageUrl = () => {
+    const imageUrlInput = document.getElementById('image-url-input');
+    const url = imageUrlInput.value.trim();
+    if (url) {
+      setCurrentProduct(prev => ({
+        ...prev,
+        images: [...prev.images, url]
+      }));
+      setImagePreviews(prev => [...prev, url]);
+      imageUrlInput.value = '';
+    }
   };
 
   const handleRemoveImage = (index) => {
@@ -156,7 +156,7 @@ export default function ProductCatalog() {
         updatedProducts = [...products];
         updatedProducts[existingIndex] = {
           ...currentProduct,
-          price: Number(currentProduct.price) // Ensure numeric
+          price: Number(currentProduct.price)
         };
       } else {
         // Add new product
@@ -164,7 +164,7 @@ export default function ProductCatalog() {
           ...products,
           {
             ...currentProduct,
-            price: Number(currentProduct.price) // Ensure numeric
+            price: Number(currentProduct.price)
           }
         ];
       }
@@ -185,8 +185,11 @@ export default function ProductCatalog() {
       alert('Product saved successfully!');
     } catch (err) {
       console.error('Save product error:', err);
-      setError(err.response?.data?.message || 'Failed to save product');
-      alert('Failed to save product. Please try again.');
+      const errorMsg = err.response?.data?.message || 
+                      err.response?.data?.error?.message || 
+                      'Failed to save product. Please try again.';
+      setError(errorMsg);
+      alert(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -462,47 +465,24 @@ export default function ProductCatalog() {
 
                     <div className="mb-4 sm:mb-6">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Product Images
+                        Product Images (URLs)
                       </label>
-                      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                        <div className="space-y-1 text-center">
-                          <svg
-                            className="mx-auto h-12 w-12 text-gray-400"
-                            stroke="currentColor"
-                            fill="none"
-                            viewBox="0 0 48 48"
-                            aria-hidden="true"
-                          >
-                            <path
-                              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 
-  01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 
-  32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                          <div className="flex text-sm text-gray-600 flex-wrap justify-center">
-                            <label
-                              htmlFor="file-upload"
-                              className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                            >
-                              <span>Upload images</span>
-                              <input
-                                id="file-upload"
-                                name="file-upload"
-                                type="file"
-                                className="sr-only"
-                                multiple
-                                accept="image/*"
-                                onChange={handleImageUpload}
-                              />
-                            </label>
-                            <p className="pl-1">or drag and drop</p>
-                          </div>
-                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                        </div>
+                      <div className="flex mb-2">
+                        <input
+                          type="text"
+                          id="image-url-input"
+                          placeholder="Enter image URL"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddImageUrl}
+                          className="px-3 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 text-sm sm:text-base"
+                        >
+                          Add URL
+                        </button>
                       </div>
+                      
                       {imagePreviews.length > 0 && (
                         <div className="mt-4 grid grid-cols-3 gap-2">
                           {imagePreviews.map((preview, index) => (
