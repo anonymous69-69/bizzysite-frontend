@@ -139,6 +139,15 @@ export default function ProductCatalog() {
         toast.warn(`Only ${availableSlots} images can be added`);
       }
 
+      // Check for oversized images before converting to Base64
+      const MAX_IMAGE_SIZE_MB = 1.5;
+      const oversizedFiles = filesToUpload.filter(file => file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024);
+      if (oversizedFiles.length > 0) {
+        toast.error("One or more images are too large (max 1.5MB)");
+        setIsUploading(false);
+        return;
+      }
+
       // Convert files to Base64 strings
       const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
