@@ -17,6 +17,13 @@ export default function BusinessDashboard() {
   // Load storeId from localStorage on component mount
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
+    const userId = localStorage.getItem('userId');
+    
+    if (!userId) {
+      navigate('/login');
+      return;
+    }
+    
     if (savedStoreId) {
       setStoreId(savedStoreId);
       fetchBusinessInfo(savedStoreId);
@@ -32,7 +39,12 @@ export default function BusinessDashboard() {
         'x-store-id': storeId
       }
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch store');
+        }
+        return res.json();
+      })
       .then(data => {
         if (data?.business) {
           setBusinessInfo({ ...data.business });
@@ -59,21 +71,25 @@ export default function BusinessDashboard() {
     try {
       const userId = localStorage.getItem('userId');
       if (!userId) {
-        throw new Error('User not authenticated');
+        navigate('/login');
+        return;
       }
       
-      // Only include x-store-id header if we have a storeId
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${userId}`
       };
-      
+
+      // Only include x-store-id if we have one
       if (storeId) {
         headers['x-store-id'] = storeId;
       }
 
-      const res = await fetch('https://bizzysite.onrender.com/api/business', {
-        method: storeId ? 'PUT' : 'POST',
+      const method = storeId ? 'PUT' : 'POST';
+      const url = 'https://bizzysite.onrender.com/api/business';
+      
+      const res = await fetch(url, {
+        method,
         headers,
         body: JSON.stringify({
           type: 'business',
@@ -87,7 +103,7 @@ export default function BusinessDashboard() {
         throw new Error(result.message || "Failed to save business information");
       }
 
-      // Handle storeId consistently regardless of method
+      // Handle storeId from response (create or update)
       const newStoreId = result.storeId || (result.data && result.data.storeId);
       if (newStoreId) {
         localStorage.setItem('storeId', newStoreId);
