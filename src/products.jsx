@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,7 +13,7 @@ export default function ProductCatalog() {
   const [currentProduct, setCurrentProduct] = useState({
     _id: uuidv4(),
     name: '',
-    price: 0, // ✅ Number
+    price: 0,
     currency: '$',
     description: '',
     images: [],
@@ -25,7 +24,7 @@ export default function ProductCatalog() {
   const [storeId, setStoreId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const [userId, setUserId] = useState('');
 
   const currencies = [
     { symbol: '$', name: 'USD' },
@@ -33,24 +32,36 @@ export default function ProductCatalog() {
     { symbol: '£', name: 'GBP' },
     { symbol: '₹', name: 'INR' },
     { symbol: '¥', name: 'JPY' },
-    { symbol: '₹', name: 'INR' },
   ];
 
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
+    const savedUserId = localStorage.getItem('userId');
+    
+    if (savedUserId) {
+      setUserId(savedUserId);
+    } else {
+      navigate('/login');
+      return;
+    }
+    
     if (savedStoreId) {
       setStoreId(savedStoreId);
       fetchProducts(savedStoreId);
     }
-  }, []);
+  }, [navigate]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (storeId) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await api.get('/store');
+      const response = await axios.get(`${API_BASE_URL}/store`, {
+        headers: {
+          'Authorization': `Bearer ${userId}`,
+          'x-store-id': storeId
+        }
+      });
       setProducts(response.data?.products || []);
-      setStoreId(response.data?.storeId || '');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load products');
       if (err.response?.status === 401) navigate('/login');
@@ -58,12 +69,12 @@ export default function ProductCatalog() {
       setIsLoading(false);
     }
   };
-  
 
   const handleAddProductClick = () => {
     setCurrentProduct({
       _id: uuidv4(),
       name: '',
+      price: 0,
       description: '',
       images: [],
       inStock: true,
@@ -75,25 +86,19 @@ export default function ProductCatalog() {
 
   const handleEditProduct = (product) => {
     setCurrentProduct({
-      _id: product._id,
-      name: product.name,
-      price: product.price,
-      description: product.description,
-      images: product.images,
-      inStock: product.inStock,
-      currency: product.currency
+      ...product,
+      price: Number(product.price) // Ensure price is number
     });
-    setImagePreviews(product.images);
+    setImagePreviews([...product.images]);
     setShowProductModal(true);
   };
 
   const handleCloseModal = () => {
     setShowProductModal(false);
     setCurrentProduct({
-      id: null,
-      _id: null,
+      _id: uuidv4(),
       name: '',
-      price: '0.00',
+      price: 0,
       description: '',
       images: [],
       inStock: true,
@@ -142,25 +147,46 @@ export default function ProductCatalog() {
     setIsLoading(true);
   
     try {
-      const productData = {
-        ...currentProduct,
-        price: Number(currentProduct.price) // Force numeric
-      };
-  
-      const updatedProducts = products.some(p => p._id === currentProduct._id)
-        ? products.map(p => p._id === currentProduct._id ? productData : p)
-        : [...products, productData];
-  
-      await api.put('/products', updatedProducts, {
+      // Create updated products array
+      let updatedProducts;
+      const existingIndex = products.findIndex(p => p._id === currentProduct._id);
+      
+      if (existingIndex >= 0) {
+        // Update existing product
+        updatedProducts = [...products];
+        updatedProducts[existingIndex] = {
+          ...currentProduct,
+          price: Number(currentProduct.price) // Ensure numeric
+        };
+      } else {
+        // Add new product
+        updatedProducts = [
+          ...products,
+          {
+            ...currentProduct,
+            price: Number(currentProduct.price) // Ensure numeric
+          }
+        ];
+      }
+
+      // Send to backend
+      await axios.put(`${API_BASE_URL}/business`, {
+        type: 'products',
+        data: updatedProducts
+      }, {
         headers: {
-          'X-Store-ID': storeId
+          'Authorization': `Bearer ${userId}`,
+          'x-store-id': storeId
         }
       });
-  
+
       setProducts(updatedProducts);
       setShowProductModal(false);
+      alert('Product saved successfully!');
     } catch (err) {
+      console.error('Save product error:', err);
       setError(err.response?.data?.message || 'Failed to save product');
+      alert('Failed to save product. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -172,26 +198,27 @@ export default function ProductCatalog() {
     setIsLoading(true);
     try {
       const updatedProducts = products.filter(p => p._id !== productId);
-      await api.put('/products', updatedProducts, {
+      
+      await axios.put(`${API_BASE_URL}/business`, {
+        type: 'products',
+        data: updatedProducts
+      }, {
         headers: {
-          'X-Store-ID': storeId
+          'Authorization': `Bearer ${userId}`,
+          'x-store-id': storeId
         }
       });
+      
       setProducts(updatedProducts);
+      alert('Product deleted successfully!');
     } catch (err) {
+      console.error('Delete product error:', err);
       setError(err.response?.data?.message || 'Failed to delete product');
+      alert('Failed to delete product. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
-
-  const api = axios.create({
-    baseURL: API_BASE_URL,
-    withCredentials: true,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -246,7 +273,21 @@ export default function ProductCatalog() {
           </button>
         </div>
 
-        {products.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <strong>Error:</strong> {error}
+            <button 
+              className="ml-4 text-sm underline"
+              onClick={() => setError('')}
+            >
+              Dismiss
+            </button>
+          </div>
+        ) : products.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-6 sm:p-8 text-center">
             <div className="max-w-md mx-auto">
               <svg
@@ -277,48 +318,48 @@ export default function ProductCatalog() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {products.map(product => (
               <div key={product._id} className="bg-white rounded-lg shadow overflow-hidden">
                 {product.images.length > 0 ? (
                   <img
                     src={product.images[0]}
                     alt={product.name}
-                    className="w-full h-32 sm:h-40 md:h-48 object-cover"
+                    className="w-full h-48 object-cover"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = 'https://placehold.co/300x200?text=No+Image';
                     }}
                   />
                 ) : (
-                  <div className="w-full h-32 sm:h-40 md:h-48 bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-500 text-sm">No image</span>
+                  <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-500">No image</span>
                   </div>
                 )}
-                <div className="p-2 sm:p-3 md:p-4">
-                  <h3 className="text-base md:text-lg font-semibold text-gray-800 line-clamp-1">{product.name}</h3>
-                  <p className="text-indigo-600 font-medium mt-1 text-sm md:text-base">
-                    {product.currency}{product.price}
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">{product.name}</h3>
+                  <p className="text-indigo-600 font-medium mt-1">
+                    {product.currency}{product.price.toFixed(2)}
                   </p>
-                  <p className="text-gray-600 mt-1 md:mt-2 text-xs md:text-sm line-clamp-2">
+                  <p className="text-gray-600 mt-2 text-sm line-clamp-2">
                     {product.description || 'No description'}
                   </p>
-                  <div className="flex items-center mt-2 md:mt-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${product.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                  <div className="flex items-center mt-3">
+                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${product.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                       }`}>
                       {product.inStock ? "In Stock" : "Out of Stock"}
                     </span>
                   </div>
-                  <div className="mt-2 md:mt-4 flex justify-between">
+                  <div className="mt-4 flex justify-between">
                     <button
                       onClick={() => handleEditProduct(product)}
-                      className="text-indigo-600 hover:text-indigo-800 text-xs md:text-sm font-medium"
+                      className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteProduct(product._id)}
-                      className="text-red-600 hover:text-red-800 text-xs md:text-sm font-medium"
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
                     >
                       Delete
                     </button>
@@ -339,10 +380,10 @@ export default function ProductCatalog() {
               <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
-                    {currentProduct.id ? 'Edit Product' : 'Add New Product'}
+                    {products.some(p => p._id === currentProduct._id) ? 'Edit Product' : 'Add New Product'}
                   </h2>
                   <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                    {currentProduct.id ? 'Update your product details' : 'Add a new product to your catalog'}
+                    {products.some(p => p._id === currentProduct._id) ? 'Update your product details' : 'Add a new product to your catalog'}
                   </p>
 
                   <form onSubmit={handleSubmit}>
@@ -395,7 +436,7 @@ export default function ProductCatalog() {
                           className="flex-1 px-3 py-2 border-t border-b border-r border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
                           required
                           min="0"
-                          step="any"
+                          step="0.01"
                         />
                       </div>
                     </div>
@@ -434,8 +475,8 @@ export default function ProductCatalog() {
                           >
                             <path
                               d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 
-01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 
-32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+  01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 
+  32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
                               strokeWidth={2}
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -511,14 +552,16 @@ export default function ProductCatalog() {
                         type="button"
                         onClick={handleCloseModal}
                         className="mr-3 px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
+                        disabled={isLoading}
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
+                        disabled={isLoading}
                       >
-                        {currentProduct.id ? 'Update Product' : 'Add Product'}
+                        {isLoading ? 'Saving...' : (products.some(p => p._id === currentProduct._id) ? 'Update Product' : 'Add Product')}
                       </button>
                     </div>
                   </form>
