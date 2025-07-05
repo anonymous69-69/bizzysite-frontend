@@ -10,6 +10,7 @@
     "axios": "^1.10.0",
     "browser-image-compression": "^2.0.2",
     "cors": "^2.8.5",
+    "multer": "^2.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",

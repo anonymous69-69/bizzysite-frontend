@@ -78,8 +78,8 @@ export default function ProductCatalog() {
   // Image compression function
   const compressImage = async (file) => {
     const options = {
-      maxSizeMB: 0.5,
-      maxWidthOrHeight: 1200,
+      maxSizeMB: 0.3, // Reduced from 0.5 to 0.3MB
+      maxWidthOrHeight: 1024,
       useWebWorker: true,
       fileType: 'image/jpeg'
     };
@@ -149,6 +149,14 @@ export default function ProductCatalog() {
     setIsCompressing(true);
     
     try {
+      // Apply stricter limits: max 5 images
+      const maxImages = 5;
+      const availableSlots = maxImages - currentProduct.images.length;
+      if (files.length > availableSlots) {
+        files.splice(availableSlots);
+        toast.warn(`Only ${availableSlots} images can be added`);
+      }
+
       const compressedFiles = await Promise.all(
         files.map(file => compressImage(file))
       );
@@ -187,14 +195,39 @@ export default function ProductCatalog() {
     setImagePreviews(newPreviews);
   };
 
-  // Function to convert image to Base64
-  const convertImageToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
+  // NEW: Upload images individually before saving product
+  const uploadImages = async (images) => {
+    const uploadedUrls = [];
+    
+    for (const img of images) {
+      if (typeof img === 'string') {
+        // Already uploaded, just keep the URL
+        uploadedUrls.push(img);
+        continue;
+      }
+
+      const formData = new FormData();
+      formData.append('image', img);
+      formData.append('storeId', storeId);
+
+      try {
+        const response = await axios.post(`${API_BASE_URL}/upload-image`, formData, {
+          headers: {
+            'Authorization': `Bearer ${userId}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        if (response.data.url) {
+          uploadedUrls.push(response.data.url);
+        }
+      } catch (err) {
+        console.error('Image upload error:', err);
+        throw new Error('Failed to upload images');
+      }
+    }
+    
+    return uploadedUrls;
   };
 
   const handleSubmit = async (e) => {
@@ -203,30 +236,22 @@ export default function ProductCatalog() {
     setError(null);
   
     try {
-      // Process images: convert File objects to base64 strings
-      const imageConversionPromises = currentProduct.images.map(img => {
-        if (typeof img === 'string') {
-          return Promise.resolve(img);
-        } else {
-          return convertImageToBase64(img);
-        }
-      });
+      // Step 1: Upload images individually
+      const imageUrls = await uploadImages(currentProduct.images);
 
-      const processedImages = await Promise.all(imageConversionPromises);
-
-      // Create product data with processed images
+      // Step 2: Create product data with image URLs
       const productData = {
         ...currentProduct,
-        images: processedImages,
+        images: imageUrls,
         price: Number(currentProduct.price)
       };
 
-      // Create updated products array
+      // Step 3: Create updated products array
       const updatedProducts = products.some(p => p._id === currentProduct._id)
         ? products.map(p => p._id === currentProduct._id ? productData : p)
         : [...products, productData];
 
-      // Send to backend
+      // Step 4: Send product data without images
       await axios.put(`${API_BASE_URL}/business`, {
         type: 'products',
         data: updatedProducts
@@ -256,6 +281,8 @@ export default function ProductCatalog() {
                    `Server error: ${err.response.status}`;
       } else if (err.request) {
         errorMsg = 'Network error. Please check your connection.';
+      } else {
+        errorMsg = err.message || errorMsg;
       }
       
       setError(errorMsg);
@@ -535,7 +562,7 @@ export default function ProductCatalog() {
 
                     <div className="mb-4 sm:mb-6">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Product Images
+                        Product Images (max 5)
                       </label>
                       <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                         <div className="space-y-1 text-center">
@@ -573,7 +600,7 @@ export default function ProductCatalog() {
                             </label>
                             <p className="pl-1">or drag and drop</p>
                           </div>
-                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 0.3MB per image</p>
                         </div>
                       </div>
                       
