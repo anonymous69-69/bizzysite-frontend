@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import imageCompression from 'browser-image-compression';
+import { toast } from 'react-toastify';
 
 export default function ProductCatalog() {
   const API_BASE_URL = 'https://bizzysite.onrender.com/api';
@@ -25,6 +27,7 @@ export default function ProductCatalog() {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState('');
   const [imageUploadError, setImageUploadError] = useState('');
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const currencies = [
     { symbol: '$', name: 'USD' },
@@ -33,6 +36,29 @@ export default function ProductCatalog() {
     { symbol: '₹', name: 'INR' },
     { symbol: '¥', name: 'JPY' },
   ];
+
+  // Fetch products with useCallback to avoid dependency warnings
+  const fetchProducts = useCallback(async (storeId, userId) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${API_BASE_URL}/store`, {
+        headers: {
+          'Authorization': `Bearer ${userId}`,
+          'x-store-id': storeId
+        }
+      });
+      
+      const products = response.data?.products || [];
+      setProducts(Array.isArray(products) ? products : []);
+    } catch (err) {
+      console.error('Fetch products error:', err);
+      setError(err.response?.data?.message || 'Failed to load products');
+      if (err.response?.status === 401) navigate('/login');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [navigate, API_BASE_URL]);
 
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
@@ -47,28 +73,23 @@ export default function ProductCatalog() {
     } else {
       navigate('/login');
     }
-  }, [navigate]);
+  }, [navigate, fetchProducts]);
 
-  const fetchProducts = async (storeId, userId) => {
-    setIsLoading(true);
-    setError(null);
+  // Image compression function
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB: 0.5,
+      maxWidthOrHeight: 1200,
+      useWebWorker: true,
+      fileType: 'image/jpeg'
+    };
+    
     try {
-      const response = await axios.get(`${API_BASE_URL}/store`, {
-        headers: {
-          'Authorization': `Bearer ${userId}`,
-          'x-store-id': storeId
-        }
-      });
-      
-      // Make sure products is always an array
-      const products = response.data?.products || [];
-      setProducts(Array.isArray(products) ? products : []);
-    } catch (err) {
-      console.error('Fetch products error:', err);
-      setError(err.response?.data?.message || 'Failed to load products');
-      if (err.response?.status === 401) navigate('/login');
-    } finally {
-      setIsLoading(false);
+      return await imageCompression(file, options);
+    } catch (error) {
+      console.error('Image compression error:', error);
+      toast.error('Failed to compress image');
+      return file;
     }
   };
 
@@ -120,37 +141,36 @@ export default function ProductCatalog() {
     }));
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    const validFiles = [];
-    const invalidFiles = [];
-
-    // Validate file sizes
-    files.forEach(file => {
-      if (file.size <= maxSize) {
-        validFiles.push(file);
-      } else {
-        invalidFiles.push(file.name);
-      }
-    });
-
-    if (invalidFiles.length > 0) {
-      setImageUploadError(
-        `The following files exceed 5MB: ${invalidFiles.join(', ')}`
+    if (files.length === 0) return;
+    
+    setImageUploadError('');
+    setIsCompressing(true);
+    
+    try {
+      const compressedFiles = await Promise.all(
+        files.map(file => compressImage(file))
       );
-    } else {
-      setImageUploadError('');
+      
+      const newPreviews = await Promise.all(
+        compressedFiles.map(file => URL.createObjectURL(file))
+      );
+      
+      setCurrentProduct(prev => ({
+        ...prev,
+        images: [...prev.images, ...compressedFiles]
+      }));
+      
+      setImagePreviews(prev => [...prev, ...newPreviews]);
+      toast.success('Images uploaded successfully!');
+    } catch (err) {
+      console.error('Image upload error:', err);
+      setImageUploadError('Failed to process images');
+      toast.error('Image upload failed');
+    } finally {
+      setIsCompressing(false);
     }
-
-    const newImages = [...currentProduct.images, ...validFiles];
-    setCurrentProduct(prev => ({
-      ...prev,
-      images: newImages
-    }));
-
-    const newPreviews = validFiles.map(file => URL.createObjectURL(file));
-    setImagePreviews(prev => [...prev, ...newPreviews]);
   };
 
   const handleRemoveImage = (index) => {
@@ -220,7 +240,7 @@ export default function ProductCatalog() {
 
       setProducts(updatedProducts);
       setShowProductModal(false);
-      alert('Product saved successfully!');
+      toast.success('Product saved successfully!');
     } catch (err) {
       console.error('Save product error:', err);
       let errorMsg = 'Failed to save product. Please try again.';
@@ -239,7 +259,7 @@ export default function ProductCatalog() {
       }
       
       setError(errorMsg);
-      alert(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -263,11 +283,11 @@ export default function ProductCatalog() {
       });
       
       setProducts(updatedProducts);
-      alert('Product deleted successfully!');
+      toast.success('Product deleted successfully!');
     } catch (err) {
       console.error('Delete product error:', err);
       setError(err.response?.data?.message || 'Failed to delete product');
-      alert('Failed to delete product. Please try again.');
+      toast.error('Failed to delete product');
     } finally {
       setIsLoading(false);
     }
@@ -556,9 +576,18 @@ export default function ProductCatalog() {
                           <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
                         </div>
                       </div>
+                      
+                      {isCompressing && (
+                        <div className="mt-2 text-center">
+                          <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-indigo-500 mr-2"></div>
+                          <span className="text-sm text-gray-600">Compressing images...</span>
+                        </div>
+                      )}
+                      
                       {imageUploadError && (
                         <p className="mt-2 text-sm text-red-600">{imageUploadError}</p>
                       )}
+                      
                       {imagePreviews.length > 0 && (
                         <div className="mt-4 grid grid-cols-3 gap-2">
                           {imagePreviews.map((preview, index) => (
@@ -608,14 +637,14 @@ export default function ProductCatalog() {
                         type="button"
                         onClick={handleCloseModal}
                         className="mr-3 px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
-                        disabled={isLoading}
+                        disabled={isLoading || isCompressing}
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
-                        disabled={isLoading}
+                        disabled={isLoading || isCompressing}
                       >
                         {isLoading ? 'Saving...' : (products.some(p => p._id === currentProduct._id) ? 'Update Product' : 'Add Product')}
                       </button>
