@@ -5,8 +5,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function ProductCatalog() {
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 
-  'https://bizzysite.onrender.com/api';
+  const API_BASE_URL = 'https://bizzysite.onrender.com/api';
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [showProductModal, setShowProductModal] = useState(false);
@@ -47,11 +46,11 @@ export default function ProductCatalog() {
     
     if (savedStoreId) {
       setStoreId(savedStoreId);
-      fetchProducts(savedStoreId);
+      fetchProducts();
     }
   }, [navigate]);
 
-  const fetchProducts = async (storeId) => {
+  const fetchProducts = async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -61,8 +60,14 @@ export default function ProductCatalog() {
           'x-store-id': storeId
         }
       });
-      setProducts(response.data?.products || []);
+      
+      if (response.data && Array.isArray(response.data.products)) {
+        setProducts(response.data.products);
+      } else {
+        setProducts([]);
+      }
     } catch (err) {
+      console.error('Fetch products error:', err);
       setError(err.response?.data?.message || 'Failed to load products');
       if (err.response?.status === 401) navigate('/login');
     } finally {
@@ -147,62 +152,46 @@ export default function ProductCatalog() {
     setIsLoading(true);
   
     try {
-      // Convert images to Base64 strings
-      const imageConversionPromises = currentProduct.images.map(file => {
-        return new Promise((resolve) => {
-          if (typeof file === 'string') {
-            // If it's already a string (URL), keep it as is
-            resolve(file);
-          } else {
-            // Convert File objects to Base64
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(file);
-          }
-        });
-      });
-
-      // Wait for all images to convert
-      const convertedImages = await Promise.all(imageConversionPromises);
+      // Create FormData to handle file uploads
+      const formData = new FormData();
+      formData.append('type', 'products');
       
-      // Prepare product data with converted images
+      // Add product images as files
+      currentProduct.images.forEach((image, index) => {
+        if (image instanceof File) {
+          formData.append(`images`, image);
+        }
+      });
+      
+      // Add other product data as JSON
       const productData = {
         ...currentProduct,
-        price: Number(currentProduct.price),
-        images: convertedImages
+        images: currentProduct.images.filter(img => !(img instanceof File)),
+        price: Number(currentProduct.price)
       };
-
-      // Create updated products array
-      let updatedProducts;
-      const existingIndex = products.findIndex(p => p._id === currentProduct._id);
-      
-      if (existingIndex >= 0) {
-        // Update existing product
-        updatedProducts = [...products];
-        updatedProducts[existingIndex] = productData;
-      } else {
-        // Add new product
-        updatedProducts = [...products, productData];
-      }
+      formData.append('data', JSON.stringify(productData));
 
       // Send to backend
-      await axios.put(`${API_BASE_URL}/business`, {
-        type: 'products',
-        data: updatedProducts
-      }, {
+      const response = await axios.put(`${API_BASE_URL}/business`, formData, {
         headers: {
           'Authorization': `Bearer ${userId}`,
-          'x-store-id': storeId
+          'x-store-id': storeId,
+          'Content-Type': 'multipart/form-data'
         }
       });
 
-      setProducts(updatedProducts);
-      setShowProductModal(false);
-      alert('Product saved successfully!');
+      if (response.data && response.data.data && Array.isArray(response.data.data.products)) {
+        setProducts(response.data.data.products);
+        setShowProductModal(false);
+        alert('Product saved successfully!');
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (err) {
       console.error('Save product error:', err);
       const errorMsg = err.response?.data?.message || 
                       err.response?.data?.error?.message || 
+                      err.message || 
                       'Failed to save product. Please try again.';
       setError(errorMsg);
       alert(errorMsg);
