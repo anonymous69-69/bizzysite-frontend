@@ -39,14 +39,12 @@ export default function ProductCatalog() {
     
     if (savedUserId) {
       setUserId(savedUserId);
+      if (savedStoreId) {
+        setStoreId(savedStoreId);
+        fetchProducts();
+      }
     } else {
       navigate('/login');
-      return;
-    }
-    
-    if (savedStoreId) {
-      setStoreId(savedStoreId);
-      fetchProducts();
     }
   }, [navigate]);
 
@@ -61,11 +59,9 @@ export default function ProductCatalog() {
         }
       });
       
-      if (response.data && Array.isArray(response.data.products)) {
-        setProducts(response.data.products);
-      } else {
-        setProducts([]);
-      }
+      // Make sure products is always an array
+      const products = response.data?.products || [];
+      setProducts(Array.isArray(products) ? products : []);
     } catch (err) {
       console.error('Fetch products error:', err);
       setError(err.response?.data?.message || 'Failed to load products');
@@ -152,46 +148,57 @@ export default function ProductCatalog() {
     setIsLoading(true);
   
     try {
-      // Create FormData to handle file uploads
-      const formData = new FormData();
-      formData.append('type', 'products');
-      
-      // Add product images as files
-      currentProduct.images.forEach((image, index) => {
-        if (image instanceof File) {
-          formData.append(`images`, image);
-        }
-      });
-      
-      // Add other product data as JSON
+      // Convert File objects to base64 strings
+      const convertImageToBase64 = (file) => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        });
+      };
+
+      // Process images: keep URLs, convert Files to base64
+      const processedImages = await Promise.all(
+        currentProduct.images.map(async (img) => {
+          if (typeof img === 'string') {
+            return img; // Already a URL string
+          } else {
+            return await convertImageToBase64(img);
+          }
+        })
+      );
+
+      // Create product data with processed images
       const productData = {
         ...currentProduct,
-        images: currentProduct.images.filter(img => !(img instanceof File)),
+        images: processedImages,
         price: Number(currentProduct.price)
       };
-      formData.append('data', JSON.stringify(productData));
+
+      // Create updated products array
+      const updatedProducts = products.some(p => p._id === currentProduct._id)
+        ? products.map(p => p._id === currentProduct._id ? productData : p)
+        : [...products, productData];
 
       // Send to backend
-      const response = await axios.put(`${API_BASE_URL}/business`, formData, {
+      await axios.put(`${API_BASE_URL}/business`, {
+        type: 'products',
+        data: updatedProducts
+      }, {
         headers: {
           'Authorization': `Bearer ${userId}`,
           'x-store-id': storeId,
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json'
         }
       });
 
-      if (response.data && response.data.data && Array.isArray(response.data.data.products)) {
-        setProducts(response.data.data.products);
-        setShowProductModal(false);
-        alert('Product saved successfully!');
-      } else {
-        throw new Error('Invalid response from server');
-      }
+      setProducts(updatedProducts);
+      setShowProductModal(false);
+      alert('Product saved successfully!');
     } catch (err) {
       console.error('Save product error:', err);
       const errorMsg = err.response?.data?.message || 
                       err.response?.data?.error?.message || 
-                      err.message || 
                       'Failed to save product. Please try again.';
       setError(errorMsg);
       alert(errorMsg);
