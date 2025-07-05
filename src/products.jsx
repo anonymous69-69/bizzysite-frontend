@@ -143,25 +143,26 @@ export default function ProductCatalog() {
     setImagePreviews(newPreviews);
   };
 
+  // Function to convert image to Base64
+  const convertImageToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
   
     try {
-      // Convert File objects to base64 strings
-      const convertImageToBase64 = (file) => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        });
-      };
-
-      // Process images: keep URLs, convert Files to base64
+      // Process images: convert File objects to base64 strings
       const processedImages = await Promise.all(
         currentProduct.images.map(async (img) => {
           if (typeof img === 'string') {
-            return img; // Already a URL string
+            return img; // Already a string (URL or base64)
           } else {
             return await convertImageToBase64(img);
           }
