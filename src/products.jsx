@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import imageCompression from 'browser-image-compression';
 import { toast } from 'react-toastify';
+
+// Cloudinary configuration (replace with your own credentials)
+const CLOUD_NAME = 'your-cloudinary-cloud-name';
+const UPLOAD_PRESET = 'your-upload-preset';
 
 export default function ProductCatalog() {
   const API_BASE_URL = 'https://bizzysite.onrender.com/api';
@@ -27,7 +30,7 @@ export default function ProductCatalog() {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState('');
   const [imageUploadError, setImageUploadError] = useState('');
-  const [isCompressing, setIsCompressing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const currencies = [
     { symbol: '$', name: 'USD' },
@@ -74,24 +77,6 @@ export default function ProductCatalog() {
       navigate('/login');
     }
   }, [navigate, fetchProducts]);
-
-  // Image compression function
-  const compressImage = async (file) => {
-    const options = {
-      maxSizeMB: 0.3, // Reduced from 0.5 to 0.3MB
-      maxWidthOrHeight: 1024,
-      useWebWorker: true,
-      fileType: 'image/jpeg'
-    };
-    
-    try {
-      return await imageCompression(file, options);
-    } catch (error) {
-      console.error('Image compression error:', error);
-      toast.error('Failed to compress image');
-      return file;
-    }
-  };
 
   const handleAddProductClick = () => {
     setCurrentProduct({
@@ -141,43 +126,65 @@ export default function ProductCatalog() {
     }));
   };
 
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+    
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error('Cloudinary upload error:', error);
+      throw error;
+    }
+  };
+
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
     
     setImageUploadError('');
-    setIsCompressing(true);
+    setIsUploading(true);
     
     try {
-      // Apply stricter limits: max 5 images
+      // Limit to 5 images
       const maxImages = 5;
       const availableSlots = maxImages - currentProduct.images.length;
+      const filesToUpload = files.slice(0, availableSlots);
+      
       if (files.length > availableSlots) {
-        files.splice(availableSlots);
         toast.warn(`Only ${availableSlots} images can be added`);
       }
-
-      const compressedFiles = await Promise.all(
-        files.map(file => compressImage(file))
-      );
       
-      const newPreviews = await Promise.all(
-        compressedFiles.map(file => URL.createObjectURL(file))
-      );
+      const uploadPromises = filesToUpload.map(file => uploadToCloudinary(file));
+      const imageUrls = await Promise.all(uploadPromises);
       
       setCurrentProduct(prev => ({
         ...prev,
-        images: [...prev.images, ...compressedFiles]
+        images: [...prev.images, ...imageUrls]
       }));
       
-      setImagePreviews(prev => [...prev, ...newPreviews]);
+      setImagePreviews(prev => [...prev, ...imageUrls]);
       toast.success('Images uploaded successfully!');
     } catch (err) {
       console.error('Image upload error:', err);
-      setImageUploadError('Failed to process images');
+      setImageUploadError('Failed to upload images');
       toast.error('Image upload failed');
     } finally {
-      setIsCompressing(false);
+      setIsUploading(false);
     }
   };
 
@@ -195,63 +202,24 @@ export default function ProductCatalog() {
     setImagePreviews(newPreviews);
   };
 
-  // NEW: Upload images individually before saving product
-  const uploadImages = async (images) => {
-    const uploadedUrls = [];
-    
-    for (const img of images) {
-      if (typeof img === 'string') {
-        // Already uploaded, just keep the URL
-        uploadedUrls.push(img);
-        continue;
-      }
-
-      const formData = new FormData();
-      formData.append('image', img);
-      formData.append('storeId', storeId);
-
-      try {
-        const response = await axios.post(`${API_BASE_URL}/upload-image`, formData, {
-          headers: {
-            'Authorization': `Bearer ${userId}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        
-        if (response.data.url) {
-          uploadedUrls.push(response.data.url);
-        }
-      } catch (err) {
-        console.error('Image upload error:', err);
-        throw new Error('Failed to upload images');
-      }
-    }
-    
-    return uploadedUrls;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
   
     try {
-      // Step 1: Upload images individually
-      const imageUrls = await uploadImages(currentProduct.images);
-
-      // Step 2: Create product data with image URLs
+      // Create product data
       const productData = {
         ...currentProduct,
-        images: imageUrls,
         price: Number(currentProduct.price)
       };
 
-      // Step 3: Create updated products array
+      // Create updated products array
       const updatedProducts = products.some(p => p._id === currentProduct._id)
         ? products.map(p => p._id === currentProduct._id ? productData : p)
         : [...products, productData];
 
-      // Step 4: Send product data without images
+      // Send product data to backend
       await axios.put(`${API_BASE_URL}/business`, {
         type: 'products',
         data: updatedProducts
@@ -600,14 +568,14 @@ export default function ProductCatalog() {
                             </label>
                             <p className="pl-1">or drag and drop</p>
                           </div>
-                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 0.3MB per image</p>
+                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB per image</p>
                         </div>
                       </div>
                       
-                      {isCompressing && (
+                      {isUploading && (
                         <div className="mt-2 text-center">
                           <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-indigo-500 mr-2"></div>
-                          <span className="text-sm text-gray-600">Compressing images...</span>
+                          <span className="text-sm text-gray-600">Uploading images...</span>
                         </div>
                       )}
                       
@@ -664,14 +632,14 @@ export default function ProductCatalog() {
                         type="button"
                         onClick={handleCloseModal}
                         className="mr-3 px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
-                        disabled={isLoading || isCompressing}
+                        disabled={isLoading || isUploading}
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
-                        disabled={isLoading || isCompressing}
+                        disabled={isLoading || isUploading}
                       >
                         {isLoading ? 'Saving...' : (products.some(p => p._id === currentProduct._id) ? 'Update Product' : 'Add Product')}
                       </button>
