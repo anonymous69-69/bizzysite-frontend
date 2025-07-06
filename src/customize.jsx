@@ -29,15 +29,14 @@ useEffect(() => {
       const response = await fetch(`https://bizzysite.onrender.com/api/business?storeId=${storeId}`);
       if (response.ok) {
         const data = await response.json();
-        console.log("Customization GET response:", data);
-        const c = data?.customize;
-        if (c) {
-          setPrimaryColor(c.primaryColor);
-          setSecondaryColor(c.secondaryColor);
-          setFontFamily(c.fontFamily);
-          setHeaderStyle(c.headerStyle);
-          setProductLayout(c.productLayout);
-        }
+        console.log("Full GET response:", data);
+        console.log("customize field:", data.customize);
+        const c = data?.customize ?? {};
+        setPrimaryColor(c.primaryColor || '#3b82f6');
+        setSecondaryColor(c.secondaryColor || '#8b5cf6');
+        setFontFamily(c.fontFamily || 'Inter');
+        setHeaderStyle(c.headerStyle || 'Modern');
+        setProductLayout(c.productLayout || 'Grid');
       } else {
         console.warn("No customization data found.");
       }
