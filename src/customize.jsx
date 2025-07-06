@@ -120,10 +120,7 @@ export default function CustomizeStore() {
       return;
     }
 
-    const userId = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('userId='))
-      ?.split('=')[1];
+    const userId = localStorage.getItem('userId');
 
     const settings = {
       primaryColor,
