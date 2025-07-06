@@ -25,8 +25,14 @@ useEffect(() => {
 }, [activeTab, storeId]);
 
   const fetchCustomization = async (storeId) => {
+    console.log("Reloading customization for storeId:", storeId);
+    const userId = localStorage.getItem('userId');
+    if (!userId || !storeId) {
+      console.warn("Missing userId or storeId");
+      return;
+    }
+
     try {
-      const userId = localStorage.getItem('userId');
       const response = await fetch(`https://bizzysite.onrender.com/api/store`, {
         headers: {
           'Content-Type': 'application/json',
