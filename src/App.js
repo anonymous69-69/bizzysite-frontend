@@ -32,6 +32,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Signup />} />
+        <Route path="/site/:storeId" element={<ViewSite />} />
         <Route path="/storefront" element={userId ? <Storefront /> : <Navigate to="/signup" />} />
         <Route path="/products" element={userId ? <Products /> : <Navigate to="/signup" />} />
         <Route path="/orders" element={userId ? <Orders /> : <Navigate to="/signup" />} />
@@ -41,7 +42,6 @@ function App() {
         <Route path="/customize" element={userId ? <Customize /> : <Navigate to="/signup" />} />
         <Route path="/preview" element={userId ? <ViewSite /> : <Navigate to="/signup" />} />
         <Route path="/orderform" element={userId ? <OrderForm /> : <Navigate to="/signup" />} />
-        <Route path="/site/:storeId" element={<ViewSite />} />
         <Route path="/shop/:storeId/product/:id" element={<InProduct />} />
         <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
         <Route path="/navview" element={userId ? <NavView /> : <Navigate to="/signup" />} />
