@@ -17,11 +17,16 @@ function App() {
 
   React.useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
+    console.log("Retrieved userId from localStorage:", storedUserId);
     setUserId(storedUserId);
     setCheckingAuth(false);
   }, []);
 
-  if (checkingAuth) return <div>Loading...</div>;
+  if (checkingAuth) {
+    console.log("Still checking auth...");
+    return <div>Loading...</div>;
+  }
+  console.log("Finished auth check. userId:", userId);
 
   return (
     <Router>
