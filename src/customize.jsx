@@ -11,19 +11,25 @@ export default function CustomizeStore() {
   const [imageURL, setImageURL] = useState('');
   const [storeId, setStoreId] = useState('');
 
-  useEffect(() => {
-    const savedStoreId = localStorage.getItem('storeId');
-    if (savedStoreId) {
-      setStoreId(savedStoreId);
-      fetchCustomization(savedStoreId);
-    }
-  }, []);
+useEffect(() => {
+  const savedStoreId = localStorage.getItem('storeId');
+  if (savedStoreId) {
+    setStoreId(savedStoreId);
+  }
+}, []);
+
+useEffect(() => {
+  if (activeTab === 'Customize' && storeId) {
+    fetchCustomization(storeId);
+  }
+}, [activeTab, storeId]);
 
   const fetchCustomization = async (storeId) => {
     try {
       const response = await fetch(`https://bizzysite.onrender.com/api/business?storeId=${storeId}`);
       if (response.ok) {
         const data = await response.json();
+        console.log("Customization GET response:", data);
         const c = data?.customize;
         if (c) {
           setPrimaryColor(c.primaryColor);
