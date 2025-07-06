@@ -26,7 +26,14 @@ useEffect(() => {
 
   const fetchCustomization = async (storeId) => {
     try {
-      const response = await fetch(`https://bizzysite.onrender.com/api/business?storeId=${storeId}`);
+      const userId = localStorage.getItem('userId');
+      const response = await fetch(`https://bizzysite.onrender.com/api/store`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userId}`,
+          'x-store-id': storeId
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         console.log("Full GET response:", data);
