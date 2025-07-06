@@ -5,14 +5,34 @@ export default function NavView() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Preview');
   const [storeId, setStoreId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('https://bizzysite.onrender.com/api/business')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.storeId) setStoreId(data.storeId);
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    setLoading(true);
+    fetch('https://bizzysite.onrender.com/api/store', {
+      headers: {
+        'Authorization': `Bearer ${userId}`
+      }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch store data');
+        return res.json();
       })
-      .catch((err) => console.error('Failed to fetch storeId:', err));
+      .then(data => {
+        if (data?.business?.storeId) {
+          setStoreId(data.business.storeId);
+          localStorage.setItem('storeId', data.business.storeId);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch storeId:', err);
+        setError('Failed to load store information');
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const handleCopyLink = () => {
@@ -47,6 +67,18 @@ export default function NavView() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
       <div className="max-w-6xl mx-auto p-4 sm:p-6 flex-grow w-full">
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <strong>Error:</strong> {error}
+            <button 
+              className="ml-4 text-sm underline"
+              onClick={() => setError('')}
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center space-x-4">
             <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">BizzySite</Link>
@@ -90,42 +122,49 @@ export default function NavView() {
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Website Preview Options</h3>
           <p className="text-gray-600 mb-6">Preview and share your store with customers</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-700 mb-3">Preview Your Website</h4>
-              <p className="text-gray-500 text-sm mb-4">See how your store looks to customers</p>
-              <button
-                onClick={handleViewSite}
-                className={`px-4 py-2 text-white rounded-md hover:bg-indigo-700 transition-colors ${
-                  !storeId ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600'
-                }`}
-                disabled={!storeId}
-              >
-                View Site
-              </button>
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading your store information...</p>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-700 mb-3">Preview Your Website</h4>
+                <p className="text-gray-500 text-sm mb-4">See how your store looks to customers</p>
+                <button
+                  onClick={handleViewSite}
+                  className={`px-4 py-2 text-white rounded-md hover:bg-indigo-700 transition-colors ${
+                    !storeId ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600'
+                  }`}
+                  disabled={!storeId}
+                >
+                  View Site
+                </button>
+              </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-700 mb-3">Share Your Store Link</h4>
-              <p className="text-gray-500 text-sm mb-4">Copy your store link to share with customers</p>
-              <button
-                onClick={handleCopyLink}
-                className={`px-4 py-2 border rounded-md ${
-                  !storeId 
-                    ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
-                    : 'border-indigo-300 text-indigo-600 bg-white hover:bg-indigo-50'
-                }`}
-                disabled={!storeId}
-              >
-                Copy Link
-              </button>
-              {storeId && (
-                <p className="mt-3 text-xs text-gray-500 break-words">
-                  Your store URL: https://bizzysite-frontend.onrender.com/store/{storeId}
-                </p>
-              )}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-700 mb-3">Share Your Store Link</h4>
+                <p className="text-gray-500 text-sm mb-4">Copy your store link to share with customers</p>
+                <button
+                  onClick={handleCopyLink}
+                  className={`px-4 py-2 border rounded-md ${
+                    !storeId 
+                      ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
+                      : 'border-indigo-300 text-indigo-600 bg-white hover:bg-indigo-50'
+                  }`}
+                  disabled={!storeId}
+                >
+                  Copy Link
+                </button>
+                {storeId && (
+                  <p className="mt-3 text-xs text-gray-500 break-words">
+                    Your store URL: https://bizzysite-frontend.onrender.com/store/{storeId}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
