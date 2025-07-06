@@ -139,41 +139,37 @@ export default function ProductCatalog() {
         toast.warn(`Only ${availableSlots} images can be added`);
       }
 
-      // Check for oversized images before converting to Base64
-      const MAX_IMAGE_SIZE_MB = 1.5;
-      const oversizedFiles = filesToUpload.filter(file => file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024);
-      if (oversizedFiles.length > 0) {
-        toast.error("One or more images are too large (max 1.5MB)");
-        setIsUploading(false);
-        return;
-      }
+      // Cloudinary upload
+      const cloudName = "dkbhczdas";
+      const uploadPreset = "bizzysite";
 
-      // Convert files to Base64 strings
-      const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-      });
+      const uploadToCloudinary = async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", uploadPreset);
 
-      const base64Promises = filesToUpload.map(file => toBase64(file));
-      const base64Results = await Promise.all(base64Promises);
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: "POST",
+          body: formData,
+        });
 
-      // Check total combined Base64 size (~8MB limit)
-      const totalSizeBytes = base64Results.reduce((sum, img) => sum + img.length * 2, 0);
-      if (totalSizeBytes > 8 * 1024 * 1024) { // ~8MB
-        toast.error("Combined image size too large (max 8MB)");
-        setIsUploading(false);
-        return;
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error?.message || "Upload failed");
+        return data.secure_url;
+      };
+
+      const cloudUrls = [];
+      for (const file of filesToUpload) {
+        const url = await uploadToCloudinary(file);
+        cloudUrls.push(url);
       }
 
       setCurrentProduct(prev => ({
         ...prev,
-        images: [...prev.images, ...base64Results]
+        images: [...prev.images, ...cloudUrls]
       }));
-
-      setImagePreviews(prev => [...prev, ...base64Results]);
-      toast.success('Images added successfully!');
+      setImagePreviews(prev => [...prev, ...cloudUrls]);
+      toast.success("Images uploaded successfully!");
     } catch (err) {
       console.error('Image upload error:', err);
       setImageUploadError('Failed to add images');
