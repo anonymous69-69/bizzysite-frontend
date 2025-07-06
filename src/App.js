@@ -12,24 +12,34 @@ import OrderForm from './orderform.jsx';
 import NavView from './navview';
 
 function App() {
+  const [userId, setUserId] = React.useState(null);
+  const [checkingAuth, setCheckingAuth] = React.useState(true);
+
+  React.useEffect(() => {
+    const storedUserId = localStorage.getItem('userId');
+    setUserId(storedUserId);
+    setCheckingAuth(false);
+  }, []);
+
+  if (checkingAuth) return <div>Loading...</div>;
+
   return (
     <Router>
       <Routes>
-        {/* Changed root path to Signup page */}
         <Route path="/" element={<Signup />} />
-        <Route path="/storefront" element={<Storefront />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/orders" element={<Orders />} />
+        <Route path="/storefront" element={userId ? <Storefront /> : <Signup />} />
+        <Route path="/products" element={userId ? <Products /> : <Signup />} />
+        <Route path="/orders" element={userId ? <Orders /> : <Signup />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/product/:id" element={<InProduct />} />
-        <Route path="/payment" element={<Payment />} />
-        <Route path="/customize" element={<Customize />} />
-        <Route path="/preview" element={<ViewSite />} />
-        <Route path="/orderform" element={<OrderForm />} />
+        <Route path="/payment" element={userId ? <Payment /> : <Signup />} />
+        <Route path="/customize" element={userId ? <Customize /> : <Signup />} />
+        <Route path="/preview" element={userId ? <ViewSite /> : <Signup />} />
+        <Route path="/orderform" element={userId ? <OrderForm /> : <Signup />} />
         <Route path="/shop/:storeId" element={<ViewSite />} />
         <Route path="/shop/:storeId/product/:id" element={<InProduct />} />
         <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
-        <Route path="/navview" element={<NavView />} />
+        <Route path="/navview" element={userId ? <NavView /> : <Signup />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>
