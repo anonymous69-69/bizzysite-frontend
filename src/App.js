@@ -41,7 +41,7 @@ function App() {
         <Route path="/customize" element={userId ? <Customize /> : <Navigate to="/signup" />} />
         <Route path="/preview" element={userId ? <ViewSite /> : <Navigate to="/signup" />} />
         <Route path="/orderform" element={userId ? <OrderForm /> : <Navigate to="/signup" />} />
-        <Route path="/shop/:storeId" element={<ViewSite />} />
+        <Route path="/site/:storeId" element={<ViewSite />} />
         <Route path="/shop/:storeId/product/:id" element={<InProduct />} />
         <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
         <Route path="/navview" element={userId ? <NavView /> : <Navigate to="/signup" />} />
