@@ -132,7 +132,7 @@ export default function CustomizeStore() {
 
     try {
       const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${userId}`,
