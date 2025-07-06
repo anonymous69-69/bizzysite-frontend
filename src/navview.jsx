@@ -9,9 +9,14 @@ export default function NavView() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Try to get storeId from localStorage first
+    const localStoreId = localStorage.getItem('storeId');
+    if (localStoreId) {
+      setStoreId(localStoreId);
+      return;
+    }
     const userId = localStorage.getItem('userId');
     if (!userId) return;
-
     setLoading(true);
     fetch('https://bizzysite.onrender.com/api/store', {
       headers: {
@@ -47,8 +52,8 @@ export default function NavView() {
         alert('Store link copied to clipboard!');
       })
       .catch(err => {
-        console.error('Failed to copy: ', err);
-        alert('Failed to copy link. Please try again.');
+        console.error('Clipboard API failed:', err);
+        alert('Unable to copy the link. Please check browser permissions.');
       });
   };
 
@@ -59,8 +64,9 @@ export default function NavView() {
     }
     
     window.open(
-      `https://bizzysite-frontend.onrender.com/store/${storeId}`, 
-      '_blank'
+      `https://bizzysite-frontend.onrender.com/store/${storeId}`,
+      '_blank',
+      'noopener,noreferrer'
     );
   };
 
