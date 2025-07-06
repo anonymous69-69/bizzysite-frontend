@@ -14,38 +14,25 @@ const ViewSite = () => {
 
   // Fetch business data using storeId from URL
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBusiness = async () => {
       try {
-        setLoading(true);
-        const response = await fetch(
-          `https://bizzysite.onrender.com/api/business/${storeId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
+        const res = await fetch('https://bizzysite.onrender.com/api/store', {
+          headers: {
+            'x-store-id': storeId
           }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Failed to load store: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        setBusinessData(data);
+        });
+        if (!res.ok) throw new Error("Failed to load store");
+  
+        const data = await res.json();
+        console.log("Loaded store data:", data);
+        setBusiness(data);
       } catch (err) {
-        console.error("Error fetching business data:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        console.error("Error loading store:", err);
+        setError("Could not load this store.");
       }
     };
-
-    if (storeId) {
-      fetchData();
-    } else {
-      setError("Store ID is missing in URL");
-      setLoading(false);
-    }
+  
+    if (storeId) fetchBusiness();
   }, [storeId]);
 
   // Add to cart function
