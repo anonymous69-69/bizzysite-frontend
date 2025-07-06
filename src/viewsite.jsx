@@ -11,7 +11,8 @@ const ViewSite = () => {
   const [cart, setCart] = useState([]);
   const { storeId } = useParams();
   const navigate = useNavigate();
-
+  const [business, setBusiness] = useState(null);
+ 
   // Fetch business data using storeId from URL
   useEffect(() => {
     const fetchBusiness = async () => {
@@ -124,7 +125,7 @@ const ViewSite = () => {
     );
   }
 
-  const business = businessData.business || {};
+
   const products = businessData.products || [];
   const theme = businessData.customize || {};
 
