@@ -46,7 +46,7 @@ export default function NavView() {
       return;
     }
     
-    const link = `https://bizzysite-frontend.onrender.com/store/${storeId}`;
+    const link = `https://bizzysite-frontend.onrender.com/shop/${storeId}`;
     navigator.clipboard.writeText(link)
       .then(() => {
         alert('Store link copied to clipboard!');
@@ -64,7 +64,7 @@ export default function NavView() {
     }
     
     window.open(
-      `https://bizzysite-frontend.onrender.com/store/${storeId}`,
+      `https://bizzysite-frontend.onrender.com/shop/${storeId}`,
       '_blank',
       'noopener,noreferrer'
     );
@@ -165,7 +165,7 @@ export default function NavView() {
                 </button>
                 {storeId && (
                   <p className="mt-3 text-xs text-gray-500 break-words">
-                    Your store URL: https://bizzysite-frontend.onrender.com/store/{storeId}
+                    Your store URL: https://bizzysite-frontend.onrender.com/shop/{storeId}
                   </p>
                 )}
               </div>
