@@ -24,7 +24,8 @@ export default function NavView() {
     setLoading(true);
     fetch('https://bizzysite.onrender.com/api/store', {
       headers: {
-        'Authorization': `Bearer ${userId}`
+        'Authorization': `Bearer ${userId}`,
+        'x-store-id': localStoreId
       }
     })
       .then(res => {
