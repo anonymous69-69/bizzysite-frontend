@@ -33,13 +33,7 @@ export default function BusinessDashboard() {
   const fetchBusinessInfo = (storeId) => {
     const userId = localStorage.getItem("userId");
     
-    fetch(`https://bizzysite.onrender.com/api/store`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${userId}`,
-        'x-store-id': storeId
-      }
-    })
+    fetch(`https://bizzysite.onrender.com/api/store/${storeId}`)
       .then(res => res.json())
       .then(data => {
         if (data?.business) {
