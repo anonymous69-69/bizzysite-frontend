@@ -134,7 +134,6 @@ export default function BusinessDashboard() {
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center space-x-4">
             <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">BizzySite</Link>
-            <ViewSiteButtons storeId={storeId} />
           </div>
         </div>
         <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">Welcome to your business dashboard</h2>
@@ -408,43 +407,6 @@ export default function BusinessDashboard() {
           </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function ViewSiteButtons({ storeId }) {
-  return (
-    <div className="flex items-center space-x-2">
-      <button
-        className="px-3 py-1 sm:px-4 sm:py-2 border border-purple-300 text-purple-500 bg-white rounded-md font-medium hover:bg-purple-50 text-sm sm:text-base"
-        onClick={() => {
-          if (storeId) {
-            window.open(
-              `https://bizzysite-frontend.onrender.com/store/${storeId}`,
-              "_blank"
-            );
-          } else {
-            alert("Please save your business information first");
-          }
-        }}
-      >
-        View Site
-      </button>
-      <button
-        className="px-3 py-1 sm:px-4 sm:py-2 border border-purple-300 text-purple-500 bg-white rounded-md font-medium hover:bg-purple-50 text-sm sm:text-base"
-        onClick={() => {
-          if (storeId) {
-            navigator.clipboard.writeText(
-              `https://bizzysite-frontend.onrender.com/store/${storeId}`
-            );
-            alert("🔗 Store link copied to clipboard!");
-          } else {
-            alert("Please save your business information first");
-          }
-        }}
-      >
-        Copy Link
-      </button>
     </div>
   );
 }
