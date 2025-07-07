@@ -81,7 +81,7 @@ export default function NavView() {
     }
     
     window.open(
-      `https://bizzysite-frontend.onrender.com/site/${storeId}`,
+      `https://bizzysite-frontend.onrender.com/#/site/${storeId}`,
       '_blank',
       'noopener,noreferrer'
     );
@@ -184,8 +184,8 @@ export default function NavView() {
                 </button>
                 {storeId && (
                   <p className="mt-3 text-xs text-gray-500 break-words">
-                  Your store URL: https://bizzysite-frontend.onrender.com/site/{storeId}
-                </p>
+                    Your store URL: https://bizzysite-frontend.onrender.com/site/{storeId}
+                  </p>
                 )}
               </div>
             </div>
