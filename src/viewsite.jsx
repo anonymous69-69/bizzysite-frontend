@@ -19,22 +19,12 @@ const ViewSite = () => {
         setLoading(true);
         setError(null);
         
-        console.log(`[ViewSite] Fetching store data for storeId: ${storeId}`);
+        console.log(`[ViewSite] Fetching public store data for storeId: ${storeId}`);
         
-        // Get the user ID from localStorage
-        const userId = localStorage.getItem('userId');
-        console.log(`[ViewSite] User ID from localStorage: ${userId}`);
-        
-        if (!userId) {
-          throw new Error("User not authenticated. Please login again.");
-        }
-
-        const res = await fetch('https://bizzysite.onrender.com/api/store', {
-          headers: {
-            'x-store-id': storeId,
-            'Authorization': `Bearer ${userId}`
-          }
-        });
+        // Use public endpoint without authentication
+        const res = await fetch(
+          `https://bizzysite.onrender.com/api/store/public/${storeId}`
+        );
         
         console.log(`[ViewSite] API response status: ${res.status}`);
         
@@ -42,7 +32,6 @@ const ViewSite = () => {
           let errorMsg = `Failed to load store (Status: ${res.status})`;
           
           try {
-            // Attempt to get error details from response body
             const errorData = await res.json();
             console.log("[ViewSite] Error response body:", errorData);
             errorMsg = errorData.message || errorData.error || errorMsg;
@@ -52,7 +41,7 @@ const ViewSite = () => {
           
           throw new Error(errorMsg);
         }
-
+  
         const data = await res.json();
         console.log("[ViewSite] Store data received:", data);
         setBusiness(data);
@@ -63,7 +52,7 @@ const ViewSite = () => {
         setLoading(false);
       }
     };
-
+  
     if (storeId) {
       fetchBusiness();
     } else {
