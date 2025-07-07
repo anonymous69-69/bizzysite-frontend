@@ -13,10 +13,14 @@ export default function NavView() {
     const localStoreId = localStorage.getItem('storeId');
     if (localStoreId) {
       setStoreId(localStoreId);
+      setLoading(false);
       return;
     }
     const userId = localStorage.getItem('userId');
-    if (!userId) return;
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     fetch('https://bizzysite.onrender.com/api/store', {
       headers: {
