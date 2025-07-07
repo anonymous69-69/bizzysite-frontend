@@ -41,8 +41,12 @@ export default function NavView() {
         console.log("Fetched store data:", data);
         if (data?.storeId || data?.business?.storeId) {
           const sid = data.storeId || data.business.storeId;
-          setStoreId(sid);
-          localStorage.setItem('storeId', sid);
+          if (sid) {
+            setStoreId(sid);
+            localStorage.setItem('storeId', sid);
+          }
+        } else {
+          console.warn("No storeId found in fetched data:", data);
         }
         setLoading(false);
       })
@@ -82,6 +86,8 @@ export default function NavView() {
       'noopener,noreferrer'
     );
   };
+
+  console.log("Rendered storeId:", storeId);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
