@@ -19,29 +19,48 @@ const ViewSite = () => {
         setLoading(true);
         setError(null);
         
+        console.log(`[ViewSite] Fetching store data for storeId: ${storeId}`);
+        
         const res = await fetch('https://bizzysite.onrender.com/api/store', {
           headers: {
             'x-store-id': storeId
           }
         });
         
+        console.log(`[ViewSite] API response status: ${res.status}`);
+        
         if (!res.ok) {
-          throw new Error(res.status === 404 
-            ? "Store not found" 
-            : "Failed to load store");
+          let errorMsg = `Failed to load store (Status: ${res.status})`;
+          
+          try {
+            // Attempt to get error details from response body
+            const errorData = await res.json();
+            console.log("[ViewSite] Error response body:", errorData);
+            errorMsg = errorData.message || errorData.error || errorMsg;
+          } catch (e) {
+            console.error("[ViewSite] Failed to parse error response:", e);
+          }
+          
+          throw new Error(errorMsg);
         }
 
         const data = await res.json();
+        console.log("[ViewSite] Store data received:", data);
         setBusiness(data);
       } catch (err) {
-        console.error("Error loading store:", err);
-        setError(err.message || "Could not load this store.");
+        console.error("[ViewSite] Error loading store:", err);
+        setError(err.message || "Could not load this store. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-    if (storeId) fetchBusiness();
+    if (storeId) {
+      fetchBusiness();
+    } else {
+      setError("Store ID is missing from URL");
+      setLoading(false);
+    }
   }, [storeId]);
 
   // Add to cart function
@@ -101,18 +120,29 @@ const ViewSite = () => {
             Error loading store
           </h3>
           <p className="mt-2 text-gray-600">{error}</p>
+          <p className="mt-3 text-sm text-gray-500">
+            Store ID: <code className="bg-gray-100 px-2 py-1 rounded">{storeId || "N/A"}</code>
+          </p>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
             Try Again
           </button>
-          <Link
-            to="/"
-            className="block mt-2 text-indigo-600 hover:underline"
-          >
-            Return to Home
-          </Link>
+          <div className="mt-4 space-y-2">
+            <Link
+              to="/"
+              className="block text-indigo-600 hover:underline"
+            >
+              Return to Home
+            </Link>
+            <a
+              href="mailto:support@bizzysite.com"
+              className="block text-indigo-600 hover:underline"
+            >
+              Contact Support
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -126,7 +156,10 @@ const ViewSite = () => {
             Store not found
           </h3>
           <p className="mt-2 text-gray-600">
-            The store ID <code>{storeId}</code> does not exist.
+            The store ID <code className="bg-gray-100 px-2 py-1 rounded">{storeId}</code> does not exist.
+          </p>
+          <p className="mt-3 text-sm text-gray-500">
+            Make sure you've completed your store setup.
           </p>
           <Link
             to="/"
@@ -465,7 +498,7 @@ const ViewSite = () => {
               <span
                 className="absolute -top-2 -right-2 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
                 style={{ backgroundColor: secondaryColor }}
-              >
+                >
                 {totalItems}
               </span>
             )}
