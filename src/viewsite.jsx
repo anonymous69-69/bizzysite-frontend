@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 
 const ViewSite = () => {
-  const [businessData, setBusinessData] = useState(null);
+  const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,28 +11,36 @@ const ViewSite = () => {
   const [cart, setCart] = useState([]);
   const { storeId } = useParams();
   const navigate = useNavigate();
-  const [business, setBusiness] = useState(null);
- 
+
   // Fetch business data using storeId from URL
   useEffect(() => {
     const fetchBusiness = async () => {
       try {
+        setLoading(true);
+        setError(null);
+        
         const res = await fetch('https://bizzysite.onrender.com/api/store', {
           headers: {
             'x-store-id': storeId
           }
         });
-        if (!res.ok) throw new Error("Failed to load store");
-  
+        
+        if (!res.ok) {
+          throw new Error(res.status === 404 
+            ? "Store not found" 
+            : "Failed to load store");
+        }
+
         const data = await res.json();
-        console.log("Loaded store data:", data);
         setBusiness(data);
       } catch (err) {
         console.error("Error loading store:", err);
-        setError("Could not load this store.");
+        setError(err.message || "Could not load this store.");
+      } finally {
+        setLoading(false);
       }
     };
-  
+
     if (storeId) fetchBusiness();
   }, [storeId]);
 
@@ -99,12 +107,18 @@ const ViewSite = () => {
           >
             Try Again
           </button>
+          <Link
+            to="/"
+            className="block mt-2 text-indigo-600 hover:underline"
+          >
+            Return to Home
+          </Link>
         </div>
       </div>
     );
   }
 
-  if (!businessData) {
+  if (!business) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center p-6 bg-white rounded-lg shadow-md max-w-md">
@@ -125,9 +139,8 @@ const ViewSite = () => {
     );
   }
 
-
-  const products = businessData.products || [];
-  const theme = businessData.customize || {};
+  const products = business.products || [];
+  const theme = business.customize || {};
 
   // Theme defaults
   const primaryColor = theme.primaryColor || "#4f46e5";
