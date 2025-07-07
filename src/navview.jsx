@@ -63,7 +63,7 @@ export default function NavView() {
       return;
     }
     
-    const link = `https://bizzysite-frontend.onrender.com/site/${storeId}`;
+    const link = `https://bizzysite-frontend.onrender.com/#/site/${storeId}`;
     navigator.clipboard.writeText(link)
       .then(() => {
         alert('Store link copied to clipboard!');
@@ -184,7 +184,7 @@ export default function NavView() {
                 </button>
                 {storeId && (
                   <p className="mt-3 text-xs text-gray-500 break-words">
-                    Your store URL: https://bizzysite-frontend.onrender.com/site/{storeId}
+                   Your store URL: https://bizzysite-frontend.onrender.com/#/site/{storeId}
                   </p>
                 )}
               </div>

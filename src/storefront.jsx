@@ -32,12 +32,18 @@ export default function BusinessDashboard() {
 
   const fetchBusinessInfo = (storeId) => {
     const userId = localStorage.getItem("userId");
-    
     fetch(`https://bizzysite.onrender.com/api/store/${storeId}`)
       .then(res => res.json())
       .then(data => {
-        if (data?.business) {
-          setBusinessInfo({ ...data.business });
+        if (data?.name || data?.business) {
+          const info = data.business || data; // support both shapes
+          setBusinessInfo({
+            name: info.name || '',
+            phone: info.phone || '',
+            email: info.email || '',
+            description: info.description || '',
+            address: info.address || ''
+          });
         }
       })
       .catch(err => console.error('Failed to fetch business info:', err));
