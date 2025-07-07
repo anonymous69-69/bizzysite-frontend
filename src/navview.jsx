@@ -9,18 +9,23 @@ export default function NavView() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Try to get storeId from localStorage first
     const localStoreId = localStorage.getItem('storeId');
+    const userId = localStorage.getItem('userId');
+    console.log("Local storeId:", localStoreId);
+    console.log("Local userId:", userId);
+
     if (localStoreId) {
       setStoreId(localStoreId);
       setLoading(false);
       return;
     }
-    const userId = localStorage.getItem('userId');
+
     if (!userId) {
+      console.warn("No userId found in localStorage");
       setLoading(false);
       return;
     }
+
     setLoading(true);
     fetch('https://bizzysite.onrender.com/api/store', {
       headers: {
@@ -33,16 +38,19 @@ export default function NavView() {
         return res.json();
       })
       .then(data => {
-        if (data?.business?.storeId) {
-          setStoreId(data.business.storeId);
-          localStorage.setItem('storeId', data.business.storeId);
+        console.log("Fetched store data:", data);
+        if (data?.storeId || data?.business?.storeId) {
+          const sid = data.storeId || data.business.storeId;
+          setStoreId(sid);
+          localStorage.setItem('storeId', sid);
         }
+        setLoading(false);
       })
       .catch(err => {
         console.error('Failed to fetch storeId:', err);
         setError('Failed to load store information');
-      })
-      .finally(() => setLoading(false));
+        setLoading(false);
+      });
   }, []);
 
   const handleCopyLink = () => {
