@@ -21,9 +21,18 @@ const ViewSite = () => {
         
         console.log(`[ViewSite] Fetching store data for storeId: ${storeId}`);
         
+        // Get the user ID from localStorage
+        const userId = localStorage.getItem('userId');
+        console.log(`[ViewSite] User ID from localStorage: ${userId}`);
+        
+        if (!userId) {
+          throw new Error("User not authenticated. Please login again.");
+        }
+
         const res = await fetch('https://bizzysite.onrender.com/api/store', {
           headers: {
-            'x-store-id': storeId
+            'x-store-id': storeId,
+            'Authorization': `Bearer ${userId}`
           }
         });
         
@@ -130,6 +139,12 @@ const ViewSite = () => {
             Try Again
           </button>
           <div className="mt-4 space-y-2">
+            <Link
+              to="/login"
+              className="block text-indigo-600 hover:underline"
+            >
+              Login Again
+            </Link>
             <Link
               to="/"
               className="block text-indigo-600 hover:underline"
