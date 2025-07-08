@@ -18,15 +18,15 @@ const ViewSite = () => {
       try {
         setLoading(true);
         setError(null);
-  
+
         console.log(`[ViewSite] Fetching store data for storeId: ${storeId}`);
-  
+
         const res = await fetch(`https://bizzysite.onrender.com/api/store/${storeId}`);
         console.log(`[ViewSite] API response status: ${res.status}`);
-  
+
         if (!res.ok) {
           let errorMsg = `Failed to load store (Status: ${res.status})`;
-  
+
           try {
             const errorData = await res.json();
             console.log("[ViewSite] Error response body:", errorData);
@@ -34,10 +34,10 @@ const ViewSite = () => {
           } catch (e) {
             console.error("[ViewSite] Failed to parse error response:", e);
           }
-  
+
           throw new Error(errorMsg);
         }
-  
+
         const data = await res.json();
         console.log("[ViewSite] Store data received:", data);
         setBusiness(data);
@@ -48,7 +48,7 @@ const ViewSite = () => {
         setLoading(false);
       }
     };
-  
+
     if (storeId) {
       fetchBusiness();
     } else {
@@ -191,17 +191,15 @@ const ViewSite = () => {
     >
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity duration-300 ${
-          isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity duration-300 ${isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setIsMenuOpen(false)}
       ></div>
 
       {/* Mobile Side Menu */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ${
-          isMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="p-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold">{business.name || "Menu"}</h3>
@@ -209,22 +207,22 @@ const ViewSite = () => {
         <nav className="p-4">
           <ul className="space-y-3">
             <li>
-              <button 
+              <button
                 onClick={() => {
                   setIsMenuOpen(false);
                   document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
-                }} 
+                }}
                 className="block py-2 hover:text-indigo-600 w-full text-left"
               >
                 Home
               </button>
             </li>
             <li>
-              <button 
+              <button
                 onClick={() => {
                   setIsMenuOpen(false);
                   document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
-                }} 
+                }}
                 className="block py-2 hover:text-indigo-600 w-full text-left"
               >
                 Products
@@ -247,19 +245,17 @@ const ViewSite = () => {
 
       {/* Contact Modal Overlay */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-70 z-50 transition-opacity duration-300 ${
-          isContactModalOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black bg-opacity-70 z-50 transition-opacity duration-300 ${isContactModalOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setIsContactModalOpen(false)}
       ></div>
 
       {/* Contact Modal */}
       <div
-        className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 p-6 w-full max-w-md transition-all duration-300 ${
-          isContactModalOpen
+        className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 p-6 w-full max-w-md transition-all duration-300 ${isContactModalOpen
             ? "opacity-100 scale-100"
             : "opacity-0 scale-95 pointer-events-none"
-        }`}
+          }`}
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-gray-800">
@@ -290,16 +286,14 @@ const ViewSite = () => {
 
       {/* Cart Sidebar with darker background */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-70 z-30 transition-opacity duration-300 ${
-          isCartOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black bg-opacity-70 z-30 transition-opacity duration-300 ${isCartOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setIsCartOpen(false)}
       ></div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-40 transform transition-transform duration-300 ${
-          isCartOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-40 transform transition-transform duration-300 ${isCartOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-lg font-semibold">Your Cart ({totalItems})</h3>
@@ -430,13 +424,13 @@ const ViewSite = () => {
             </h1>
           </div>
           <div className="hidden md:flex items-center space-x-6">
-            <button 
+            <button
               onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })}
               className="hover:opacity-80"
             >
               Home
             </button>
-            <button 
+            <button
               onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
               className="hover:opacity-80"
             >
@@ -498,7 +492,7 @@ const ViewSite = () => {
               <span
                 className="absolute -top-2 -right-2 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
                 style={{ backgroundColor: secondaryColor }}
-                >
+              >
                 {totalItems}
               </span>
             )}
@@ -554,15 +548,14 @@ const ViewSite = () => {
             </div>
           ) : (
             <div
-              className={`grid ${
-                productLayout === "Grid"
-                  ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+              className={`grid ${productLayout === "Grid"
+                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3" // Changed from grid-cols-1 to grid-cols-2 for mobile
                   : productLayout === "List"
-                  ? "grid-cols-1"
-                  : "grid-cols-1 md:grid-cols-2"
-              } gap-4 md:gap-6`}
+                    ? "grid-cols-1"
+                    : "grid-cols-1 md:grid-cols-2"
+                } gap-4 md:gap-6`}
             >
-              {products.map((product) => {
+              {products.map((product, index) => {
                 const cartItem = cart.find(
                   (item) => item._id === product._id
                 );
@@ -570,17 +563,18 @@ const ViewSite = () => {
                 return (
                   <div
                     key={product._id}
-                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow animate-slideIn"
                     style={{
                       border:
                         productLayout === "Card"
                           ? `2px solid ${secondaryColor}`
                           : "none",
                       display: productLayout === "List" ? "flex flex-col sm:flex-row" : "block",
+                      animationDelay: `${index * 0.1}s`, // Staggered animation
                     }}
                   >
                     <button
-                      onClick={() => 
+                      onClick={() =>
                         navigate(`/store/${storeId}/product/${product._id}`)
                       }
                       className="w-full text-left"
@@ -589,17 +583,15 @@ const ViewSite = () => {
                         <img
                           src={product.images[0]}
                           alt={product.name}
-                          className={`${
-                            productLayout === "List"
+                          className={`${productLayout === "List"
                               ? "w-full h-48 sm:w-1/3 sm:h-auto object-cover"
                               : "w-full h-48 object-cover"
-                          }`}
+                            }`}
                         />
                       ) : (
                         <div
-                          className={`${
-                            productLayout === "List" ? "sm:w-1/3" : "w-full"
-                          } h-48 bg-gray-200 flex items-center justify-center`}
+                          className={`${productLayout === "List" ? "sm:w-1/3" : "w-full"
+                            } h-48 bg-gray-200 flex items-center justify-center`}
                         >
                           <span className="text-gray-500">No image</span>
                         </div>
@@ -607,9 +599,8 @@ const ViewSite = () => {
                     </button>
 
                     <div
-                      className={`p-4 ${
-                        productLayout === "List" ? "sm:w-2/3" : ""
-                      }`}
+                      className={`p-4 ${productLayout === "List" ? "sm:w-2/3" : ""
+                        }`}
                     >
                       <h3 className="text-lg font-semibold mb-2">
                         {product.name || "Product Name"}
@@ -712,7 +703,7 @@ const ViewSite = () => {
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2">
                 <li>
-                  <button 
+                  <button
                     onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })}
                     className="hover:underline"
                   >
@@ -720,7 +711,7 @@ const ViewSite = () => {
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
                     className="hover:underline"
                   >
