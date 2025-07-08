@@ -445,6 +445,7 @@ const ViewSite = () => {
                     (total, item) => total + (parseFloat(item.price) * item.quantity),
                     0
                   ),
+                  shippingCharge: business.shippingCharge || 50
                 },
               });
             }}

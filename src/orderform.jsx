@@ -26,7 +26,7 @@ const OrderForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Order summary
-  const shippingCharge = 50; // Example shipping charge
+  const shippingCharge = location.state?.shippingCharge || 50;
   const platformFee = total * 0.03;
   const orderTotal = total + shippingCharge + platformFee;
 
