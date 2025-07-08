@@ -17,6 +17,7 @@ export default function BusinessDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [animate, setAnimate] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
@@ -138,6 +139,34 @@ export default function BusinessDashboard() {
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center space-x-4">
             <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">BizzySite</Link>
+          </div>
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="focus:outline-none"
+            >
+              <img
+                src="https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg"
+                alt="Profile"
+                className="w-10 h-10 rounded-full border-2 border-indigo-600"
+              />
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10">
+                <Link
+                  to="/profile"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Profile
+                </Link>
+                <Link
+                  to="/settings"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Settings
+                </Link>
+              </div>
+            )}
           </div>
         </div>
         <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">Welcome to your business dashboard</h2>
