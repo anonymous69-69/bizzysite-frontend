@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export default function NavView() {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ export default function NavView() {
     const link = `https://bizzysite-frontend.onrender.com/site/${storeId}`;
     navigator.clipboard.writeText(link)
       .then(() => {
-        alert('Store link copied to clipboard!');
+        toast.success('Store link copied to clipboard');
       })
       .catch(err => {
         console.error('Clipboard API failed:', err);

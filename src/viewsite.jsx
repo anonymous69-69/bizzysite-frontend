@@ -742,50 +742,28 @@ const ViewSite = () => {
       </section>
 
       {/* Footer */}
-      <footer
-        className="py-8 px-4 text-white"
-        style={{ backgroundColor: primaryColor }}
-      >
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">{business.name || "Our Store"}</h3>
-              <p className="text-opacity-80">
-                {business.description || "Quality products for our customers"}
-              </p>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Contact</h4>
-              <p className="mb-2">{business.phone || "Phone not provided"}</p>
-              <p className="mb-2">{business.email || "Email not provided"}</p>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li>
-                  <button
-                    onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="hover:underline"
-                  >
-                    Home
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="hover:underline"
-                  >
-                    Products
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-opacity-20 mt-8 pt-8 text-center">
-            <p>© {new Date().getFullYear()} {business.name || "Our Store"}. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+<footer className="bg-gray-800 text-white py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+  <div className="max-w-7xl mx-auto">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+      <div>
+        <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
+        <p className="text-gray-300 mb-4 text-sm sm:text-base">
+          Empowering small businesses to succeed online with simple, powerful tools.
+        </p>
+      </div>
+      <div>
+        <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
+        <ul className="space-y-2 text-gray-300 text-sm sm:text-base">
+          <li>Email: rhythmsarma66@gmail.com</li>
+          <li>Phone: +91 7086758292</li>
+        </ul>
+      </div>
+    </div>
+    <div className="border-t border-gray-700 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
+      <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
+    </div>
+  </div>
+</footer>
     </div>
   );
 };
