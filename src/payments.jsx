@@ -69,10 +69,12 @@ export default function PaymentMethodForm() {
         data: payload
       });
 
+      const token = localStorage.getItem('token');
       const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           type: 'payments',
