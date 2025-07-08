@@ -10,7 +10,8 @@ export default function BusinessDashboard() {
     phone: '',
     email: '',
     description: '',
-    address: ''
+    address: '',
+    shippingCharge: ''
   });
   const [storeId, setStoreId] = useState('');
   const [activeTab, setActiveTab] = useState('Setup');
@@ -46,7 +47,8 @@ export default function BusinessDashboard() {
             phone: info.phone || '',
             email: info.email || '',
             description: info.description || '',
-            address: info.address || ''
+            address: info.address || '',
+            shippingCharge: info.shippingCharge || ''
           });
         }
       })
@@ -293,6 +295,20 @@ export default function BusinessDashboard() {
                 onChange={handleChange}
                 placeholder="Enter your business address"
                 rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div className="mb-6">
+              <label htmlFor="shippingCharge" className="block text-sm font-medium text-gray-700 mb-1">
+                Shipping Charge (in ₹)
+              </label>
+              <input
+                type="number"
+                id="shippingCharge"
+                name="shippingCharge"
+                value={businessInfo.shippingCharge || ''}
+                onChange={handleChange}
+                placeholder="Enter flat shipping charge"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
