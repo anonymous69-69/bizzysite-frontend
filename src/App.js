@@ -47,6 +47,7 @@ function App() {
         <Route path="/shop/:storeId/product/:id" element={<InProduct />} />
         <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
         <Route path="/navview" element={userId ? <NavView /> : <Navigate to="/signup" />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>
