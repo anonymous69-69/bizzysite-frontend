@@ -748,7 +748,7 @@ const ViewSite = () => {
       <div>
         <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
         <p className="text-gray-300 mb-4 text-sm sm:text-base">
-          Empowering small businesses to succeed online with simple, powerful tools.
+          Made with BizzySite. A free website builder for small businesses.
         </p>
       </div>
       <div>

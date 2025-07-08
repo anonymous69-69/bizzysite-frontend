@@ -67,7 +67,9 @@ export default function NavView() {
     const link = `https://bizzysite-frontend.onrender.com/site/${storeId}`;
     navigator.clipboard.writeText(link)
       .then(() => {
-        toast.success('Store link copied to clipboard');
+        toast.success('Store link copied to clipboard', {
+          position: 'top-right'
+        });
       })
       .catch(err => {
         console.error('Clipboard API failed:', err);
