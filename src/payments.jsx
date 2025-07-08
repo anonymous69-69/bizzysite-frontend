@@ -14,20 +14,27 @@ export default function PaymentMethodForm() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true); // Added loading state
 
   useEffect(() => {
     const fetchPaymentSettings = async () => {
       try {
-        const token = localStorage.getItem('token');
+        // FIX 1: Use userId instead of token
+        const token = localStorage.getItem('userId');
         if (!token) {
-          // No token, do not fetch payment settings
+          setIsLoading(false);
           return;
         }
+        
+        // FIX 2: Prevent caching of API response
         const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache'
+          },
+          cache: 'no-store'
         });
+        
         if (response.ok) {
           const data = await response.json();
           console.log('Fetched payment data:', data);
@@ -42,6 +49,8 @@ export default function PaymentMethodForm() {
         }
       } catch (error) {
         console.error('Error fetching payment settings:', error);
+      } finally {
+        setIsLoading(false); // Always set loading to false
       }
     };
     fetchPaymentSettings();
@@ -77,8 +86,8 @@ export default function PaymentMethodForm() {
       ifscCode: paymentDetails.bankEnabled ? paymentDetails.ifscCode : ""
     };
 
-    // Check for token before making request
-    const token = localStorage.getItem('token');
+    // FIX 1: Use userId instead of token
+    const token = localStorage.getItem('userId');
     if (!token) {
       setErrorMessage('You must be logged in to save payment details.');
       setIsSaving(false);
@@ -127,6 +136,18 @@ export default function PaymentMethodForm() {
       setIsSaving(false);
     }
   };
+
+  // Show loading state while fetching data
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
+          <p className="mt-4 text-gray-700">Loading payment details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
