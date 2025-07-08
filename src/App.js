@@ -11,6 +11,7 @@ import InProduct from './inproduct';
 import OrderForm from './orderform.jsx'; 
 import NavView from './navview';
 import Profile from './profile';
+import ResetPassword from './resetpassword';
 
 function App() {
   const [userId, setUserId] = React.useState(null);
