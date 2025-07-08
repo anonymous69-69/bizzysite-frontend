@@ -30,15 +30,19 @@ export default function PaymentMethodForm() {
         });
         if (response.ok) {
           const data = await response.json();
-          if (data.payments) {
-            setPaymentDetails(data.payments);
-          }
+          setPaymentDetails({
+            upiEnabled: data.upiEnabled,
+            bankEnabled: data.bankEnabled,
+            upiId: data.upiId || '',
+            accountHolderName: data.accountHolderName || '',
+            accountNumber: data.accountNumber || '',
+            ifscCode: data.ifscCode || ''
+          });
         }
       } catch (error) {
         console.error('Error fetching payment settings:', error);
       }
     };
-    
     fetchPaymentSettings();
   }, []);
 
