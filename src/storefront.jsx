@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function BusinessDashboard() {
@@ -107,10 +108,10 @@ export default function BusinessDashboard() {
       }
 
       setBusinessInfo(result.data?.business || businessInfo);
-      alert('Business information saved successfully!');
+      toast.success('Business information saved successfully!');
     } catch (err) {
       setError(`Save failed: ${err.message}`);
-      alert(`Save failed: ${err.message}`);
+      toast.error(`Save failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -118,6 +119,7 @@ export default function BusinessDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
+      <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 flex-grow w-full">
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
