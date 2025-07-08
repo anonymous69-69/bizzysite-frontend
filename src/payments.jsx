@@ -52,7 +52,7 @@ export default function PaymentMethodForm() {
     e.preventDefault();
     setIsSaving(true);
     setErrorMessage('');
-    
+
     // Create clean payload with only necessary fields
     const payload = {
       upiEnabled: paymentDetails.upiEnabled,
@@ -63,13 +63,20 @@ export default function PaymentMethodForm() {
       ifscCode: paymentDetails.bankEnabled ? paymentDetails.ifscCode : ""
     };
 
+    // Check for token before making request
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setErrorMessage('You must be logged in to save payment details.');
+      setIsSaving(false);
+      return;
+    }
+
     try {
       console.log("📤 Sending payment details to backend:", {
         type: "payments",
         data: payload
       });
 
-      const token = localStorage.getItem('token');
       const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
         method: 'POST',
         headers: {
@@ -90,7 +97,7 @@ export default function PaymentMethodForm() {
       }
 
       const result = await response.json();
-      
+
       if (response.ok) {
         setShowSuccessModal(true);
         setTimeout(() => setShowSuccessModal(false), 3000);

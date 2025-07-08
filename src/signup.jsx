@@ -39,6 +39,7 @@ export default function LoginPage() {
       }
 
       localStorage.setItem('userId', data.userId);
+      localStorage.setItem('token', data.userId);
       toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
       // Send welcome email after successful signup
       if (!isLogin) {
