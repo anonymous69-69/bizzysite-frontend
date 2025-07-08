@@ -38,14 +38,15 @@ export default function PaymentMethodForm() {
         if (response.ok) {
           const data = await response.json();
           console.log('Fetched payment data:', data);
-          setPaymentDetails({
-            upiEnabled: data.upiEnabled ?? false,
-            bankEnabled: data.bankEnabled ?? false,
+          setPaymentDetails(prev => ({
+            ...prev,
+            upiEnabled: typeof data.upiEnabled === 'boolean' ? data.upiEnabled : false,
+            bankEnabled: typeof data.bankEnabled === 'boolean' ? data.bankEnabled : false,
             upiId: data.upiId || '',
             accountHolderName: data.accountHolderName || '',
             accountNumber: data.accountNumber || '',
             ifscCode: data.ifscCode || ''
-          });
+          }));
         }
       } catch (error) {
         console.error('Error fetching payment settings:', error);
@@ -55,6 +56,8 @@ export default function PaymentMethodForm() {
     };
     fetchPaymentSettings();
   }, []);
+  // Debug: Log payment form state
+  console.log("🌐 Payment form state:", paymentDetails);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
