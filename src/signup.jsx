@@ -209,7 +209,7 @@ export default function LoginPage() {
                 {!isLogin && (
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Business Name
+                      Your Name
                     </label>
                     <input
                       type="text"
