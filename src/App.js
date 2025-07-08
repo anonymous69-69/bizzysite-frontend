@@ -10,6 +10,7 @@ import Payment from './payments';
 import InProduct from './inproduct'; 
 import OrderForm from './orderform.jsx'; 
 import NavView from './navview';
+import Profile from './profile';
 
 function App() {
   const [userId, setUserId] = React.useState(null);
@@ -36,6 +37,7 @@ function App() {
         <Route path="/storefront" element={userId ? <Storefront /> : <Navigate to="/signup" />} />
         <Route path="/products" element={userId ? <Products /> : <Navigate to="/signup" />} />
         <Route path="/orders" element={userId ? <Orders /> : <Navigate to="/signup" />} />
+        <Route path="/profile" element={userId ? <Profile /> : <Navigate to="/signup" />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/product/:id" element={<InProduct />} />
         <Route path="/payment" element={userId ? <Payment /> : <Navigate to="/signup" />} />

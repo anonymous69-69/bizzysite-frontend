@@ -146,7 +146,7 @@ export default function BusinessDashboard() {
               className="focus:outline-none"
             >
               <img
-                src="https://www.svgrepo.com/show/508699/user-circle-alt.svg"
+                src="https://www.svgrepo.com/download/510463/user-circle.svg"
                 alt="Profile"
                 className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-white"
               />
