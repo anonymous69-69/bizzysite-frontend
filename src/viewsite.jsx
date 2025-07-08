@@ -1,6 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 
+
+const ProductSkeleton = ({ layout }) => {
+  const isListLayout = layout === "List";
+  const isCardLayout = layout === "Card";
+
+  return (
+    <div
+      className={`bg-white rounded-lg overflow-hidden shadow-md ${
+        isListLayout ? "flex flex-col sm:flex-row" : "block"
+      }`}
+      style={{
+        border: isCardLayout ? "2px solid #d1d5db" : "none",
+      }}
+    >
+      <div className={`${isListLayout ? "sm:w-1/3" : "w-full"} h-48 bg-gray-200 animate-pulse`}></div>
+      <div className={`p-4 ${isListLayout ? "sm:w-2/3" : ""}`}>
+        <div className="h-6 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2 mb-4 animate-pulse"></div>
+        <div className="flex justify-between items-center">
+          <div className="h-5 bg-gray-200 rounded w-1/4 animate-pulse"></div>
+          <div className="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
 const ViewSite = () => {
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -95,13 +124,45 @@ const ViewSite = () => {
     );
   };
 
+
+  const productLayout = business?.customize?.productLayout || "Grid";
+
+
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your store...</p>
-        </div>
+      <div className="min-h-screen flex flex-col">
+        {/* Header Skeleton */}
+        <header className="sticky top-0 z-20 p-4 bg-gray-200 shadow-md">
+          <div className="container mx-auto flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <div className="w-6 h-6 bg-gray-300 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-32 animate-pulse"></div>
+            </div>
+            <div className="h-6 bg-gray-300 rounded w-6 animate-pulse"></div>
+          </div>
+        </header>
+  
+        {/* Hero Section Skeleton */}
+        <section className="py-8 md:py-12 px-4 bg-gray-100">
+          <div className="container mx-auto max-w-4xl">
+            <div className="h-8 bg-gray-300 rounded w-3/4 mx-auto mb-4 animate-pulse"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto mb-2 animate-pulse"></div>
+            <div className="h-4 bg-gray-300 rounded w-2/3 mx-auto animate-pulse"></div>
+          </div>
+        </section>
+  
+        {/* Products Section Skeleton */}
+        <section className="py-12 px-4 bg-gray-50">
+          <div className="container mx-auto">
+            <div className="h-6 bg-gray-300 rounded w-1/4 mx-auto mb-8 animate-pulse"></div>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              {[...Array(6)].map((_, index) => (
+                <ProductSkeleton key={index} layout={productLayout} />
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
@@ -179,7 +240,6 @@ const ViewSite = () => {
   const primaryColor = theme.primaryColor || "#4f46e5";
   const secondaryColor = theme.secondaryColor || "#d1d5db";
   const fontFamily = theme.fontFamily || "Inter, sans-serif";
-  const productLayout = theme.productLayout || "Grid";
 
   // Calculate total items in cart
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
