@@ -30,9 +30,10 @@ export default function PaymentMethodForm() {
         });
         if (response.ok) {
           const data = await response.json();
+          console.log('Fetched payment data:', data);
           setPaymentDetails({
-            upiEnabled: data.upiEnabled,
-            bankEnabled: data.bankEnabled,
+            upiEnabled: data.upiEnabled ?? false,
+            bankEnabled: data.bankEnabled ?? false,
             upiId: data.upiId || '',
             accountHolderName: data.accountHolderName || '',
             accountNumber: data.accountNumber || '',
