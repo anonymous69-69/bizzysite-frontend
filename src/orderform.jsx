@@ -91,7 +91,7 @@ const OrderForm = () => {
 
       // Step 2: Launch Razorpay Checkout
       const options = {
-        key: "rzp_live_N7mJnT7SKV4wmF",
+        key: "rzp_live_QIjpR4yQhX9L3h",
         amount: razorOrder.amount,
         currency: razorOrder.currency,
         name: "My Store",
