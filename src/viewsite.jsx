@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 
 
+
 const ProductSkeleton = ({ layout }) => {
   const isListLayout = layout === "List";
   const isCardLayout = layout === "Card";
@@ -40,6 +41,7 @@ const ViewSite = () => {
   const [cart, setCart] = useState([]);
   const { storeId } = useParams();
   const navigate = useNavigate();
+  
 
   // Fetch business data using storeId from URL
   useEffect(() => {
@@ -436,7 +438,7 @@ const ViewSite = () => {
           <button
             onClick={() => {
               setIsCartOpen(false);
-              navigate(`/store/${storeId}/orderform`, {
+              navigate(`/shop/${storeId}/orderform`, {
                 state: {
                   cart,
                   total: cart.reduce(

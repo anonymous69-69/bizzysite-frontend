@@ -46,7 +46,7 @@ function App() {
         <Route path="/payment" element={userId ? <Payment /> : <Navigate to="/signup" />} />
         <Route path="/customize" element={userId ? <Customize /> : <Navigate to="/signup" />} />
         <Route path="/preview" element={<ViewSite />} />
-        <Route path="/orderform" element={userId ? <OrderForm /> : <Navigate to="/signup" />} />
+        <Route path="/orderform" element={<OrderForm />} />
         <Route path="/shop/:storeId/product/:id" element={<InProduct />} />
         <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
         <Route path="/navview" element={userId ? <NavView /> : <Navigate to="/signup" />} />
