@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function CustomizeStore() {
   const [activeTab, setActiveTab] = useState('Customize');
@@ -129,12 +130,12 @@ useEffect(() => {
 
   const handleSaveChanges = async () => {
     if (!primaryColor || !secondaryColor || !fontFamily || !headerStyle || !productLayout) {
-      alert("Please select all customization options first.");
+      toast.error("Please select all customization options first.");
       return;
     }
 
     if (!storeId) {
-      alert("Please complete your business setup first to get a Store ID");
+      toast.error("Please complete your business setup first to get a Store ID");
       return;
     }
 
@@ -166,15 +167,16 @@ useEffect(() => {
         throw new Error('Failed to save customization');
       }
 
-      alert("Customization saved successfully!");
+      toast.success("Customization saved successfully!");
     } catch (error) {
       console.error("❌ Error saving customization:", error);
-      alert("Failed to save customization: " + error.message);
+      toast.error("Failed to save customization: " + error.message);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function LoginPage() {
@@ -36,12 +37,12 @@ export default function LoginPage() {
       }
 
       localStorage.setItem('userId', data.userId);
-      alert(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
+      toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
       setShowModal(false);
       navigate('/storefront');
     } catch (error) {
       console.error(error);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
@@ -52,6 +53,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Toaster position="top-right" />
       {/* Header with Login/Signup buttons */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
