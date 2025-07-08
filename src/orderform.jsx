@@ -6,7 +6,7 @@ const storeId = window.location.pathname.split("/")[2]; // Assuming /view/:store
 const OrderForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { cart, total } = location.state || { cart: [], total: 0 };
+  const { cart = [], total = 0, shippingCharge: sc = 50 } = location.state || {};
 
   // Form state
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const OrderForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Order summary
-  const shippingCharge = location.state?.shippingCharge || 50;
+  const shippingCharge = typeof sc === 'number' ? sc : parseFloat(sc) || 50;
   const platformFee = total * 0.03;
   const orderTotal = total + shippingCharge + platformFee;
 
@@ -66,6 +66,14 @@ const OrderForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    // Debug logs
+    console.log("📦 total:", total);
+    console.log("🚚 shippingCharge:", shippingCharge);
+    console.log("🧾 platformFee:", platformFee);
+    console.log("💰 orderTotal:", orderTotal);
+    console.log("💸 amount being sent to backend:", Math.round(orderTotal * 100));
+    console.log("location.state:", location.state);
 
     try {
       // Step 1: Create Razorpay Order
