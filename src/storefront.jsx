@@ -1,3 +1,16 @@
+import './tailwind.css'; // ensure tailwind config is applied
+
+<style>
+  @layer utilities {
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+    .animate-wiggle {
+      animation: wiggle 0.5s ease-in-out;
+    }
+  }
+</style>
 import { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,6 +28,7 @@ export default function BusinessDashboard() {
   const [activeTab, setActiveTab] = useState('Setup');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
@@ -270,7 +284,11 @@ export default function BusinessDashboard() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 animate-pulse"
+                onClick={() => {
+                  setAnimate(true);
+                  setTimeout(() => setAnimate(false), 500);
+                }}
+                className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 ${animate ? 'animate-wiggle' : ''}`}
               >
                 {loading ? 'Saving...' : 'Save Business Information'}
               </button>
