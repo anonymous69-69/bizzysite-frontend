@@ -28,13 +28,10 @@ export default function PaymentMethodForm() {
           return;
         }
         
-        // FIX 2: Prevent caching of API response
         const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Cache-Control': 'no-cache'
-          },
-          cache: 'no-store'
+            'Authorization': `Bearer ${token}`
+          }
         });
         
         if (response.ok) {
