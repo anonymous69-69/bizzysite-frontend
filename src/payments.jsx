@@ -12,6 +12,8 @@ export default function PaymentMethodForm() {
     accountNumber: '',
     ifscCode: ''
   });
+  const [isUPIEnabled, setIsUPIEnabled] = useState(false);
+  const [isBankEnabled, setIsBankEnabled] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true); // Added loading state
@@ -47,6 +49,8 @@ export default function PaymentMethodForm() {
             accountNumber: data.accountNumber || '',
             ifscCode: data.ifscCode || ''
           }));
+          setIsUPIEnabled(typeof data.upiEnabled === 'boolean' ? data.upiEnabled : false);
+          setIsBankEnabled(typeof data.bankEnabled === 'boolean' ? data.bankEnabled : false);
         }
       } catch (error) {
         console.error('Error fetching payment settings:', error);
@@ -68,10 +72,19 @@ export default function PaymentMethodForm() {
   };
 
   const handleToggleChange = (field) => {
-    setPaymentDetails(prev => ({
-      ...prev,
-      [field]: !prev[field]
-    }));
+    if (field === 'upiEnabled') {
+      setIsUPIEnabled(prev => !prev);
+      setPaymentDetails(prev => ({
+        ...prev,
+        upiEnabled: !prev.upiEnabled
+      }));
+    } else if (field === 'bankEnabled') {
+      setIsBankEnabled(prev => !prev);
+      setPaymentDetails(prev => ({
+        ...prev,
+        bankEnabled: !prev.bankEnabled
+      }));
+    }
   };
 
   const handleSavePayments = async (e) => {
@@ -81,12 +94,12 @@ export default function PaymentMethodForm() {
 
     // Create clean payload with only necessary fields
     const payload = {
-      upiEnabled: paymentDetails.upiEnabled,
-      bankEnabled: paymentDetails.bankEnabled,
-      upiId: paymentDetails.upiEnabled ? paymentDetails.upiId : "",
-      accountHolderName: paymentDetails.bankEnabled ? paymentDetails.accountHolderName : "",
-      accountNumber: paymentDetails.bankEnabled ? paymentDetails.accountNumber : "",
-      ifscCode: paymentDetails.bankEnabled ? paymentDetails.ifscCode : ""
+      upiEnabled: isUPIEnabled,
+      bankEnabled: isBankEnabled,
+      upiId: isUPIEnabled ? paymentDetails.upiId : "",
+      accountHolderName: isBankEnabled ? paymentDetails.accountHolderName : "",
+      accountNumber: isBankEnabled ? paymentDetails.accountNumber : "",
+      ifscCode: isBankEnabled ? paymentDetails.ifscCode : ""
     };
 
     // Use the correct token key as expected by backend
@@ -233,17 +246,17 @@ export default function PaymentMethodForm() {
                 <input 
                   type="checkbox" 
                   className="sr-only" 
-                  checked={paymentDetails.upiEnabled} 
+                  checked={isUPIEnabled} 
                   onChange={() => handleToggleChange('upiEnabled')} 
                 />
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${paymentDetails.upiEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
-                  <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${paymentDetails.upiEnabled ? 'translate-x-5' : 'translate-x-1'}`} />
+                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isUPIEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                  <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isUPIEnabled ? 'translate-x-5' : 'translate-x-1'}`} />
                 </div>
               </label>
             </div>
 
             {/* UPI Details Section */}
-            {paymentDetails.upiEnabled && (
+            {isUPIEnabled && (
               <div className="p-4 border border-gray-200 rounded-lg animate-slideDown">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">UPI Details</h4>
                 <div className="space-y-3">
@@ -273,17 +286,17 @@ export default function PaymentMethodForm() {
                 <input 
                   type="checkbox" 
                   className="sr-only" 
-                  checked={paymentDetails.bankEnabled} 
+                  checked={isBankEnabled} 
                   onChange={() => handleToggleChange('bankEnabled')} 
                 />
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${paymentDetails.bankEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
-                  <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${paymentDetails.bankEnabled ? 'translate-x-5' : 'translate-x-1'}`} />
+                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isBankEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                  <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isBankEnabled ? 'translate-x-5' : 'translate-x-1'}`} />
                 </div>
               </label>
             </div>
 
             {/* Bank Details Section */}
-            {paymentDetails.bankEnabled && (
+            {isBankEnabled && (
               <div className="p-4 border border-gray-200 rounded-lg animate-slideDown">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">Bank Details</h4>
                 <div className="space-y-3">
@@ -383,7 +396,7 @@ export default function PaymentMethodForm() {
           <p className="text-gray-600 mb-4 sm:mb-6">Currently enabled payment options</p>
 
           <div className="space-y-3 sm:space-y-4">
-            {paymentDetails.upiEnabled && (
+            {isUPIEnabled && (
               <div className="p-3 sm:p-4 border border-gray-200 rounded-lg">
                 <h4 className="font-medium text-gray-800 text-sm sm:text-base">UPI Payments</h4>
                 <p className="text-xs sm:text-sm text-gray-500">Enabled for customer checkout</p>
@@ -392,7 +405,7 @@ export default function PaymentMethodForm() {
                 )}
               </div>
             )}
-            {paymentDetails.bankEnabled && (
+            {isBankEnabled && (
               <div className="p-3 sm:p-4 border border-gray-200 rounded-lg">
                 <h4 className="font-medium text-gray-800 text-sm sm:text-base">Bank Transfers</h4>
                 <p className="text-xs sm:text-sm text-gray-500">Enabled for customer checkout</p>
@@ -401,7 +414,7 @@ export default function PaymentMethodForm() {
                 )}
               </div>
             )}
-            {!paymentDetails.upiEnabled && !paymentDetails.bankEnabled && (
+            {!isUPIEnabled && !isBankEnabled && (
               <p className="text-gray-500 text-sm sm:text-base">No payment methods currently enabled</p>
             )}
           </div>
