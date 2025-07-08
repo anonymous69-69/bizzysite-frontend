@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export default function PaymentMethodForm() {
   const [activeTab, setActiveTab] = useState('Payments');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState({
     upiEnabled: false,
     bankEnabled: false,
@@ -18,7 +18,16 @@ export default function PaymentMethodForm() {
   useEffect(() => {
     const fetchPaymentSettings = async () => {
       try {
-        const response = await fetch(`https://bizzysite.onrender.com/api/business`);
+        const token = localStorage.getItem('token');
+        if (!token) {
+          // No token, do not fetch payment settings
+          return;
+        }
+        const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (response.ok) {
           const data = await response.json();
           if (data.payments) {
@@ -99,8 +108,9 @@ export default function PaymentMethodForm() {
       const result = await response.json();
 
       if (response.ok) {
-        setShowSuccessModal(true);
-        setTimeout(() => setShowSuccessModal(false), 3000);
+        toast.success('Payment details saved successfully', {
+          position: 'top-right'
+        });
       } else {
         console.error("❌ Backend response error:", result);
         setErrorMessage(`Failed to save: ${result.message || 'Unknown error'}`);
@@ -115,21 +125,6 @@ export default function PaymentMethodForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-auto">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Success!</h3>
-            <p className="text-gray-600 mb-4">Payment details saved successfully.</p>
-            <button 
-              onClick={() => setShowSuccessModal(false)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
         {/* Error Message */}
