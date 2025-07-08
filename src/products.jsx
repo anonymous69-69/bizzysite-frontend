@@ -368,8 +368,8 @@ export default function ProductCatalog() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {products.map((product) => (
-              <div key={product._id} className="bg-white rounded-lg shadow p-4">
-                <div className="h-40 mb-4">
+              <div key={product._id} className="bg-white rounded-lg shadow p-4 flex flex-col">
+                <div className="aspect-square mb-4">
                   {product.images.length > 0 ? (
                     <img
                       src={product.images[0]}
