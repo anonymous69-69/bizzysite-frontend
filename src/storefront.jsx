@@ -146,7 +146,7 @@ export default function BusinessDashboard() {
               className="focus:outline-none"
             >
               <img
-                src="https://www.svgrepo.com/show/493494/user.svg"
+                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
                 alt="Profile"
                 className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-white"
               />

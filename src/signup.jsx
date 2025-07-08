@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
+import { auth, provider } from './firebase';
+import { signInWithPopup } from 'firebase/auth';
 
 export default function LoginPage() {
   const [showModal, setShowModal] = useState(false);
@@ -38,6 +40,14 @@ export default function LoginPage() {
 
       localStorage.setItem('userId', data.userId);
       toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
+      // Send welcome email after successful signup
+      if (!isLogin) {
+        await fetch('https://bizzysite.onrender.com/api/send-welcome-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name }),
+        });
+      }
       setShowModal(false);
       navigate('/storefront');
     } catch (error) {
@@ -252,7 +262,33 @@ export default function LoginPage() {
                     required
                   />
                 </div>
-                
+                {isLogin && (
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const emailPrompt = prompt("Enter your email to reset your password:");
+                        if (emailPrompt) {
+                          try {
+                            const res = await fetch("https://bizzysite.onrender.com/api/request-password-reset", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ email: emailPrompt })
+                            });
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.message || "Something went wrong");
+                            toast.success(data.message || "Password reset email sent");
+                          } catch (err) {
+                            toast.error(err.message);
+                          }
+                        }
+                      }}
+                      className="text-sm text-[#fa6da4] hover:text-pink-700 transition-colors"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+                )}
                 <div>
                   <button
                     type="submit"
@@ -277,6 +313,19 @@ export default function LoginPage() {
                   <div className="mt-6 grid grid-cols-1 gap-3">
                     <button
                       type="button"
+                      onClick={async () => {
+                        try {
+                          const result = await signInWithPopup(auth, provider);
+                          const user = result.user;
+                          localStorage.setItem('userId', user.uid);
+                          toast.success('Signed in with Google');
+                          setShowModal(false);
+                          navigate('/storefront');
+                        } catch (error) {
+                          console.error(error);
+                          toast.error('Google sign-in failed');
+                        }
+                      }}
                       className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fa6da4]"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
