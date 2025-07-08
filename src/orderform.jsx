@@ -73,7 +73,7 @@ const OrderForm = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: orderTotal,
+          amount: Math.round(orderTotal * 100),
           storeId: storeId,
           customerName: formData.fullName
         })
