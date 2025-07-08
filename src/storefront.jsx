@@ -1,16 +1,5 @@
 import './tailwind.css'; // ensure tailwind config is applied
 
-<style>
-  @layer utilities {
-    @keyframes wiggle {
-      0%, 100% { transform: rotate(-3deg); }
-      50% { transform: rotate(3deg); }
-    }
-    .animate-wiggle {
-      animation: wiggle 0.5s ease-in-out;
-    }
-  }
-</style>
 import { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
