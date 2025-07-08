@@ -32,8 +32,8 @@ export default function ProfilePage() {
         });
         
         setUserData({
-          name: response.data.name || '',
-          email: response.data.email || ''
+          name: response.data.name || localStorage.getItem('userName') || '',
+          email: response.data.email || localStorage.getItem('userEmail') || ''
         });
       } catch (err) {
         console.error('Failed to fetch user data:', err);
@@ -71,6 +71,9 @@ export default function ProfilePage() {
           'Authorization': `Bearer ${userId}`
         }
       });
+
+      localStorage.setItem('userName', userData.name);
+      localStorage.setItem('userEmail', userData.email);
 
       toast.success('Profile updated successfully!');
     } catch (err) {
