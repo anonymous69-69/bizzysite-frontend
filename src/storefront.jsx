@@ -47,7 +47,7 @@ export default function BusinessDashboard() {
             email: info.email || '',
             description: info.description || '',
             address: info.address || '',
-            shippingCharge: info.shippingCharge || ''
+            shippingCharge: info.shippingCharge ?? ''
           });
         }
       })
