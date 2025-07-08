@@ -1,4 +1,3 @@
-import './tailwind.css'; // ensure tailwind config is applied
 
 import { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
