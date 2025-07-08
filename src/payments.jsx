@@ -19,8 +19,8 @@ export default function PaymentMethodForm() {
   useEffect(() => {
     const fetchPaymentSettings = async () => {
       try {
-        // FIX 1: Use userId instead of token
-        const token = localStorage.getItem('userId');
+        // Use the correct token key as expected by backend
+        const token = localStorage.getItem('token');
         if (!token) {
           setIsLoading(false);
           return;
@@ -86,8 +86,8 @@ export default function PaymentMethodForm() {
       ifscCode: paymentDetails.bankEnabled ? paymentDetails.ifscCode : ""
     };
 
-    // FIX 1: Use userId instead of token
-    const token = localStorage.getItem('userId');
+    // Use the correct token key as expected by backend
+    const token = localStorage.getItem('token');
     if (!token) {
       setErrorMessage('You must be logged in to save payment details.');
       setIsSaving(false);
