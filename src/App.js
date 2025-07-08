@@ -35,19 +35,19 @@ function App() {
       <Routes>
         <Route path="/" element={<Signup />} />
         <Route path="/site/:storeId" element={<ViewSite />} />
-        <Route path="/storefront" element={userId ? <Storefront /> : <Navigate to="/signup" />} />
-        <Route path="/products" element={userId ? <Products /> : <Navigate to="/signup" />} />
-        <Route path="/orders" element={userId ? <Orders /> : <Navigate to="/signup" />} />
-        <Route path="/profile" element={userId ? <Profile /> : <Navigate to="/signup" />} />
+        <Route path="/storefront" element={<Storefront />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/product/:id" element={<InProduct />} />
-        <Route path="/payment" element={userId ? <Payment /> : <Navigate to="/signup" />} />
-        <Route path="/customize" element={userId ? <Customize /> : <Navigate to="/signup" />} />
-        <Route path="/preview" element={userId ? <ViewSite /> : <Navigate to="/signup" />} />
-        <Route path="/orderform" element={userId ? <OrderForm /> : <Navigate to="/signup" />} />
+        <Route path="/payment" element={<Payment />} />
+        <Route path="/customize" element={<Customize />} />
+        <Route path="/preview" element={<ViewSite />} />
+        <Route path="/orderform" element={<OrderForm />} />
         <Route path="/shop/:storeId/product/:id" element={<InProduct />} />
         <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
-        <Route path="/navview" element={userId ? <NavView /> : <Navigate to="/signup" />} />
+        <Route path="/navview" element={<NavView />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 export default function ResetPassword() {
   const { token } = useParams();
+  const navigate = useNavigate();
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e) => {
@@ -17,6 +18,9 @@ export default function ResetPassword() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       toast.success('Password reset successful');
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
     } catch (err) {
       toast.error(err.message);
     }
