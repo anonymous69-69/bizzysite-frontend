@@ -38,9 +38,11 @@ export default function LoginPage() {
         throw new Error(data.message || 'Something went wrong');
       }
 
-      localStorage.setItem('userId', data.userId);
-      localStorage.setItem('token', data.userId);
-      localStorage.setItem('storeId', data.storeId);
+    localStorage.setItem('userId', data.userId);
+    localStorage.setItem('storeId', data.storeId);
+    localStorage.setItem('token', data.token); // ✅ real JWT token
+    localStorage.setItem('userEmail', data.user.email);
+    localStorage.setItem('userRole', data.user.role);
       toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
       // Send welcome email after successful signup
       if (!isLogin) {

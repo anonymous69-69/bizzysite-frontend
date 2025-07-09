@@ -1,9 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const adminToken = 'your-admin-token'; // Replace with actual token from auth context or localStorage
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('userRole');
+    if (!token || role !== 'admin') {
+      navigate('/signup'); // redirect to login or any fallback page
+    }
+  }, []);
 
   useEffect(() => {
     fetch('https://bizzysite.onrender.com/api/orders')
