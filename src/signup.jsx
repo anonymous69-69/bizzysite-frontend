@@ -71,9 +71,17 @@ export default function LoginPage() {
           })
         });
         const businessData = await businessRes.json();
-        const storeId = businessData?._id || businessData.business?._id;
+        console.log("Business creation response:", businessData);
+
+        const storeId =
+          typeof businessData === 'string'
+            ? businessData
+            : businessData?._id || businessData.business?._id;
+
         if (storeId) {
           localStorage.setItem('storeId', storeId);
+        } else {
+          console.warn("storeId not found in response:", businessData);
         }
       }
       setShowModal(false);
