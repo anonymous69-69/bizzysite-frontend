@@ -31,11 +31,9 @@ export default function ProfilePage() {
           }
         });
         
-        const name = response.data.name || localStorage.getItem('userName') || '';
-        const email = response.data.email || localStorage.getItem('userEmail') || '';
+        const name = response.data.name || '';
+        const email = response.data.email || '';
         setUserData({ name, email });
-        localStorage.setItem('userName', name);
-        localStorage.setItem('userEmail', email);
       } catch (err) {
         console.error('Failed to fetch user data:', err);
         setError('Failed to load profile data');
