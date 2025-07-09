@@ -42,7 +42,7 @@ export default function BusinessDashboard() {
       .then(res => res.json())
       .then(data => {
         if (data?.business || data?.name || data?.description) {
-          const info = data.business || data; // support both shapes
+          const info = data.business || data;
           setBusinessInfo(prev => ({
             ...prev,
             name: typeof info.name === 'string' ? info.name : '',
@@ -137,10 +137,10 @@ export default function BusinessDashboard() {
       <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 flex-grow w-full">
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <div className={`border rounded mb-6 px-4 py-3 ${darkMode ? 'bg-red-900 border-red-700 text-red-100' : 'bg-red-100 border-red-400 text-red-700'}`}>
             <strong>Error:</strong> {error}
             <button 
-              className="ml-4 text-sm underline"
+              className={`ml-4 text-sm underline ${darkMode ? 'text-red-200' : 'text-red-800'}`}
               onClick={() => setError('')}
             >
               Dismiss
@@ -148,10 +148,15 @@ export default function BusinessDashboard() {
           </div>
         )}
 
-        <div className="rounded-md p-3 mb-4" style={{ backgroundColor: '#7a7777' }}>
+        <div className={`rounded-md p-3 mb-4 ${darkMode ? 'bg-gray-800' : ''}`}>
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center space-x-4">
-              <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">BizzySite</Link>
+              <Link 
+                to="/signup" 
+                className={`text-2xl sm:text-3xl font-bold ${darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-indigo-600'} transition-colors`}
+              >
+                BizzySite
+              </Link>
             </div>
             <div className="relative">
               <button
@@ -165,16 +170,16 @@ export default function BusinessDashboard() {
                 />
               </button>
               {showMenu && (
-                <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10">
+                <div className={`absolute right-0 mt-2 w-40 rounded-md shadow-lg z-10 ${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className={`block px-4 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
                   >
                     Profile
                   </Link>
                   <Link
                     to="/settings"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className={`block px-4 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
                   >
                     Settings
                   </Link>
@@ -183,12 +188,17 @@ export default function BusinessDashboard() {
             </div>
           </div>
         </div>
-        <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">Welcome to your business dashboard</h2>
-        <p className="text-gray-700 mb-6 sm:mb-8 text-sm sm:text-base">Set up your online store in minutes and start selling today</p>
+
+        <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+          Welcome to your business dashboard
+        </h2>
+        <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+          Set up your online store in minutes and start selling today
+        </p>
 
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className="flex space-x-2 sm:space-x-6 px-2 py-2 bg-gray-50 rounded-lg min-w-max">
+            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
               {[
                 { name: 'Setup', icon: '📊' },
                 { name: 'Products', icon: '📦' },
@@ -210,8 +220,12 @@ export default function BusinessDashboard() {
                   onClick={() => setActiveTab(tab.name)}
                   className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
                     activeTab === tab.name
-                      ? 'bg-purple-100 text-indigo-700'
-                      : 'text-gray-500 hover:text-indigo-600'
+                      ? darkMode
+                        ? 'bg-indigo-800 text-white'
+                        : 'bg-purple-100 text-indigo-700'
+                      : darkMode
+                        ? 'text-gray-300 hover:text-indigo-300'
+                        : 'text-gray-500 hover:text-indigo-600'
                   }`}
                 >
                   <span className="text-lg">{tab.icon}</span>
@@ -222,14 +236,18 @@ export default function BusinessDashboard() {
           </div>
         </div>
 
-        <div id="business-info" className="rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8" style={{ backgroundColor: '#7a7777' }}>
-          <h3 className="text-lg font-semibold mb-4" style={{ color: '#7a7777' }}>Business Information</h3>
-          <p className="text-gray-600 mb-6">Tell us about your business to get started</p>
+        <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+          <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+            Business Information
+          </h3>
+          <p className={`mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            Tell us about your business to get started
+          </p>
 
           <form onSubmit={handleSave}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="name" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   Business Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -239,13 +257,15 @@ export default function BusinessDashboard() {
                   value={businessInfo.name}
                   onChange={handleChange}
                   placeholder="Enter your business name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                    darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
+                  }`}
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="phone" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   Phone Number
                 </label>
                 <input
@@ -255,15 +275,17 @@ export default function BusinessDashboard() {
                   value={businessInfo.phone}
                   onChange={handleChange}
                   placeholder="Enter your phone number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                    darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
+                  }`}
                 />
               </div>
             </div>
 
-            <div className="border-t border-gray-200 my-6"></div>
+            <div className={`border-t my-6 ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}></div>
 
             <div className="mb-6">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 Email Address
               </label>
               <input
@@ -273,14 +295,16 @@ export default function BusinessDashboard() {
                 value={businessInfo.email}
                 onChange={handleChange}
                 placeholder="Enter your email address"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
+                }`}
               />
             </div>
 
-            <div className="border-t border-gray-200 my-6"></div>
+            <div className={`border-t my-6 ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}></div>
 
             <div className="mb-6">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="description" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 Business Description
               </label>
               <textarea
@@ -290,14 +314,16 @@ export default function BusinessDashboard() {
                 onChange={handleChange}
                 placeholder="Describe your business"
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
+                }`}
               />
             </div>
 
-            <div className="border-t border-gray-200 my-6"></div>
+            <div className={`border-t my-6 ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}></div>
 
             <div className="mb-6">
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="address" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 Business Address
               </label>
               <textarea
@@ -307,11 +333,13 @@ export default function BusinessDashboard() {
                 onChange={handleChange}
                 placeholder="Enter your business address"
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
+                }`}
               />
             </div>
             <div className="mb-6">
-              <label htmlFor="shippingCharge" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="shippingCharge" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 Shipping Charge (in ₹)
               </label>
               <input
@@ -321,7 +349,9 @@ export default function BusinessDashboard() {
                 value={businessInfo.shippingCharge !== '' ? businessInfo.shippingCharge : ''}
                 onChange={handleChange}
                 placeholder="Enter flat shipping charge"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
+                }`}
               />
             </div>
 
@@ -342,10 +372,14 @@ export default function BusinessDashboard() {
         </div>
 
         {storeId && (
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Your Store ID</h3>
+          <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+              Your Store ID
+            </h3>
             <div className="flex items-center">
-              <code className="bg-gray-100 p-2 rounded-md font-mono text-sm sm:text-base break-all">
+              <code className={`p-2 rounded-md font-mono text-sm sm:text-base break-all ${
+                darkMode ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-800'
+              }`}>
                 {storeId}
               </code>
               <button
@@ -353,12 +387,14 @@ export default function BusinessDashboard() {
                   navigator.clipboard.writeText(storeId);
                   alert('Store ID copied to clipboard!');
                 }}
-                className="ml-2 px-3 py-1 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
+                className={`ml-2 px-3 py-1 text-sm rounded-md hover:bg-opacity-80 ${
+                  darkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-800'
+                }`}
               >
                 Copy
               </button>
             </div>
-            <p className="mt-3 text-sm text-gray-600">
+            <p className={`mt-3 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               This is your unique store identifier. You'll need this when managing your store.
             </p>
           </div>
@@ -391,7 +427,9 @@ export default function BusinessDashboard() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-700 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
+          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${
+            darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'
+          }`}>
             <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
