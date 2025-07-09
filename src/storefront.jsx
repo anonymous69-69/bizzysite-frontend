@@ -37,6 +37,7 @@ export default function BusinessDashboard() {
     }
     
     if (savedStoreId) {
+      localStorage.setItem('storeId', savedStoreId); // ensure current session uses it
       setStoreId(savedStoreId);
       fetchBusinessInfo(savedStoreId);
     }
