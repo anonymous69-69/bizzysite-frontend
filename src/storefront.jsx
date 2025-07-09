@@ -148,37 +148,39 @@ export default function BusinessDashboard() {
           </div>
         )}
 
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center space-x-4">
-            <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">BizzySite</Link>
-          </div>
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="focus:outline-none"
-            >
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                alt="Profile"
-                className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-white"
-              />
-            </button>
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10">
-                <Link
-                  to="/profile"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Profile
-                </Link>
-                <Link
-                  to="/settings"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Settings
-                </Link>
-              </div>
-            )}
+        <div className={`rounded-md p-3 mb-4 ${darkMode ? 'bg-gray-100' : ''}`}>
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center space-x-4">
+              <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">BizzySite</Link>
+            </div>
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="focus:outline-none"
+              >
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-white"
+                />
+              </button>
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10">
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    to="/settings"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Settings
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">Welcome to your business dashboard</h2>
@@ -220,7 +222,7 @@ export default function BusinessDashboard() {
           </div>
         </div>
 
-        <div id="business-info" className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8">
+        <div id="business-info" className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${darkMode ? 'bg-gray-100' : 'bg-white'}`}>
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Business Information</h3>
           <p className="text-gray-600 mb-6">Tell us about your business to get started</p>
 
@@ -237,7 +239,7 @@ export default function BusinessDashboard() {
                   value={businessInfo.name}
                   onChange={handleChange}
                   placeholder="Enter your business name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
                   required
                 />
               </div>
@@ -253,7 +255,7 @@ export default function BusinessDashboard() {
                   value={businessInfo.phone}
                   onChange={handleChange}
                   placeholder="Enter your phone number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
                 />
               </div>
             </div>
@@ -271,7 +273,7 @@ export default function BusinessDashboard() {
                 value={businessInfo.email}
                 onChange={handleChange}
                 placeholder="Enter your email address"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
               />
             </div>
 
@@ -288,7 +290,7 @@ export default function BusinessDashboard() {
                 onChange={handleChange}
                 placeholder="Describe your business"
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
               />
             </div>
 
@@ -305,7 +307,7 @@ export default function BusinessDashboard() {
                 onChange={handleChange}
                 placeholder="Enter your business address"
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
               />
             </div>
             <div className="mb-6">
@@ -319,7 +321,7 @@ export default function BusinessDashboard() {
                 value={businessInfo.shippingCharge !== '' ? businessInfo.shippingCharge : ''}
                 onChange={handleChange}
                 placeholder="Enter flat shipping charge"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black dark:text-white"
               />
             </div>
 
