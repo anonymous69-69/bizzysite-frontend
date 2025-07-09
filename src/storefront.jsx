@@ -213,8 +213,8 @@ export default function BusinessDashboard() {
                   />
                 </button>
                 {showMenu && (
-                  <div className={`absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-50 ${
-                    darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'text-gray-800'
+                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 dark:text-white ${
+                    darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'
                   }`}>
                     <Link
                       to="/profile"
