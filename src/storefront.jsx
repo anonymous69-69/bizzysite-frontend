@@ -153,7 +153,7 @@ export default function BusinessDashboard() {
             <div className="flex items-center space-x-4">
               <Link 
                 to="/signup" 
-                className={`text-2xl sm:text-3xl font-bold ${darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-indigo-600'} transition-colors`}
+                className={`text-2xl sm:text-3xl font-bold ${darkMode ? 'text-gray-300 hover:text-gray-100' : 'text-gray-800 hover:text-indigo-600'} transition-colors`}
               >
                 BizzySite
               </Link>
