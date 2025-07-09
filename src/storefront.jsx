@@ -111,7 +111,12 @@ export default function BusinessDashboard() {
         setStoreId(newStoreId);
       }
 
-      setBusinessInfo(result.data?.business || businessInfo);
+      if (result.data?.business) {
+        setBusinessInfo(prev => ({
+          ...prev,
+          ...result.data.business
+        }));
+      }
       toast.success('Business information saved successfully!');
     } catch (err) {
       setError(`Save failed: ${err.message}`);
