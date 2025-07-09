@@ -14,26 +14,22 @@ export default function CustomizeStore() {
   const [imageURL, setImageURL] = useState('');
   const [storeId, setStoreId] = useState('');
 
-useEffect(() => {
-  const savedStoreId = localStorage.getItem('storeId');
-  if (savedStoreId) {
-    setStoreId(savedStoreId);
-  }
-}, []);
+  useEffect(() => {
+    const savedStoreId = localStorage.getItem('storeId');
+    if (savedStoreId) {
+      setStoreId(savedStoreId);
+    }
+  }, []);
 
-useEffect(() => {
-  if (activeTab === 'Customize' && storeId) {
-    fetchCustomization(storeId);
-  }
-}, [activeTab, storeId]);
+  useEffect(() => {
+    if (activeTab === 'Customize' && storeId) {
+      fetchCustomization(storeId);
+    }
+  }, [activeTab, storeId]);
 
   const fetchCustomization = async (storeId) => {
-    console.log("Reloading customization for storeId:", storeId);
     const userId = localStorage.getItem('userId');
-    if (!userId || !storeId) {
-      console.warn("Missing userId or storeId");
-      return;
-    }
+    if (!userId || !storeId) return;
 
     try {
       const response = await fetch(`https://bizzysite.onrender.com/api/store`, {
@@ -45,16 +41,12 @@ useEffect(() => {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log("Full GET response:", data);
-        console.log("customize field:", data.customize);
         const c = data?.customize ?? {};
         setPrimaryColor(c.primaryColor || '#3b82f6');
         setSecondaryColor(c.secondaryColor || '#8b5cf6');
         setFontFamily(c.fontFamily || 'Inter');
         setHeaderStyle(c.headerStyle || 'Modern');
         setProductLayout(c.productLayout || 'Grid');
-      } else {
-        console.warn("No customization data found.");
       }
     } catch (err) {
       console.error("Failed to fetch customization:", err);
@@ -171,7 +163,6 @@ useEffect(() => {
 
       toast.success("Customization saved successfully!");
     } catch (error) {
-      console.error("❌ Error saving customization:", error);
       toast.error("Failed to save customization: " + error.message);
     }
   };
@@ -180,32 +171,57 @@ useEffect(() => {
     <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
       <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        <div className="mb-6">
+        {/* Header with dark mode */}
+        <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
           <div className="flex justify-between items-center mb-2">
-            <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-purple-600 transition-colors">BizzySite</Link>
+            <Link 
+              to="/signup" 
+              className={`text-2xl sm:text-3xl font-bold transition-colors ${
+                darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'
+              }`}
+            >
+              BizzySite
+            </Link>
           </div>
-          <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">Welcome to your business dashboard</h2>
-          <p className="text-gray-700 mb-6 sm:mb-8 text-sm sm:text-base">Set up your online store in minutes and start selling today</p>
+          
+          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${
+            darkMode ? 'text-gray-300' : 'text-gray-600'
+          }`}>
+            Welcome to your business dashboard
+          </h2>
+          
+          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${
+            darkMode ? 'text-gray-400' : 'text-gray-700'
+          }`}>
+            Set up your online store in minutes and start selling today
+          </p>
         </div>
 
+        {/* Navigation tabs with dark mode */}
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className="flex space-x-2 sm:space-x-6 px-2 py-2 bg-gray-50 rounded-lg min-w-max">
+            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${
+              darkMode ? 'bg-gray-800' : 'bg-gray-50'
+            }`}>
               {[
-              { name: 'Setup', icon: '📊', path: '/storefront' },
-              { name: 'Products', icon: '📦', path: '/products' },
-              { name: 'Orders', icon: '🛒', path: '/orders' },
-              { name: 'Customize', icon: '🎨', path: '/customize' },
-              { name: 'Preview', icon: '🌐', path: '/navview' },
-              { name: 'Payments', icon: '💳', path: '/payment' }
+                { name: 'Setup', icon: '📊', path: '/storefront' },
+                { name: 'Products', icon: '📦', path: '/products' },
+                { name: 'Orders', icon: '🛒', path: '/orders' },
+                { name: 'Customize', icon: '🎨', path: '/customize' },
+                { name: 'Preview', icon: '🌐', path: '/navview' },
+                { name: 'Payments', icon: '💳', path: '/payment' }
               ].map((tab) => (
                 <Link
                   to={tab.path}
                   key={tab.name}
                   className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
                     activeTab === tab.name
-                      ? 'bg-purple-100 text-indigo-700'
-                      : 'text-gray-500 hover:text-indigo-600'
+                      ? darkMode
+                        ? 'bg-indigo-800 text-white' 
+                        : 'bg-purple-100 text-indigo-700'
+                      : darkMode
+                        ? 'text-gray-300 hover:text-indigo-300'
+                        : 'text-gray-500 hover:text-indigo-600'
                   }`}
                   onClick={() => setActiveTab(tab.name)}
                 >
@@ -219,25 +235,48 @@ useEffect(() => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">Color Scheme</h2>
-              <p className="text-gray-600 mb-6">Choose colors that match your brand</p>
+            {/* Color Scheme Section with dark mode */}
+            <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 ${
+              darkMode ? 'bg-gray-800' : 'bg-white'
+            }`}>
+              <h2 className={`text-xl font-bold mb-2 ${
+                darkMode ? 'text-white' : 'text-gray-800'
+              }`}>
+                Color Scheme
+              </h2>
+              <p className={`mb-6 ${
+                darkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                Choose colors that match your brand
+              </p>
 
               <div className="mb-6 sm:mb-8">
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Primary Color</h3>
+                <h3 className={`text-lg font-medium mb-4 ${
+                  darkMode ? 'text-gray-300' : 'text-gray-800'
+                }`}>
+                  Primary Color
+                </h3>
                 <div className="flex flex-wrap gap-3 mb-4">
                   {colorPalette.map((color) => (
                     <button
                       key={`primary-${color.value}`}
                       onClick={() => handleColorChange(color.value, 'primary')}
-                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 ${primaryColor === color.value ? 'border-indigo-500' : 'border-transparent'}`}
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 ${
+                        primaryColor === color.value 
+                          ? darkMode 
+                            ? 'border-indigo-400' 
+                            : 'border-indigo-500' 
+                          : 'border-transparent'
+                      }`}
                       style={{ backgroundColor: color.value }}
                       title={color.name}
                     />
                   ))}
                 </div>
                 <div>
-                  <label htmlFor="primary-color" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="primary-color" className={`block text-sm font-medium mb-1 ${
+                    darkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
                     Custom Color
                   </label>
                   <div className="flex items-center gap-2">
@@ -246,33 +285,51 @@ useEffect(() => {
                       id="primary-color"
                       value={primaryColor}
                       onChange={(e) => handleCustomColorChange(e, 'primary')}
-                      className="w-8 h-8 sm:w-10 sm:h-10 rounded border border-gray-300 cursor-pointer"
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded border cursor-pointer ${
+                        darkMode ? 'border-gray-600' : 'border-gray-300'
+                      }`}
                     />
                     <input
                       type="text"
                       value={primaryColor}
                       onChange={(e) => handleCustomColorChange(e, 'primary')}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+                      className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${
+                        darkMode 
+                          ? 'bg-gray-700 border-gray-600 text-white' 
+                          : 'border-gray-300'
+                      }`}
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Secondary Color</h3>
+                <h3 className={`text-lg font-medium mb-4 ${
+                  darkMode ? 'text-gray-300' : 'text-gray-800'
+                }`}>
+                  Secondary Color
+                </h3>
                 <div className="flex flex-wrap gap-3 mb-4">
                   {colorPalette.map((color) => (
                     <button
                       key={`secondary-${color.value}`}
                       onClick={() => handleColorChange(color.value, 'secondary')}
-                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 ${secondaryColor === color.value ? 'border-indigo-500' : 'border-transparent'}`}
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 ${
+                        secondaryColor === color.value 
+                          ? darkMode 
+                            ? 'border-indigo-400' 
+                            : 'border-indigo-500' 
+                          : 'border-transparent'
+                      }`}
                       style={{ backgroundColor: color.value }}
                       title={color.name}
                     />
                   ))}
                 </div>
                 <div>
-                  <label htmlFor="secondary-color" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="secondary-color" className={`block text-sm font-medium mb-1 ${
+                    darkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
                     Custom Color
                   </label>
                   <div className="flex items-center gap-2">
@@ -281,32 +338,55 @@ useEffect(() => {
                       id="secondary-color"
                       value={secondaryColor}
                       onChange={(e) => handleCustomColorChange(e, 'secondary')}
-                      className="w-8 h-8 sm:w-10 sm:h-10 rounded border border-gray-300 cursor-pointer"
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded border cursor-pointer ${
+                        darkMode ? 'border-gray-600' : 'border-gray-300'
+                      }`}
                     />
                     <input
                       type="text"
                       value={secondaryColor}
                       onChange={(e) => handleCustomColorChange(e, 'secondary')}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+                      className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${
+                        darkMode 
+                          ? 'bg-gray-700 border-gray-600 text-white' 
+                          : 'border-gray-300'
+                      }`}
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">Typography & Layout</h2>
-              <p className="text-gray-600 mb-6">Customize the look and feel of your store</p>
+            {/* Typography & Layout Section with dark mode */}
+            <div className={`rounded-lg shadow p-4 sm:p-6 ${
+              darkMode ? 'bg-gray-800' : 'bg-white'
+            }`}>
+              <h2 className={`text-xl font-bold mb-2 ${
+                darkMode ? 'text-white' : 'text-gray-800'
+              }`}>
+                Typography & Layout
+              </h2>
+              <p className={`mb-6 ${
+                darkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                Customize the look and feel of your store
+              </p>
 
               <div className="mb-4 sm:mb-6">
-                <label htmlFor="font-family" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="font-family" className={`block text-sm font-medium mb-2 ${
+                  darkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}>
                   Font Family
                 </label>
                 <select
                   id="font-family"
                   value={fontFamily}
                   onChange={(e) => setFontFamily(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${
+                    darkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white' 
+                      : 'border-gray-300'
+                  }`}
                 >
                   {fontFamilies.map((font) => (
                     <option key={font.value} value={font.value}>
@@ -317,14 +397,20 @@ useEffect(() => {
               </div>
 
               <div className="mb-4 sm:mb-6">
-                <label htmlFor="header-style" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="header-style" className={`block text-sm font-medium mb-2 ${
+                  darkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}>
                   Header Style
                 </label>
                 <select
                   id="header-style"
                   value={headerStyle}
                   onChange={(e) => setHeaderStyle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${
+                    darkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white' 
+                      : 'border-gray-300'
+                  }`}
                 >
                   {headerStyles.map((style) => (
                     <option key={style.value} value={style.value}>
@@ -335,14 +421,20 @@ useEffect(() => {
               </div>
 
               <div>
-                <label htmlFor="product-layout" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="product-layout" className={`block text-sm font-medium mb-2 ${
+                  darkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}>
                   Product Layout
                 </label>
                 <select
                   id="product-layout"
                   value={productLayout}
                   onChange={(e) => setProductLayout(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${
+                    darkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white' 
+                      : 'border-gray-300'
+                  }`}
                 >
                   {productLayouts.map((layout) => (
                     <option key={layout.value} value={layout.value}>
@@ -354,11 +446,24 @@ useEffect(() => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6 lg:sticky lg:top-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Live Preview</h2>
-            <p className="text-gray-600 mb-6">See how your changes look</p>
+          {/* Live Preview Section with dark mode */}
+          <div className={`rounded-lg shadow p-4 sm:p-6 lg:sticky lg:top-6 ${
+            darkMode ? 'bg-gray-800' : 'bg-white'
+          }`}>
+            <h2 className={`text-xl font-bold mb-2 ${
+              darkMode ? 'text-white' : 'text-gray-800'
+            }`}>
+              Live Preview
+            </h2>
+            <p className={`mb-6 ${
+              darkMode ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              See how your changes look
+            </p>
 
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className={`border rounded-lg overflow-hidden ${
+              darkMode ? 'border-gray-700' : 'border-gray-200'
+            }`}>
               <header
                 className="flex items-center justify-between p-3 sm:p-4 text-white text-lg sm:text-xl font-semibold"
                 style={{ backgroundColor: primaryColor, fontFamily }}
@@ -370,15 +475,30 @@ useEffect(() => {
                 </div>
                 <div className="mx-auto -ml-6 text-center w-full">Your Business Name</div>
               </header>
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4">
+              <div className={`grid grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 ${
+                darkMode ? 'bg-gray-900' : 'bg-white'
+              }`}>
                 {[1, 2, 3].map((item) => (
                   <div
                     key={item}
-                    className="rounded-lg p-2 sm:p-3 shadow"
-                    style={{ border: `2px solid ${secondaryColor}`, fontFamily }}
+                    className={`rounded-lg p-2 sm:p-3 shadow ${
+                      darkMode ? 'bg-gray-800' : 'bg-white'
+                    }`}
+                    style={{ 
+                      border: `2px solid ${secondaryColor}`,
+                      fontFamily 
+                    }}
                   >
-                    <h4 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">Product {item}</h4>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3">Sample product description.</p>
+                    <h4 className={`text-base sm:text-lg font-medium mb-1 sm:mb-2 ${
+                      darkMode ? 'text-white' : 'text-gray-800'
+                    }`}>
+                      Product {item}
+                    </h4>
+                    <p className={`text-xs sm:text-sm mb-2 sm:mb-3 ${
+                      darkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      Sample product description.
+                    </p>
                     <button
                       className="w-full py-1 sm:py-2 rounded-md text-white font-medium text-sm sm:text-base"
                       style={{ backgroundColor: primaryColor }}
@@ -426,7 +546,9 @@ useEffect(() => {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-700 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
+          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${
+            darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'
+          }`}>
             <p>© 2024 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>

@@ -20,6 +20,12 @@ export default function BusinessDashboard() {
   const [error, setError] = useState('');
   const [animate, setAnimate] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000); // simulate loading
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
@@ -131,6 +137,29 @@ export default function BusinessDashboard() {
       setLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
+        <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow space-y-6 animate-pulse">
+          <div className="h-8 bg-gray-300 rounded w-1/3"></div>
+          <div className="h-6 bg-gray-300 rounded w-1/2"></div>
+
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow space-y-4">
+            <div className="h-6 bg-gray-300 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-full"></div>
+          </div>
+
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow space-y-4">
+            <div className="h-6 bg-gray-300 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-full"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen flex flex-col overflow-x-hidden ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
