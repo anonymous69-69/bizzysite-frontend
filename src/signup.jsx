@@ -38,12 +38,9 @@ export default function LoginPage() {
         throw new Error(data.message || 'Something went wrong');
       }
 
-      // after successful login (e.g., in login.jsx or auth logic)
-      localStorage.setItem('userId', data.userId);              // for store access
-      localStorage.setItem('storeId', data.storeId);            // for product/orders
-
-      localStorage.setItem('token', data.token);                // must be a real JWT from backend
-      localStorage.setItem('userEmail', data.user.email);       // to detect if admin
+      localStorage.setItem('userId', data.userId);
+      localStorage.setItem('token', data.userId);
+      localStorage.setItem('storeId', data.storeId);
       toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
       // Send welcome email after successful signup
       if (!isLogin) {
@@ -91,13 +88,13 @@ export default function LoginPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">BizzySite</h1>
           <div className="flex space-x-4">
-            <button
+            <button 
               onClick={() => openModal(true)}
               className="px-4 py-2 text-gray-700 font-medium hover:text-pink-600 transition-colors"
             >
               Login
             </button>
-            <button
+            <button 
               onClick={() => openModal(false)}
               className="px-4 py-2 bg-[#fa6da4] text-white font-medium rounded-md hover:bg-pink-700 transition-colors"
             >
@@ -116,13 +113,13 @@ export default function LoginPage() {
             Empower your small business with a beautiful ecommerce website, fast checkout, and integrated payments.
           </p>
           <div className="flex justify-center space-x-4">
-            <button
+            <button 
               onClick={() => openModal(false)}
               className="px-6 py-3 bg-[#fa6da4] text-white font-medium rounded-md hover:bg-pink-700 transition-colors"
             >
               Sign Up
             </button>
-            <button
+            <button 
               onClick={() => openModal(true)}
               className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 transition-colors"
             >
@@ -230,11 +227,11 @@ export default function LoginPage() {
 
       {/* Login/Signup Modal */}
       {showModal && (
-        <div
+        <div 
           className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50"
           onClick={() => setShowModal(false)}
         >
-          <div
+          <div 
             className="bg-white rounded-lg shadow-xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
@@ -257,7 +254,7 @@ export default function LoginPage() {
                     />
                   </div>
                 )}
-
+                
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email address
@@ -272,7 +269,7 @@ export default function LoginPage() {
                     required
                   />
                 </div>
-
+                
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                     Password
@@ -334,7 +331,7 @@ export default function LoginPage() {
                       </span>
                     </div>
                   </div>
-
+                  
                   <div className="mt-6 grid grid-cols-1 gap-3">
                     <button
                       type="button"
@@ -367,8 +364,8 @@ export default function LoginPage() {
                     onClick={() => setIsLogin(!isLogin)}
                     className="text-[#fa6da4] hover:text-pink-700 text-sm font-medium transition-colors"
                   >
-                    {isLogin
-                      ? "Don't have an account? Sign up"
+                    {isLogin 
+                      ? "Don't have an account? Sign up" 
                       : "Already have an account? Sign in"}
                   </button>
                 </div>
