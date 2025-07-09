@@ -39,8 +39,12 @@ export default function LoginPage() {
       }
 
       localStorage.setItem('userId', data.userId);
-      localStorage.setItem('token', data.userId);
+      localStorage.setItem('token', data.token || '');
       localStorage.setItem('storeId', data.storeId);
+      localStorage.setItem('userEmail', data.user?.email || '');
+      localStorage.setItem('userRole', data.user?.role || '');
+      localStorage.setItem('userName', data.user?.name || '');
+      localStorage.setItem('userPhone', data.user?.phone || '');
       toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
       // Send welcome email after successful signup
       if (!isLogin) {
