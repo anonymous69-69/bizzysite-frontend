@@ -89,7 +89,7 @@ export default function ProfilePage() {
   const handleLogout = () => {
     localStorage.removeItem('userId');
     localStorage.removeItem('storeId');
-    navigate('/login');
+    navigate('/signup');
     toast.success('Logged out successfully');
   };
 
