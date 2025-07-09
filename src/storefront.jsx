@@ -249,13 +249,6 @@ export default function BusinessDashboard() {
           </p>
         </div>
 
-        <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
-          Welcome to your business dashboard
-        </h2>
-        <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-          Set up your online store in minutes and start selling today
-        </p>
-
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
             <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
