@@ -178,45 +178,36 @@ export default function BusinessDashboard() {
           </div>
         )}
 
-        <div className={`rounded-md p-3 mb-4 ${darkMode ? 'bg-gray-800' : ''}`}>
+<div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
           <div className="flex justify-between items-center mb-2">
+            <Link 
+              to="/signup" 
+              className={`text-2xl sm:text-3xl font-bold transition-colors ${
+                darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'
+              }`}
+            >
+              BizzySite
+            </Link>
             <div className="flex items-center space-x-4">
-              <Link 
-                to="/signup" 
-                className={`text-2xl sm:text-3xl font-bold ${darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-indigo-600'} transition-colors`}
-              >
-                BizzySite
-              </Link>
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setShowMenu(!showMenu)}
-                className="focus:outline-none"
-              >
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-white"
-                />
-              </button>
-              {showMenu && (
-                <div className={`absolute right-0 mt-2 w-40 rounded-md shadow-lg z-10 ${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
-                  <Link
-                    to="/profile"
-                    className={`block px-4 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    to="/settings"
-                    className={`block px-4 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                  >
-                    Settings
-                  </Link>
-                </div>
-              )}
+              <img
+                src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff&bold=true"
+                alt="Profile"
+                className="w-10 h-10 rounded-full"
+              />
             </div>
           </div>
+          
+          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${
+            darkMode ? 'text-gray-300' : 'text-gray-600'
+          }`}>
+            Welcome to your business dashboard
+          </h2>
+          
+          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${
+            darkMode ? 'text-gray-400' : 'text-gray-700'
+          }`}>
+            Set up your online store in minutes and start selling today
+          </p>
         </div>
 
         <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
