@@ -95,9 +95,15 @@ const OrderForm = () => {
         key: "rzp_live_QIjpR4yQhX9L3h",
         amount: razorOrder.amount,
         currency: razorOrder.currency,
-        name: "My Store",
+        name: "my store",
         description: "Order Payment",
         order_id: razorOrder.id,
+        notes: {
+          storeId: storeId,
+          storeOwnerName: localStorage.getItem('userName') || '',
+          storeOwnerEmail: localStorage.getItem('userEmail') || '',
+          storeOwnerPhone: localStorage.getItem('userPhone') || ''
+        },
         handler: async function (response) {
           // Step 3: On successful payment, save order
           const order = {

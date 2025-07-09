@@ -141,6 +141,10 @@ export default function BusinessDashboard() {
           description: typeof updated.description === 'string' ? updated.description : '',
           shippingCharge: typeof updated.shippingCharge === 'number' ? updated.shippingCharge : prev.shippingCharge
         }));
+        // Store business info in localStorage for Razorpay notes
+        localStorage.setItem('businessName', updated.name || '');
+        localStorage.setItem('businessEmail', updated.email || '');
+        localStorage.setItem('businessPhone', updated.phone || '');
       }
       toast.success('Business information saved successfully!');
     } catch (err) {
