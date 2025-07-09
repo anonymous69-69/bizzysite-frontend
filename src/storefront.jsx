@@ -41,14 +41,15 @@ export default function BusinessDashboard() {
       .then(data => {
         if (data?.business || data?.name || data?.description) {
           const info = data.business || data; // support both shapes
-          setBusinessInfo({
-            name: info.name || '',
-            phone: info.phone || '',
-            email: info.email || '',
+          setBusinessInfo(prev => ({
+            ...prev,
+            name: typeof info.name === 'string' ? info.name : '',
+            phone: typeof info.phone === 'string' ? info.phone : '',
+            email: typeof info.email === 'string' ? info.email : '',
             description: typeof info.description === 'string' ? info.description : '',
-            address: info.address || '',
+            address: typeof info.address === 'string' ? info.address : '',
             shippingCharge: typeof info.shippingCharge === 'number' ? info.shippingCharge : ''
-          });
+          }));
         }
       })
       .catch(err => console.error('Failed to fetch business info:', err));
