@@ -106,9 +106,9 @@ export default function SettingsPage() {
               className="focus:outline-none"
             >
               <img
-                src="https://avatars.githubusercontent.com/u/9919?s=64&v=4"
+                src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff&bold=true"
                 alt="Profile"
-                className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-white"
+                className="w-10 h-10 rounded-full"
               />
             </button>
             {showMenu && (
@@ -298,13 +298,6 @@ export default function SettingsPage() {
               </div>
 
               <div className="flex justify-between">
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                >
-                  Logout
-                </button>
                 <button
                   type="submit"
                   disabled={loading}
