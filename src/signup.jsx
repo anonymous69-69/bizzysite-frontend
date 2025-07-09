@@ -71,8 +71,9 @@ export default function LoginPage() {
           })
         });
         const businessData = await businessRes.json();
-        if (businessData.business?._id) {
-          localStorage.setItem('storeId', businessData.business._id);
+        const storeId = businessData?._id || businessData.business?._id;
+        if (storeId) {
+          localStorage.setItem('storeId', storeId);
         }
       }
       setShowModal(false);
