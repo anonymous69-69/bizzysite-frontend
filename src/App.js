@@ -13,6 +13,7 @@ import OrderForm from './orderform.jsx';
 import NavView from './navview';
 import Profile from './profile';
 import ResetPassword from './resetpassword';
+import Settings from './settings';
 
 function App() {
   const [userId, setUserId] = React.useState(null);
@@ -41,6 +42,7 @@ function App() {
         <Route path="/products" element={userId ? <Products /> : <Navigate to="/signup" />} />
         <Route path="/orders" element={userId ? <Orders /> : <Navigate to="/signup" />} />
         <Route path="/profile" element={userId ? <Profile /> : <Navigate to="/signup" />} />
+        <Route path="/settings" element={userId ? <Settings /> : <Navigate to="/signup" />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/product/:id" element={<InProduct />} />
         <Route path="/payment" element={userId ? <Payment /> : <Navigate to="/signup" />} />
