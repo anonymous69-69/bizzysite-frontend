@@ -40,6 +40,7 @@ export default function LoginPage() {
 
       localStorage.setItem('userId', data.userId);
       localStorage.setItem('token', data.userId);
+      localStorage.setItem('storeId', data.storeId);
       toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
       // Send welcome email after successful signup
       if (!isLogin) {
