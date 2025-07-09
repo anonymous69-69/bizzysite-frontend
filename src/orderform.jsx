@@ -6,7 +6,7 @@ const OrderForm = () => {
   const { storeId } = useParams(); // FIX: Use useParams for reliable storeId extraction
   const location = useLocation();
   const navigate = useNavigate();
-  const { cart = [], total = 0, shippingCharge: sc = 50 } = location.state || {};
+  const { cart = [], total = 0, shippingCharge: sc } = location.state || {};
 
   // Form state
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const OrderForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Order summary
-  const shippingCharge = typeof sc === 'number' ? sc : parseFloat(sc) || 50;
+  const shippingCharge = typeof sc === 'number' ? sc : parseFloat(sc);
   const platformFee = total * 0.03;
   const orderTotal = total + shippingCharge + platformFee;
 
