@@ -14,7 +14,7 @@ import NavView from './navview';
 import Profile from './profile';
 import ResetPassword from './resetpassword';
 import Settings from './settings';
-import AdminDashboard from './adminDashboard';
+
 
 function App() {
   const [userId, setUserId] = React.useState(null);
@@ -54,7 +54,7 @@ function App() {
         <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
         <Route path="/navview" element={userId ? <NavView /> : <Navigate to="/signup" />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>
