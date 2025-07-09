@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTheme } from './ThemeContext';
 
 export default function NavView() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ export default function NavView() {
   const [storeId, setStoreId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { darkMode } = useTheme();
 
   useEffect(() => {
     const localStoreId = localStorage.getItem('storeId');
@@ -93,7 +95,7 @@ export default function NavView() {
   console.log("Rendered storeId:", storeId);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
+    <div className={`min-h-screen flex flex-col overflow-x-hidden ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
       <div className="max-w-6xl mx-auto p-4 sm:p-6 flex-grow w-full">
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -197,7 +199,7 @@ export default function NavView() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div>

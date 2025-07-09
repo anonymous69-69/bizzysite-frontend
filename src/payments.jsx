@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTheme } from './ThemeContext';
 
 export default function PaymentMethodForm() {
+  const { darkMode } = useTheme();
   const [activeTab, setActiveTab] = useState('Payments');
   const [paymentDetails, setPaymentDetails] = useState({
     upiEnabled: false,
@@ -153,7 +155,7 @@ export default function PaymentMethodForm() {
   // Show loading state while fetching data
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+      <div className={`min-h-screen flex flex-col items-center justify-center ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
           <p className="mt-4 text-gray-700">Loading payment details...</p>
@@ -163,7 +165,7 @@ export default function PaymentMethodForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
 
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
         {/* Error Message */}
@@ -419,7 +421,7 @@ export default function PaymentMethodForm() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'}`}>
         <div className="max-w-7xl mx-auto"> 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div>
@@ -431,9 +433,9 @@ export default function PaymentMethodForm() {
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
               <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-                <li>Email: hello@bizzysite.com</li>
-                <li>Phone: +1 (555) 123-4567</li>
-                <li>Address: 123 Business St, City</li>
+                <li>Email: rhythmsarma66@gmail.com</li>
+                <li>Phone: +91 7086758292</li>
+                <li></li>
               </ul>
             </div>
             <div>
