@@ -49,6 +49,23 @@ export default function LoginPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, name }),
         });
+        // Create blank business entry after signup
+        await fetch('https://bizzysite.onrender.com/api/business', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${data.userId}`
+          },
+          body: JSON.stringify({
+            type: 'business',
+            data: {
+              name: '',
+              email: '',
+              phone: '',
+              address: ''
+            }
+          })
+        });
       }
       setShowModal(false);
       navigate('/storefront');
