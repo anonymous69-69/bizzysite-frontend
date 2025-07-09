@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useTheme } from './ThemeContext';
 
 export default function PaymentMethodForm() {
   const { darkMode } = useTheme();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Payments');
   const [paymentDetails, setPaymentDetails] = useState({
     upiEnabled: false,
@@ -19,11 +20,32 @@ export default function PaymentMethodForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
+  const [userName, setUserName] = useState('User');
 
   useEffect(() => {
     const fetchPaymentSettings = async () => {
       try {
         const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        
+        if (!userId) {
+          navigate('/login');
+          return;
+        }
+
+        // Fetch user name
+        fetch(`https://bizzysite.onrender.com/api/user`, {
+          headers: {
+            Authorization: `Bearer ${userId}`
+          }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data?.name) setUserName(data.name);
+          })
+          .catch(err => console.error('Failed to fetch user info:', err));
+        
         if (!token) {
           setIsLoading(false);
           return;
@@ -194,12 +216,48 @@ export default function PaymentMethodForm() {
             >
               BizzySite
             </Link>
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="focus:outline-none"
+                >
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=4f46e5&color=fff&bold=true`}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full"
+                  />
+                </button>
+                {showMenu && (
+                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 dark:text-white ${
+                    darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'
+                  }`}>
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      Settings
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+          
           <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${
             darkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
             Welcome to your business dashboard
           </h2>
+          
           <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${
             darkMode ? 'text-gray-400' : 'text-gray-700'
           }`}>

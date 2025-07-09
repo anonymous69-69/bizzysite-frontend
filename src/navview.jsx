@@ -10,10 +10,26 @@ export default function NavView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { darkMode } = useTheme();
+  const [userName, setUserName] = useState('User');
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     const localStoreId = localStorage.getItem('storeId');
     const userId = localStorage.getItem('userId');
+
+    // Fetch user name
+    if (userId) {
+      fetch(`https://bizzysite.onrender.com/api/user`, {
+        headers: {
+          Authorization: `Bearer ${userId}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data?.name) setUserName(data.name);
+        })
+        .catch(err => console.error('Failed to fetch user info:', err));
+    }
 
     if (localStoreId) {
       setStoreId(localStoreId);
@@ -101,11 +117,38 @@ export default function NavView() {
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
-              <img
-                src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff&bold=true"
-                alt="Profile"
-                className="w-10 h-10 rounded-full"
-              />
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="focus:outline-none"
+                >
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=4f46e5&color=fff&bold=true`}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full"
+                  />
+                </button>
+                {showMenu && (
+                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 dark:text-white ${
+                    darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'
+                  }`}>
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      Settings
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           
