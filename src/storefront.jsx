@@ -148,7 +148,7 @@ export default function BusinessDashboard() {
           </div>
         )}
 
-        <div className={`rounded-md p-3 mb-4 ${darkMode ? 'bg-gray-100' : ''}`}>
+        <div className="rounded-md p-3 mb-4" style={{ backgroundColor: '#7a7777' }}>
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center space-x-4">
               <Link to="/signup" className="text-2xl sm:text-3xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">BizzySite</Link>
@@ -222,8 +222,8 @@ export default function BusinessDashboard() {
           </div>
         </div>
 
-        <div id="business-info" className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${darkMode ? 'bg-gray-100' : 'bg-white'}`}>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Business Information</h3>
+        <div id="business-info" className="rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8" style={{ backgroundColor: '#7a7777' }}>
+          <h3 className="text-lg font-semibold mb-4" style={{ color: '#7a7777' }}>Business Information</h3>
           <p className="text-gray-600 mb-6">Tell us about your business to get started</p>
 
           <form onSubmit={handleSave}>
