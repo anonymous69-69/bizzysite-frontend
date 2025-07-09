@@ -153,7 +153,7 @@ export default function BusinessDashboard() {
             <div className="flex items-center space-x-4">
               <Link 
                 to="/signup" 
-                className={`text-2xl sm:text-3xl font-bold ${darkMode ? 'text-gray-300 hover:text-gray-100' : 'text-gray-800 hover:text-indigo-600'} transition-colors`}
+                className={`text-2xl sm:text-3xl font-bold ${darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-indigo-600'} transition-colors`}
               >
                 BizzySite
               </Link>
@@ -189,10 +189,10 @@ export default function BusinessDashboard() {
           </div>
         </div>
 
-        <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+        <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
           Welcome to your business dashboard
         </h2>
-        <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+        <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
           Set up your online store in minutes and start selling today
         </p>
 
