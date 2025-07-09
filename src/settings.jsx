@@ -221,59 +221,24 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label 
-                  htmlFor="currency" 
+                <label
                   className={`block font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
                 >
                   Currency
                 </label>
-                <select
-                  id="currency"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    darkMode 
-                      ? 'bg-gray-700 text-white border-gray-600' 
-                      : 'bg-white text-gray-700 border-gray-300'
-                  }`}
-                >
-                  <option value="INR">Indian Rupee (₹)</option>
-                  <option value="USD">US Dollar ($)</option>
-                  <option value="EUR">Euro (€)</option>
-                  <option value="GBP">British Pound (£)</option>
-                </select>
+                <p className={`${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Indian Rupee (₹)</p>
               </div>
 
               <div>
-                <label 
-                  htmlFor="language" 
+                <label
                   className={`block font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
                 >
                   Language
                 </label>
-                <select
-                  id="language"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    darkMode 
-                      ? 'bg-gray-700 text-white border-gray-600' 
-                      : 'bg-white text-gray-700 border-gray-300'
-                  }`}
-                >
-                  <option value="en">English</option>
-                  <option value="hi">Hindi (हिंदी)</option>
-                  <option value="es">Spanish (Español)</option>
-                  <option value="fr">French (Français)</option>
-                </select>
+                <p className={`${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>English</p>
               </div>
 
-              <button
-                onClick={handleSavePreferences}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              >
-                Save Preferences
-              </button>
+              {/* Save Preferences button removed since dropdowns are static */}
             </div>
           </div>
 
@@ -430,28 +395,6 @@ export default function SettingsPage() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                    Payment Reminders
-                  </h4>
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Get settlement reminders
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleNotificationChange('reminders')}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    notifications.reminders ? 'bg-indigo-600' : 'bg-gray-300'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      notifications.reminders ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
             </div>
           </div>
 
@@ -462,18 +405,6 @@ export default function SettingsPage() {
             </h3>
             
             <div className="space-y-6">
-              <div>
-                <h4 className={`font-medium mb-2 ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
-                  Download Store Data
-                </h4>
-                <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Export your products, orders, and business information
-                </p>
-                <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">
-                  Export Data
-                </button>
-              </div>
-
               <div className="pt-4 border-t border-gray-300 dark:border-gray-700">
                 <h4 className={`font-medium mb-2 ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
                   Delete Account
