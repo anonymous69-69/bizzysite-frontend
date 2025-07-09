@@ -45,7 +45,7 @@ export default function BusinessDashboard() {
             name: info.name || '',
             phone: info.phone || '',
             email: info.email || '',
-            description: info.description || '',
+            description: typeof info.description === 'string' ? info.description : '',
             address: info.address || '',
             shippingCharge: typeof info.shippingCharge === 'number' ? info.shippingCharge : ''
           });
@@ -305,7 +305,7 @@ export default function BusinessDashboard() {
                 type="number"
                 id="shippingCharge"
                 name="shippingCharge"
-                value={businessInfo.shippingCharge || ''}
+                value={businessInfo.shippingCharge !== '' ? businessInfo.shippingCharge : ''}
                 onChange={handleChange}
                 placeholder="Enter flat shipping charge"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
