@@ -1,5 +1,6 @@
 // settings.jsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useTheme } from './ThemeContext';
 import { Link, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
@@ -12,7 +13,7 @@ export default function SettingsPage() {
   const [showMenu, setShowMenu] = useState(false);
   
   // Settings states
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, setDarkMode } = useTheme();
   const [notifications, setNotifications] = useState({
     orders: true,
     promotions: true,
@@ -25,33 +26,6 @@ export default function SettingsPage() {
     new: '',
     confirm: ''
   });
-
-  useEffect(() => {
-    // Check for saved preferences
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-    const savedCurrency = localStorage.getItem('currency') || 'INR';
-    const savedLanguage = localStorage.getItem('language') || 'en';
-    
-    setDarkMode(savedDarkMode);
-    setCurrency(savedCurrency);
-    setLanguage(savedLanguage);
-    
-    // Apply dark mode immediately
-    if (savedDarkMode) {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  useEffect(() => {
-    // Toggle dark mode class
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('darkMode', 'true');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('darkMode', 'false');
-    }
-  }, [darkMode]);
 
   const handleNotificationChange = (type) => {
     setNotifications(prev => ({
