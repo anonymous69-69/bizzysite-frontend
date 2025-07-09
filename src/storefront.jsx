@@ -112,14 +112,13 @@ export default function BusinessDashboard() {
       }
 
       if (result.data?.business) {
-        setBusinessInfo({
-          name: result.data.business.name || '',
-          phone: result.data.business.phone || '',
-          email: result.data.business.email || '',
-          description: typeof result.data.business.description === 'string' ? result.data.business.description : '',
-          address: result.data.business.address || '',
-          shippingCharge: typeof result.data.business.shippingCharge === 'number' ? result.data.business.shippingCharge : ''
-        });
+        const updated = result.data.business;
+        setBusinessInfo(prev => ({
+          ...prev,
+          ...updated,
+          description: typeof updated.description === 'string' ? updated.description : '',
+          shippingCharge: typeof updated.shippingCharge === 'number' ? updated.shippingCharge : prev.shippingCharge
+        }));
       }
       toast.success('Business information saved successfully!');
     } catch (err) {
