@@ -28,8 +28,12 @@ export default function OrderManagement() {
         .catch(err => console.error('Failed to fetch user info:', err));
     }
     
-    // Fetch orders
-    fetch("https://bizzysite.onrender.com/api/orders")
+    // Fetch orders with authentication - FIXED: Add Authorization header
+    fetch("https://bizzysite.onrender.com/api/orders", {
+      headers: { 
+        Authorization: `Bearer ${localStorage.getItem('userId')}` 
+      }
+    })
       .then(res => res.json())
       .then(data => {
         const formatted = data.map((order, i) => {
@@ -74,27 +78,44 @@ export default function OrderManagement() {
   const today = new Date().toISOString().split('T')[0];
   const totalOrdersToday = orders.filter(order => order.date === today).length;
 
-  const handleStatusChange = (orderId, newStatus) => {
-    const updatedOrders = orders.map(order =>
-      order.id === orderId ? { ...order, status: newStatus } : order
-    );
-    setOrders(updatedOrders);
+  // FIXED: Use API for status changes
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      await fetch(`https://bizzysite.onrender.com/api/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('userId')}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      
+      // Update local state
+      const updatedOrders = orders.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+      );
+      setOrders(updatedOrders);
+    } catch (err) {
+      console.error("Status update failed:", err);
+    }
   };
 
-  const handleDeleteOrder = (orderId) => {
-    const updatedOrders = orders.filter(order => order.id !== orderId);
-    setOrders(updatedOrders);
-    fetch(`https://bizzysite.onrender.com/api/orders/${orderId}`, {
-      method: 'DELETE',
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to delete order');
-        console.log('✅ Order deleted from DB');
-      })
-      .catch((err) => {
-        console.error("❌ Failed to delete order from backend", err);
+  // FIXED: Use API for order deletion
+  const handleDeleteOrder = async (orderId) => {
+    try {
+      await fetch(`https://bizzysite.onrender.com/api/orders/${orderId}`, {
+        method: 'DELETE',
+        headers: { 
+          Authorization: `Bearer ${localStorage.getItem('userId')}` 
+        }
       });
-    setOrderToDelete(null);
+      
+      const updatedOrders = orders.filter(order => order.id !== orderId);
+      setOrders(updatedOrders);
+      setOrderToDelete(null);
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
   };
 
   return (

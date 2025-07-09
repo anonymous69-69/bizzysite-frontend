@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const storeId = window.location.pathname.split("/")[2]; // Assuming /view/:storeId or similar
 const OrderForm = () => {
+  const { storeId } = useParams(); // FIX: Use useParams for reliable storeId extraction
   const location = useLocation();
   const navigate = useNavigate();
   const { cart = [], total = 0, shippingCharge: sc = 50 } = location.state || {};
@@ -74,6 +74,7 @@ const OrderForm = () => {
     console.log("💰 orderTotal:", orderTotal);
     console.log("💸 amount being sent to backend:", Math.round(orderTotal * 100));
     console.log("location.state:", location.state);
+    console.log("✅ Using storeId from URL params:", storeId); // FIX: Use storeId from params
 
     try {
       // Step 1: Create Razorpay Order
@@ -82,7 +83,7 @@ const OrderForm = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: Math.round(orderTotal * 100),
-          storeId: storeId,
+          storeId: storeId, // FIX: Use storeId from params
           customerName: formData.fullName
         })
       });
@@ -100,6 +101,7 @@ const OrderForm = () => {
         handler: async function (response) {
           // Step 3: On successful payment, save order
           const order = {
+            storeId: storeId, // FIX: Include storeId in order data
             customer: {
               name: formData.fullName,
               instagramId: formData.instagramId,
@@ -124,9 +126,11 @@ const OrderForm = () => {
             currency: cart[0]?.currency || '$',
             status: 'Pending',
             razorpayPaymentId: response.razorpay_payment_id,
-            storeId: storeId,
+            razorpayOrderId: razorOrder.id // FIX: Include Razorpay order ID
           };
 
+          console.log("📦 Order data being saved:", order);
+          
           const saveRes = await fetch('https://bizzysite.onrender.com/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -136,7 +140,8 @@ const OrderForm = () => {
           if (saveRes.ok) {
             setShowSuccessModal(true);
           } else {
-            alert("Order failed to save.");
+            console.error("Order save failed:", await saveRes.text());
+            alert("Order failed to save. Please contact support.");
           }
         },
         prefill: {
@@ -156,6 +161,7 @@ const OrderForm = () => {
       setIsSubmitting(false);
     }
   };
+  
   // Dynamically add Razorpay script on mount
   useEffect(() => {
     const script = document.createElement("script");
@@ -171,7 +177,7 @@ const OrderForm = () => {
           <h3 className="text-lg font-medium text-gray-800">Your cart is empty</h3>
           <p className="mt-2 text-gray-600">Please add some products to your cart before checkout.</p>
           <Link
-            to="/preview"
+            to={`/view/${storeId}`} // FIX: Use storeId in back link
             className="inline-block mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
             Back to Store
