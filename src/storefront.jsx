@@ -39,7 +39,7 @@ export default function BusinessDashboard() {
     fetch(`https://bizzysite.onrender.com/api/store/${storeId}`)
       .then(res => res.json())
       .then(data => {
-        if (data?.name || data?.business) {
+        if (data?.business || data?.name || data?.description) {
           const info = data.business || data; // support both shapes
           setBusinessInfo({
             name: info.name || '',
@@ -58,7 +58,7 @@ export default function BusinessDashboard() {
     const { name, value } = e.target;
     setBusinessInfo(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'shippingCharge' ? (value === '' ? '' : parseFloat(value)) : value
     }));
   };
 
