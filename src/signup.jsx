@@ -53,8 +53,8 @@ export default function LoginPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, name }),
         });
-        // Create blank business entry after signup
-        await fetch('https://bizzysite.onrender.com/api/business', {
+        // Create blank business entry after signup and store storeId
+        const businessRes = await fetch('https://bizzysite.onrender.com/api/business', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -70,6 +70,10 @@ export default function LoginPage() {
             }
           })
         });
+        const businessData = await businessRes.json();
+        if (businessData.business?._id) {
+          localStorage.setItem('storeId', businessData.business._id);
+        }
       }
       setShowModal(false);
       navigate('/storefront');
