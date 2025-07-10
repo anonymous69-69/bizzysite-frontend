@@ -14,85 +14,98 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Prepare payload: include name only for signup
+  
     const payload = {
       email,
       password,
       ...(isLogin ? {} : { name }),
     };
-
+  
     try {
       const response = await fetch(`https://bizzysite.onrender.com/api/${isLogin ? 'login' : 'signup'}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',  // ensure JSON body
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
-        // On HTTP error status, throw with server's message
         throw new Error(data.message || 'Something went wrong');
       }
-
+  
+      // Save user data to localStorage
       localStorage.setItem('userId', data.userId);
-      localStorage.setItem('storeId', data.storeId);
       localStorage.setItem('token', data.userId || '');
       localStorage.setItem('userEmail', data.email || '');
       localStorage.setItem('userName', data.name || '');
       localStorage.setItem('userPhone', data.phone || '');
       localStorage.setItem('userRole', 'vendor');
+      
       toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
-      // Send welcome email after successful signup
+  
+      // STORE CREATION FIX - Only for new signups
       if (!isLogin) {
-        await fetch('https://bizzysite.onrender.com/api/send-welcome-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name }),
-        });
-        // Create blank business entry after signup and store storeId
-        const businessRes = await fetch('https://bizzysite.onrender.com/api/business', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${data.userId}`
-          },
-          body: JSON.stringify({
-            type: 'business',
-            data: {
-              name: '',
-              email: '',
-              phone: '',
-              address: ''
-            }
-          })
-        });
-        const businessData = await businessRes.json();
-        console.log("✅ FULL business creation response:", businessData);
-        console.log("✅ typeof businessData:", typeof businessData);
-
-        const storeId =
-          typeof businessData === 'string'
-            ? businessData
-            : businessData?._id || businessData.business?._id;
-
-        if (storeId) {
-          localStorage.setItem('storeId', storeId);
-        } else {
-          console.warn("storeId not found in response:", businessData);
+        try {
+          // Create business with default values
+          const businessRes = await fetch('https://bizzysite.onrender.com/api/business', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${data.userId}`
+            },
+            body: JSON.stringify({
+              type: 'business',
+              data: {
+                name: name || 'My Store',
+                email: email,
+                phone: '',
+                address: '',
+                shippingCharge: 0
+              }
+            })
+          });
+  
+          const businessData = await businessRes.json();
+          
+          if (!businessRes.ok) {
+            throw new Error(businessData.message || "Failed to create store");
+          }
+  
+          // Handle store ID - CRITICAL FIX
+          const storeId = businessData.storeId;
+          if (storeId) {
+            localStorage.setItem('storeId', storeId);
+          } else {
+            throw new Error("Store ID not received from server");
+          }
+  
+          // Send welcome email
+          await fetch('https://bizzysite.onrender.com/api/send-welcome-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, name }),
+          });
+        } catch (error) {
+          console.error("Store creation error:", error);
+          toast.error("Failed to initialize your store. Please try again.");
+          return;
         }
       }
+  
       setShowModal(false);
-      navigate('/storefront');
+      setTimeout(() => {
+        navigate('/storefront');
+      }, 500);
     } catch (error) {
       console.error(error);
-      toast.error(error.message);
+      toast.error(error.message || 'Operation failed');
     }
   };
 
+  // REST OF THE COMPONENT REMAINS UNCHANGED
+  // Only the handleSubmit function was modified above
+  
   const openModal = (login) => {
     setIsLogin(login);
     setShowModal(true);
@@ -101,7 +114,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Toaster position="top-right" />
-      {/* Header with Login/Signup buttons */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">BizzySite</h1>
@@ -122,7 +134,6 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
       <div className="bg-white py-16 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4">BizzySite</h1>
@@ -147,7 +158,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Features Section */}
       <div className="bg-gray-50 py-16 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Features</h2>
@@ -202,7 +212,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -243,7 +252,6 @@ export default function LoginPage() {
         </div>
       </footer>
 
-      {/* Login/Signup Modal */}
       {showModal && (
         <div 
           className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50"

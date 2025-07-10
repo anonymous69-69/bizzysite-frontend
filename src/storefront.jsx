@@ -55,25 +55,34 @@ export default function BusinessDashboard() {
     }
   }, []);
 
-  const fetchBusinessInfo = (storeId) => {
-    const userId = localStorage.getItem("userId");
-    fetch(`https://bizzysite.onrender.com/api/store/${storeId}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data?.business || data?.name || data?.description) {
-          const info = data.business || data;
-          setBusinessInfo(prev => ({
-            ...prev,
-            name: typeof info.name === 'string' ? info.name : '',
-            phone: typeof info.phone === 'string' ? info.phone : '',
-            email: typeof info.email === 'string' ? info.email : '',
-            description: typeof info.description === 'string' ? info.description : '',
-            address: typeof info.address === 'string' ? info.address : '',
-            shippingCharge: typeof info.shippingCharge === 'number' ? info.shippingCharge : ''
-          }));
-        }
-      })
-      .catch(err => console.error('Failed to fetch business info:', err));
+  const fetchBusinessInfo = async (storeId) => {
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        navigate('/login');
+        return;
+      }
+      
+      const response = await fetch(`https://bizzysite.onrender.com/api/store/${storeId}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch store");
+      }
+  
+      const info = data.business || data;
+      setBusinessInfo({
+        name: info.name || '',
+        phone: info.phone || '',
+        email: info.email || '',
+        description: info.description || '',
+        address: info.address || '',
+        shippingCharge: info.shippingCharge || 0
+      });
+    } catch (err) {
+      console.error('Failed to fetch business info:', err);
+      toast.error('Failed to load store information');
+    }
   };
 
   const handleChange = (e) => {
