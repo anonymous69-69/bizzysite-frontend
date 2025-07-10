@@ -78,7 +78,7 @@ export default function CustomizeStore() {
     formData.append('image', file);
 
     try {
-      const res = await fetch(`https://bizzysite.onrender.com/api/upload`, {
+      const res = await fetch(`https://bizzysite.onrender.com/api/business?storeId=${storeId}`, {
         method: 'POST',
         body: formData
       });
@@ -161,7 +161,7 @@ export default function CustomizeStore() {
     };
 
     try {
-      const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
+      const response = await fetch(`https://bizzysite.onrender.com/api/business?storeId=${storeId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
