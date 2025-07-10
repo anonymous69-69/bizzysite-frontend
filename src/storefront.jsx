@@ -80,14 +80,15 @@ export default function BusinessDashboard() {
       }
 
       const data = await response.json();
+      const business = data.business || {};
       setBusinessInfo(prev => ({
         ...prev,
-        name: data.name || '',
-        phone: data.phone || '',
-        email: data.email || '',
-        description: data.description || '',
-        address: data.address || '',
-        shippingCharge: data.shippingCharge !== undefined ? String(data.shippingCharge) : ''
+        name: business.name || '',
+        phone: business.phone || '',
+        email: business.email || '',
+        description: business.description || '',
+        address: business.address || '',
+        shippingCharge: business.shippingCharge !== undefined ? String(business.shippingCharge) : ''
       }));
     } catch (err) {
       console.error('Failed to fetch business info:', err);
