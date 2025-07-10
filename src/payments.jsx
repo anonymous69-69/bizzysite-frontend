@@ -24,39 +24,60 @@ export default function PaymentMethodForm() {
   const [userName, setUserName] = useState('User');
 
   useEffect(() => {
-    const fetchPaymentDetails = async () => {
+    const fetchPaymentSettings = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const storeId = localStorage.getItem("storeId");
-  
-        if (!token || !storeId) {
-          console.warn("Missing token or storeId");
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        
+        if (!userId) {
+          navigate('/login');
           return;
         }
-  
-        const res = await axios.get('/api/business', {
+
+        // Fetch user name
+        fetch(`https://bizzysite.onrender.com/api/user`, {
           headers: {
-            Authorization: `Bearer ${token}`,
-            'x-store-id': storeId
+            Authorization: `Bearer ${userId}`
+          }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data?.name) setUserName(data.name);
+          })
+          .catch(err => console.error('Failed to fetch user info:', err));
+        
+        if (!token) {
+          setIsLoading(false);
+          return;
+        }
+        
+        const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
           }
         });
-  
-        const data = res.data;
-  
-        // Update your state values with fetched data
-        setUpiEnabled(data.upiEnabled || false);
-        setBankEnabled(data.bankEnabled || false);
-        setUpiId(data.upiId || "");
-        setAccountHolderName(data.accountHolderName || "");
-        setAccountNumber(data.accountNumber || "");
-        setIfscCode(data.ifscCode || "");
-  
+        
+        if (response.ok) {
+          const data = await response.json();
+          setPaymentDetails(prev => ({
+            ...prev,
+            upiEnabled: typeof data.upiEnabled === 'boolean' ? data.upiEnabled : false,
+            bankEnabled: typeof data.bankEnabled === 'boolean' ? data.bankEnabled : false,
+            upiId: data.upiId || '',
+            accountHolderName: data.accountHolderName || '',
+            accountNumber: data.accountNumber || '',
+            ifscCode: data.ifscCode || ''
+          }));
+          setIsUPIEnabled(typeof data.upiEnabled === 'boolean' ? data.upiEnabled : false);
+          setIsBankEnabled(typeof data.bankEnabled === 'boolean' ? data.bankEnabled : false);
+        }
       } catch (error) {
-        console.error("❌ Error fetching payment details:", error);
+        console.error('Error fetching payment settings:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-  
-    fetchPaymentDetails();
+    fetchPaymentSettings();
   }, []);
 
   const handleInputChange = (e) => {
