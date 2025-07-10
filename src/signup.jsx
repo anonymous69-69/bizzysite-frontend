@@ -71,7 +71,8 @@ export default function LoginPage() {
           })
         });
         const businessData = await businessRes.json();
-        console.log("Business creation response:", businessData);
+        console.log("✅ FULL business creation response:", businessData);
+        console.log("✅ typeof businessData:", typeof businessData);
 
         const storeId =
           typeof businessData === 'string'
@@ -85,9 +86,7 @@ export default function LoginPage() {
         }
       }
       setShowModal(false);
-      setTimeout(() => {
-        navigate('/storefront');
-      }, 500); // allow a short delay for store save
+      navigate('/storefront');
     } catch (error) {
       console.error(error);
       toast.error(error.message);
