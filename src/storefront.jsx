@@ -67,8 +67,8 @@ export default function BusinessDashboard() {
         return;
       }
       
-      // Use correct endpoint with query parameter
-      const response = await fetch(`https://bizzysite.onrender.com/api/business?storeId=${storeId}`, {
+      // Use correct endpoint WITHOUT query parameter
+      const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
         headers: {
           Authorization: `Bearer ${userId}`,
           'x-store-id': storeId  // Add store ID to headers
