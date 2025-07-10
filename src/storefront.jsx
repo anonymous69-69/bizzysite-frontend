@@ -31,12 +31,16 @@ export default function BusinessDashboard() {
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
     const userId = localStorage.getItem('userId');
-    
+  
     if (!userId) {
       navigate('/login');
       return;
     }
-    // Fetch user name after checking userId
+  
+    // ✅ Log storeId for debugging
+    console.log("💡 Saved storeId in storefront:", savedStoreId);
+  
+    // Fetch user info
     fetch(`https://bizzysite.onrender.com/api/user`, {
       headers: {
         Authorization: `Bearer ${userId}`
@@ -47,11 +51,15 @@ export default function BusinessDashboard() {
         if (data?.name) setUserName(data.name);
       })
       .catch(err => console.error('Failed to fetch user info:', err));
-    
+  
     if (savedStoreId) {
-      localStorage.setItem('storeId', savedStoreId); // ensure current session uses it
+      localStorage.setItem('storeId', savedStoreId); // not strictly necessary
       setStoreId(savedStoreId);
       fetchBusinessInfo(savedStoreId);
+    } else {
+      console.warn("❌ No storeId found in localStorage");
+      toast.error("Store ID not found. Please log in again.");
+      navigate('/login'); // optional redirect
     }
   }, []);
 
