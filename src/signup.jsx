@@ -87,8 +87,6 @@ export default function LoginPage() {
             body: JSON.stringify({ email, name }),
           });
           
-          // FIX: Set storeId in state for immediate access
-          setStoreId(storeId);
         } catch (error) {
           console.error("Store creation error:", error);
           toast.error("Failed to initialize your store. Please try again.");
