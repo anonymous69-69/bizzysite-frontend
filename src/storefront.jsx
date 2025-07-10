@@ -63,22 +63,27 @@ export default function BusinessDashboard() {
         return;
       }
       
-      const response = await fetch(`https://bizzysite.onrender.com/api/store/${storeId}`);
-      const data = await response.json();
+      // Use the authenticated endpoint instead of public endpoint
+      const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
+        headers: {
+          Authorization: `Bearer ${userId}`
+        }
+      });
       
       if (!response.ok) {
-        throw new Error("Failed to fetch store");
+        throw new Error("Failed to fetch business info");
       }
   
-      const info = data.business || data;
-      setBusinessInfo({
-        name: info.name || '',
-        phone: info.phone || '',
-        email: info.email || '',
-        description: info.description || '',
-        address: info.address || '',
-        shippingCharge: info.shippingCharge || 0
-      });
+      const data = await response.json();
+      setBusinessInfo(prev => ({
+        ...prev,
+        name: data.business?.name || '',
+        phone: data.business?.phone || '',
+        email: data.business?.email || '',
+        description: data.business?.description || '',
+        address: data.business?.address || '',
+        shippingCharge: data.business?.shippingCharge || 0
+      }));
     } catch (err) {
       console.error('Failed to fetch business info:', err);
       toast.error('Failed to load store information');
