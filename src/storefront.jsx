@@ -24,7 +24,7 @@ export default function BusinessDashboard() {
   const [userName, setUserName] = useState('User');
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000); // simulate loading
+    const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -36,9 +36,6 @@ export default function BusinessDashboard() {
       navigate('/login');
       return;
     }
-  
-    // ✅ Log storeId for debugging
-    console.log("💡 Saved storeId in storefront:", savedStoreId);
   
     // Fetch user info
     fetch(`https://bizzysite.onrender.com/api/user`, {
@@ -53,16 +50,15 @@ export default function BusinessDashboard() {
       .catch(err => console.error('Failed to fetch user info:', err));
   
     if (savedStoreId) {
-      localStorage.setItem('storeId', savedStoreId); // not strictly necessary
       setStoreId(savedStoreId);
       fetchBusinessInfo(savedStoreId);
     } else {
-      console.warn("❌ No storeId found in localStorage");
+      console.warn("No storeId found in localStorage");
       toast.error("Store ID not found. Please log in again.");
-      navigate('/login'); // optional redirect
     }
-  }, []);
+  }, [navigate]);
 
+  // FIXED: Updated API endpoint and added headers
   const fetchBusinessInfo = async (storeId) => {
     try {
       const userId = localStorage.getItem("userId");
@@ -71,26 +67,27 @@ export default function BusinessDashboard() {
         return;
       }
       
-      // Use the authenticated endpoint instead of public endpoint
-      const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
+      // Use correct endpoint with query parameter
+      const response = await fetch(`https://bizzysite.onrender.com/api/business?storeId=${storeId}`, {
         headers: {
-          Authorization: `Bearer ${userId}`
+          Authorization: `Bearer ${userId}`,
+          'x-store-id': storeId  // Add store ID to headers
         }
       });
       
       if (!response.ok) {
         throw new Error("Failed to fetch business info");
       }
-  
+
       const data = await response.json();
       setBusinessInfo(prev => ({
         ...prev,
-        name: data.business?.name || '',
-        phone: data.business?.phone || '',
-        email: data.business?.email || '',
-        description: data.business?.description || '',
-        address: data.business?.address || '',
-        shippingCharge: data.business?.shippingCharge || 0
+        name: data.name || '',
+        phone: data.phone || '',
+        email: data.email || '',
+        description: data.description || '',
+        address: data.address || '',
+        shippingCharge: data.shippingCharge !== undefined ? String(data.shippingCharge) : ''
       }));
     } catch (err) {
       console.error('Failed to fetch business info:', err);
@@ -106,6 +103,7 @@ export default function BusinessDashboard() {
     }));
   };
 
+  // FIXED: Added storeId to headers
   const handleSave = async (e) => {
     e.preventDefault();
     if (!businessInfo.name.trim()) {
@@ -124,12 +122,9 @@ export default function BusinessDashboard() {
       
       const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userId}`
+        'Authorization': `Bearer ${userId}`,
+        'x-store-id': storeId  // Add store ID to headers
       };
-
-      if (storeId) {
-        headers['x-store-id'] = storeId;
-      }
 
       const method = storeId ? 'PUT' : 'POST';
       const url = 'https://bizzysite.onrender.com/api/business';
@@ -163,7 +158,6 @@ export default function BusinessDashboard() {
           description: typeof updated.description === 'string' ? updated.description : '',
           shippingCharge: typeof updated.shippingCharge === 'number' ? updated.shippingCharge : prev.shippingCharge
         }));
-        // Store business info in localStorage for Razorpay notes
         localStorage.setItem('businessName', updated.name || '');
         localStorage.setItem('businessEmail', updated.email || '');
         localStorage.setItem('businessPhone', updated.phone || '');

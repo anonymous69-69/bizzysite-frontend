@@ -40,17 +40,19 @@ export default function ProductCatalog() {
     { symbol: '¥', name: 'JPY' },
   ];
 
+  // FIXED: Updated API endpoint and headers
   const fetchProducts = useCallback(async (storeId, userId) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE_URL}/store`, {
+      const response = await axios.get(`${API_BASE_URL}/business?storeId=${storeId}`, {
         headers: {
           'Authorization': `Bearer ${userId}`,
           'x-store-id': storeId
         }
       });
       
+      // FIX: Corrected data path to products array
       const products = response.data?.products || [];
       setProducts(Array.isArray(products) ? products : []);
     } catch (err) {
@@ -68,13 +70,22 @@ export default function ProductCatalog() {
     
     if (savedUserId) {
       setUserId(savedUserId);
-      // ... [existing user name fetch code]
+      // Fetch user name
+      fetch(`https://bizzysite.onrender.com/api/user`, {
+        headers: {
+          Authorization: `Bearer ${savedUserId}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data?.name) setUserName(data.name);
+        })
+        .catch(err => console.error('Failed to fetch user info:', err));
   
       if (savedStoreId) {
         setStoreId(savedStoreId);
         fetchProducts(savedStoreId, savedUserId);
       } else {
-        // Handle missing store ID
         console.error("Store ID not found in localStorage");
         toast.error("Your store is not properly configured");
       }
@@ -200,6 +211,7 @@ export default function ProductCatalog() {
     setImagePreviews(newPreviews);
   };
 
+  // FIXED: Added storeId to headers
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -255,6 +267,7 @@ export default function ProductCatalog() {
     }
   };
 
+  // FIXED: Added storeId to headers
   const handleDeleteProduct = async (productId) => {
     if (!window.confirm('Delete this product permanently?')) return;
 

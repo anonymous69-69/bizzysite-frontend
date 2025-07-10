@@ -44,7 +44,7 @@ export default function LoginPage() {
       
       toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
   
-      // STORE CREATION FIX - Only for new signups
+      // STORE CREATION - CRITICAL FIXES
       if (!isLogin) {
         try {
           // Create business with default values
@@ -72,7 +72,7 @@ export default function LoginPage() {
             throw new Error(businessData.message || "Failed to create store");
           }
   
-          // Handle store ID - CRITICAL FIX
+          // FIX: Handle store ID - save to localStorage
           const storeId = businessData.storeId;
           if (storeId) {
             localStorage.setItem('storeId', storeId);
@@ -86,6 +86,9 @@ export default function LoginPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, name }),
           });
+          
+          // FIX: Set storeId in state for immediate access
+          setStoreId(storeId);
         } catch (error) {
           console.error("Store creation error:", error);
           toast.error("Failed to initialize your store. Please try again.");
@@ -103,9 +106,6 @@ export default function LoginPage() {
     }
   };
 
-  // REST OF THE COMPONENT REMAINS UNCHANGED
-  // Only the handleSubmit function was modified above
-  
   const openModal = (login) => {
     setIsLogin(login);
     setShowModal(true);
