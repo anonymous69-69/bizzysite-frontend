@@ -85,7 +85,9 @@ export default function LoginPage() {
         }
       }
       setShowModal(false);
-      navigate('/storefront');
+      setTimeout(() => {
+        navigate('/storefront');
+      }, 500); // allow a short delay for store save
     } catch (error) {
       console.error(error);
       toast.error(error.message);
