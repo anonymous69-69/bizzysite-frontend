@@ -17,8 +17,7 @@ export default function CustomizeStore() {
   const [storeId, setStoreId] = useState('');
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
-  const [customizeSettings, setCustomizeSettings] = useState({});
-const [customizeLoading, setCustomizeLoading] = useState(false);
+  
 
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
@@ -71,38 +70,6 @@ const [customizeLoading, setCustomizeLoading] = useState(false);
       }
     } catch (err) {
       console.error("Failed to fetch customization:", err);
-    }
-  };
-
-  const handleSaveCustomization = async () => {
-    try {
-      setCustomizeLoading(true);
-      const userId = localStorage.getItem('userId');
-      const storeId = localStorage.getItem('storeId');
-      if (!userId || !storeId) return;
-  
-      const response = await fetch('https://bizzysite.onrender.com/api/business', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userId}`,
-          'x-store-id': storeId
-        },
-        body: JSON.stringify({
-          type: 'customize',
-          data: customizeSettings
-        })
-      });
-  
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || 'Failed to save customization');
-  
-      toast.success('Customization saved successfully!');
-    } catch (err) {
-      console.error(err);
-      toast.error(`Save failed: ${err.message}`);
-    } finally {
-      setCustomizeLoading(false);
     }
   };
 
@@ -597,16 +564,12 @@ const [customizeLoading, setCustomizeLoading] = useState(false);
               </div>
             </div>
 
-            <div className="flex justify-end mt-6">
-  <button
-    type="button"
-    onClick={handleSaveCustomization}
-    disabled={customizeLoading}
-    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
-  >
-    {customizeLoading ? 'Saving...' : 'Save Customization'}
-  </button>
-</div>
+            <button
+              onClick={handleSaveChanges}
+              className="w-full mt-6 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base"
+            >
+              Save Changes
+            </button>
           </div>
         </div>
       </div>
