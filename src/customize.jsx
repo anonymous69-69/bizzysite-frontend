@@ -44,29 +44,27 @@ export default function CustomizeStore() {
     }
   }, [activeTab, storeId]);
 
-  const fetchCustomization = async (storeId) => {
-    const userId = localStorage.getItem('userId');
-    if (!userId || !storeId) return;
-
+  const fetchCustomizeSettings = async () => {
     try {
-      const response = await fetch(`https://bizzysite.onrender.com/api/store`, {
+      const userId = localStorage.getItem('userId');
+      const storeId = localStorage.getItem('storeId');
+  
+      if (!userId || !storeId) return;
+  
+      const response = await fetch('https://bizzysite.onrender.com/api/business', {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userId}`,
+          Authorization: `Bearer ${userId}`,
           'x-store-id': storeId
         }
       });
-      if (response.ok) {
-        const data = await response.json();
-        const c = data?.customize ?? {};
-        setPrimaryColor(c.primaryColor || '#3b82f6');
-        setSecondaryColor(c.secondaryColor || '#8b5cf6');
-        setFontFamily(c.fontFamily || 'Inter');
-        setHeaderStyle(c.headerStyle || 'Modern');
-        setProductLayout(c.productLayout || 'Grid');
-      }
+  
+      if (!response.ok) throw new Error('Failed to fetch customize settings');
+  
+      const data = await response.json();
+      setCustomizeSettings(data.customize || {});
     } catch (err) {
-      console.error("Failed to fetch customization:", err);
+      console.error(err);
+      toast.error('Could not load customization settings');
     }
   };
 
