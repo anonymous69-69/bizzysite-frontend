@@ -22,12 +22,14 @@ export default function CustomizeStore() {
 
   useEffect(() => {
     const fetchCustomization = async () => {
+      const userId = localStorage.getItem('userId');
+  
+      if (!userId || !storeId) {
+        toast.error("Please complete your business setup first to get a Store ID");
+        return;
+      }
+  
       try {
-        const userId = localStorage.getItem('userId');
-        const storeId = localStorage.getItem('storeId');
-  
-        if (!userId || !storeId) return;
-  
         const response = await fetch('https://bizzysite.onrender.com/api/business', {
           headers: {
             Authorization: `Bearer ${userId}`,
@@ -45,8 +47,9 @@ export default function CustomizeStore() {
       }
     };
   
-    fetchCustomization();
-  }, []);
+    if (storeId) fetchCustomization();
+  }, [storeId]);
+  
 
   const fetchCustomization = async (storeId) => {
     const userId = localStorage.getItem('userId');
