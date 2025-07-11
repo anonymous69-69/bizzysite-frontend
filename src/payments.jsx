@@ -60,17 +60,21 @@ export default function PaymentMethodForm() {
         
         if (response.ok) {
           const data = await response.json();
-          setPaymentDetails(prev => ({
-            ...prev,
-            upiEnabled: typeof data.upiEnabled === 'boolean' ? data.upiEnabled : false,
-            bankEnabled: typeof data.bankEnabled === 'boolean' ? data.bankEnabled : false,
-            upiId: data.upiId || '',
-            accountHolderName: data.accountHolderName || '',
-            accountNumber: data.accountNumber || '',
-            ifscCode: data.ifscCode || ''
-          }));
-          setIsUPIEnabled(typeof data.upiEnabled === 'boolean' ? data.upiEnabled : false);
-          setIsBankEnabled(typeof data.bankEnabled === 'boolean' ? data.bankEnabled : false);
+          // FIX: Properly extract payments data from response
+          const paymentsData = data.payments || {};
+          
+          setPaymentDetails({
+            upiEnabled: paymentsData.upiEnabled || false,
+            bankEnabled: paymentsData.bankEnabled || false,
+            upiId: paymentsData.upiId || '',
+            accountHolderName: paymentsData.accountHolderName || '',
+            accountNumber: paymentsData.accountNumber || '',
+            ifscCode: paymentsData.ifscCode || ''
+          });
+          
+          // FIX: Update toggle states based on fetched data
+          setIsUPIEnabled(paymentsData.upiEnabled || false);
+          setIsBankEnabled(paymentsData.bankEnabled || false);
         }
       } catch (error) {
         console.error('Error fetching payment settings:', error);
@@ -80,6 +84,15 @@ export default function PaymentMethodForm() {
     };
     fetchPaymentSettings();
   }, []);
+
+  // Sync toggle states with paymentDetails
+  useEffect(() => {
+    setPaymentDetails(prev => ({
+      ...prev,
+      upiEnabled: isUPIEnabled,
+      bankEnabled: isBankEnabled
+    }));
+  }, [isUPIEnabled, isBankEnabled]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -92,16 +105,8 @@ export default function PaymentMethodForm() {
   const handleToggleChange = (field) => {
     if (field === 'upiEnabled') {
       setIsUPIEnabled(prev => !prev);
-      setPaymentDetails(prev => ({
-        ...prev,
-        upiEnabled: !prev.upiEnabled
-      }));
     } else if (field === 'bankEnabled') {
       setIsBankEnabled(prev => !prev);
-      setPaymentDetails(prev => ({
-        ...prev,
-        bankEnabled: !prev.bankEnabled
-      }));
     }
   };
 
@@ -188,9 +193,7 @@ export default function PaymentMethodForm() {
 
   return (
     <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
-
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        {/* Error Message */}
         {errorMessage && (
           <div className={`mb-6 p-4 ${darkMode ? 'bg-red-900 border-red-700 text-red-100' : 'bg-red-50 border-l-4 border-red-500'}`}>
             <div className="flex">
@@ -206,7 +209,6 @@ export default function PaymentMethodForm() {
           </div>
         )}
 
-        {/* Header with dark mode */}
         <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
           <div className="flex justify-between items-center mb-2">
             <Link 
@@ -266,7 +268,6 @@ export default function PaymentMethodForm() {
           </p>
         </div>
 
-        {/* Navigation Tabs with dark mode */}
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
             <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${
@@ -302,7 +303,6 @@ export default function PaymentMethodForm() {
           </div>
         </div>
 
-        {/* Payment Methods Section with dark mode */}
         <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${
           darkMode ? 'bg-gray-800' : 'bg-white'
         }`}>
@@ -317,7 +317,6 @@ export default function PaymentMethodForm() {
             Set up payment options for your customers
           </p>
 
-          {/* Payment Toggles */}
           <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
             <div className={`flex items-center justify-between p-3 sm:p-4 border rounded-lg ${
               darkMode ? 'border-gray-700' : 'border-gray-200'
@@ -347,7 +346,6 @@ export default function PaymentMethodForm() {
               </label>
             </div>
 
-            {/* UPI Details Section */}
             {isUPIEnabled && (
               <div className={`p-4 border rounded-lg animate-slideDown ${
                 darkMode ? 'border-gray-700 bg-gray-700' : 'border-gray-200'
@@ -413,7 +411,6 @@ export default function PaymentMethodForm() {
               </label>
             </div>
 
-            {/* Bank Details Section */}
             {isBankEnabled && (
               <div className={`p-4 border rounded-lg animate-slideDown ${
                 darkMode ? 'border-gray-700 bg-gray-700' : 'border-gray-200'
@@ -483,7 +480,6 @@ export default function PaymentMethodForm() {
             )}
           </div>
 
-          {/* Save Button */}
           <div className="flex justify-end">
             <button
               onClick={handleSavePayments}
@@ -509,7 +505,6 @@ export default function PaymentMethodForm() {
           </div>
         </div>
 
-        {/* Security Tips Section with dark mode */}
         <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${
           darkMode ? 'bg-gray-800' : 'bg-white'
         }`}>
@@ -560,7 +555,6 @@ export default function PaymentMethodForm() {
           </ul>
         </div>
 
-        {/* Active Payment Methods Section with dark mode */}
         <div className={`rounded-lg shadow p-4 sm:p-6 ${
           darkMode ? 'bg-gray-800' : 'bg-white'
         }`}>
@@ -633,7 +627,6 @@ export default function PaymentMethodForm() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'}`}>
         <div className="max-w-7xl mx-auto"> 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
