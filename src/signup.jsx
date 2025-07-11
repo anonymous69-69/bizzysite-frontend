@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { TypeAnimation } from 'react-type-animation';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, provider } from './firebase';
@@ -167,10 +168,19 @@ export default function LoginPage() {
       <div className="relative py-16 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 mb-4">BizzySite</h1>
-          <p className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">Build your online store with ease</p>
-          <p className="text-base sm:text-lg text-gray-700 max-w-3xl mx-auto mb-8">
-            Empower your small business with a beautiful ecommerce website, fast checkout, and integrated payments.
-          </p>
+          <TypeAnimation
+            sequence={[
+              "Build your online store with ease",
+              2000,
+              "Empower your small business with a beautiful ecommerce website, fast checkout, and integrated payments.",
+              4000,
+              "",
+              1000,
+            ]}
+            wrapper="p"
+            repeat={Infinity}
+            className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6"
+          />
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center items-center">
             <button 
               onClick={() => openModal(false)}
