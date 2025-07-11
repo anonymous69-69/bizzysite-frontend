@@ -19,7 +19,7 @@ export default function CustomizeStore() {
   const [showMenu, setShowMenu] = useState(false);
   
 
-  {/*useEffect(() => {
+  useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
     if (savedStoreId) {
       setStoreId(savedStoreId);
@@ -39,13 +39,13 @@ export default function CustomizeStore() {
         })
         .catch(err => console.error('Failed to fetch user info:', err));
     }
-  }, []);*/}
+  }, []);
 
-  useEffect(() => {
+  {/* useEffect(() => {
     if (activeTab === 'Customize' && storeId) {
       fetchCustomization(storeId);
     }
-  }, [activeTab, storeId]);
+  }, [activeTab, storeId]);*/}
 
   const fetchCustomization = async (storeId) => {
     const userId = localStorage.getItem('userId');
