@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, provider } from './firebase';
@@ -11,32 +11,37 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const navigate = useNavigate();
+  const containerRef = useRef(null);
 
-  // Animated background effect
+  // Enhanced animated background effect
   useEffect(() => {
     const colors = ['#bbd0ff', '#b8c0ff', '#c8b6ff'];
-    const container = document.querySelector('.background-container');
+    const container = containerRef.current;
     
     if (container) {
       // Clear any existing bubbles
       container.innerHTML = '';
       
-      // Create floating bubbles
-      for (let i = 0; i < 15; i++) {
+      // Create floating bubbles with all colors
+      for (let i = 0; i < 20; i++) {
         const bubble = document.createElement('div');
-        const size = Math.random() * 200 + 100;
-        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = Math.random() * 120 + 40; // Smaller size range
+        const color = colors[i % colors.length]; // Cycle through colors
         
-        bubble.style.position = 'absolute';
+        bubble.style.position = 'fixed';
         bubble.style.width = `${size}px`;
         bubble.style.height = `${size}px`;
         bubble.style.background = color;
         bubble.style.borderRadius = '50%';
-        bubble.style.opacity = '0.6';
-        bubble.style.filter = 'blur(40px)';
+        bubble.style.opacity = '0.4';
+        bubble.style.filter = 'blur(20px)'; // Reduced blur
         bubble.style.left = `${Math.random() * 100}%`;
         bubble.style.top = `${Math.random() * 100}%`;
-        bubble.style.animation = `float ${Math.random() * 20 + 10}s infinite alternate ease-in-out`;
+        
+        // Unique animation for each bubble
+        const duration = Math.random() * 30 + 20;
+        const delay = Math.random() * 5;
+        bubble.style.animation = `float ${duration}s ${delay}s infinite linear`;
         
         container.appendChild(bubble);
       }
@@ -139,14 +144,31 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated background */}
-      <div className="background-container fixed inset-0 -z-10"></div>
+      <div ref={containerRef} className="fixed inset-0 -z-10"></div>
       
       {/* Global styles for the animated background */}
       <style>{`
         @keyframes float {
-          0% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(${Math.random() * 50 - 25}px, ${Math.random() * 50 - 25}px) rotate(${Math.random() * 10 - 5}deg); }
-          100% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 20 - 10}deg); }
+          0% {
+            transform: translate(0, 0) rotate(0deg);
+            opacity: 0.4;
+          }
+          25% {
+            transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(90deg);
+            opacity: 0.5;
+          }
+          50% {
+            transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(180deg);
+            opacity: 0.6;
+          }
+          75% {
+            transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(270deg);
+            opacity: 0.5;
+          }
+          100% {
+            transform: translate(0, 0) rotate(360deg);
+            opacity: 0.4;
+          }
         }
       `}</style>
       
