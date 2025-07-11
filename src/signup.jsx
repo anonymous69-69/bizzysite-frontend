@@ -12,30 +12,27 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setIsLoading(true);
     const payload = {
       email,
       password,
       ...(isLogin ? {} : { name }),
     };
-  
     try {
       const response = await fetch(`https://bizzysite.onrender.com/api/${isLogin ? 'login' : 'signup'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-  
       const data = await response.json();
-  
       if (!response.ok) {
         throw new Error(data.message || 'Something went wrong');
       }
-  
       // Save user data to localStorage
       localStorage.setItem('userId', data.userId);
       localStorage.setItem('token', data.userId || '');
@@ -43,9 +40,6 @@ export default function LoginPage() {
       localStorage.setItem('userName', data.name || '');
       localStorage.setItem('userPhone', data.phone || '');
       localStorage.setItem('userRole', 'vendor');
-      
-      toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
-  
       if (!isLogin) {
         try {
           const businessRes = await fetch('https://bizzysite.onrender.com/api/business', {
@@ -65,33 +59,31 @@ export default function LoginPage() {
               }
             })
           });
-  
           const businessData = await businessRes.json();
-          
           if (!businessRes.ok) {
             throw new Error(businessData.message || "Failed to create store");
           }
-  
           const storeId = businessData.storeId;
           if (storeId) {
             localStorage.setItem('storeId', storeId);
           } else {
             throw new Error("Store ID not received from server");
           }
-  
           await fetch('https://bizzysite.onrender.com/api/send-welcome-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, name }),
           });
-          
         } catch (error) {
           console.error("Store creation error:", error);
           toast.error("Failed to initialize your store. Please try again.");
+          setIsLoading(false);
           return;
         }
       }
-  
+      // Only show success toast after everything succeeds
+      toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
+      setIsLoading(false);
       setShowModal(false);
       setTimeout(() => {
         navigate('/storefront');
@@ -99,6 +91,7 @@ export default function LoginPage() {
     } catch (error) {
       console.error(error);
       toast.error(error.message || 'Operation failed');
+      setIsLoading(false);
     }
   };
 
@@ -111,7 +104,7 @@ export default function LoginPage() {
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated background using Framer Motion */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {Array.from({ length: 10 }).map((_, i) => {
+        {Array.from({ length: 3 }).map((_, i) => {
           const size = Math.floor(Math.random() * 60) + 60;
           const left = Math.random() * 100;
           const top = Math.random() * 100;
@@ -293,6 +286,13 @@ export default function LoginPage() {
             initial={{ y: "100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 100 }}
+            onDragEnd={(event, info) => {
+              if (info.offset.y > 100) {
+                setShowModal(false);
+              }
+            }}
             className="bg-white/40 backdrop-blur-md rounded-t-2xl shadow-xl max-w-lg w-full mx-auto border border-white/20 sm:rounded-lg sm:max-w-md"
             style={{
               boxShadow: "0 0 12px rgba(122, 111, 240, 0.4)",
@@ -383,8 +383,16 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     className="w-full px-4 py-2 bg-[#7a6ff0] text-white font-medium rounded-md hover:bg-[#5a50d0] focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0] transition-colors shadow-md"
+                    disabled={isLoading}
                   >
-                    {isLogin ? 'Sign in' : 'Create account'}
+                    {isLoading ? (
+                      <span>
+                        {isLogin ? 'Signing in' : 'Creating account'}
+                        <span className="inline-block animate-pulse">...</span>
+                      </span>
+                    ) : (
+                      isLogin ? 'Sign in' : 'Create account'
+                    )}
                   </button>
                 </div>
 
@@ -407,13 +415,33 @@ export default function LoginPage() {
                         try {
                           const result = await signInWithPopup(auth, provider);
                           const user = result.user;
-                          localStorage.setItem('userId', user.uid);
-                          toast.success('Signed in with Google');
+
+                          const res = await fetch('https://bizzysite.onrender.com/api/google-login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              uid: user.uid,
+                              name: user.displayName,
+                              email: user.email
+                            }),
+                          });
+
+                          const data = await res.json();
+                          if (!res.ok) throw new Error(data.message || "Google login failed");
+
+                          localStorage.setItem('userId', data.userId);
+                          localStorage.setItem('token', data.userId || '');
+                          localStorage.setItem('userEmail', data.email || '');
+                          localStorage.setItem('userName', data.name || '');
+                          localStorage.setItem('userPhone', data.phone || '');
+                          localStorage.setItem('userRole', 'vendor');
+
+                          toast.success(data.message || 'Signed in with Google');
                           setShowModal(false);
                           navigate('/storefront');
                         } catch (error) {
                           console.error(error);
-                          toast.error('Google sign-in failed');
+                          toast.error(error.message || 'Google sign-in failed');
                         }
                       }}
                       className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md bg-white/70 hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0]"
@@ -444,7 +472,7 @@ export default function LoginPage() {
       )}
       {/* Background Animated Bubbles */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {Array.from({ length: 10 }).map((_, i) => {
+        {Array.from({ length: 3 }).map((_, i) => {
           const size = Math.floor(Math.random() * 60) + 60;
           const left = Math.random() * 90;
           const top = Math.random() * 80;
