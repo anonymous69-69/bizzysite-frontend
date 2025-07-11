@@ -5,6 +5,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useTheme } from './ThemeContext';
+import ReactCrop from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+import Modal from 'react-modal';
 
 export default function ProductCatalog() {
   const API_BASE_URL = 'https://bizzysite.onrender.com/api';
@@ -31,6 +34,13 @@ export default function ProductCatalog() {
   const [isUploading, setIsUploading] = useState(false);
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
+  
+  // Image cropping states
+  const [imageCropModalOpen, setImageCropModalOpen] = useState(false);
+  const [crop, setCrop] = useState({ unit: '%', width: 30, aspect: 1 });
+  const [originalImage, setOriginalImage] = useState(null);
+  const [imageToCrop, setImageToCrop] = useState(null);
+  const [currentFile, setCurrentFile] = useState(null);
 
   const currencies = [
     { symbol: '$', name: 'USD' },
@@ -142,59 +152,100 @@ export default function ProductCatalog() {
     }));
   };
 
+  // Helper function to get cropped image blob
+  const getCroppedImg = (image, crop) => {
+    const canvas = document.createElement('canvas');
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+    canvas.width = crop.width;
+    canvas.height = crop.height;
+    const ctx = canvas.getContext('2d');
+
+    ctx.drawImage(
+      image,
+      crop.x * scaleX,
+      crop.y * scaleY,
+      crop.width * scaleX,
+      crop.height * scaleY,
+      0,
+      0,
+      crop.width,
+      crop.height
+    );
+
+    return new Promise((resolve) => {
+      canvas.toBlob(blob => {
+        resolve(blob);
+      }, 'image/jpeg', 0.9);
+    });
+  };
+
+  // Helper function to upload cropped image
+  const uploadCroppedImageToCloudinary = async (blob) => {
+    const cloudName = "dkbhczdas";
+    const uploadPreset = "bizzysite";
+    
+    const formData = new FormData();
+    formData.append("file", blob);
+    formData.append("upload_preset", uploadPreset);
+
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || "Upload failed");
+    return data.secure_url;
+  };
+
+  // Handle image cropped and ready for upload
+  const handleImageCropped = async () => {
+    if (!imageToCrop) return;
+
+    try {
+      const croppedImageBlob = await getCroppedImg(imageToCrop, crop);
+      
+      // Upload cropped image to Cloudinary
+      const cloudUrl = await uploadCroppedImageToCloudinary(croppedImageBlob);
+      
+      setCurrentProduct(prev => ({
+        ...prev,
+        images: [...prev.images, cloudUrl]
+      }));
+      
+      setImagePreviews(prev => [...prev, cloudUrl]);
+      toast.success("Image cropped and uploaded successfully!");
+      
+    } catch (err) {
+      console.error('Image cropping error:', err);
+      toast.error('Failed to crop and upload image');
+    } finally {
+      setImageCropModalOpen(false);
+      setOriginalImage(null);
+      setImageToCrop(null);
+      setCurrentFile(null);
+    }
+  };
+
+  // Handle image upload - triggers crop modal
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
     setImageUploadError('');
-    setIsUploading(true);
-
-    try {
-      const maxImages = 5;
-      const availableSlots = maxImages - currentProduct.images.length;
-      const filesToUpload = files.slice(0, availableSlots);
-
-      if (files.length > availableSlots) {
-        toast.warn(`Only ${availableSlots} images can be added`);
-      }
-
-      const cloudName = "dkbhczdas";
-      const uploadPreset = "bizzysite";
-
-      const uploadToCloudinary = async (file) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", uploadPreset);
-
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error?.message || "Upload failed");
-        return data.secure_url;
-      };
-
-      const cloudUrls = [];
-      for (const file of filesToUpload) {
-        const url = await uploadToCloudinary(file);
-        cloudUrls.push(url);
-      }
-
-      setCurrentProduct(prev => ({
-        ...prev,
-        images: [...prev.images, ...cloudUrls]
-      }));
-      setImagePreviews(prev => [...prev, ...cloudUrls]);
-      toast.success("Images uploaded successfully!");
-    } catch (err) {
-      console.error('Image upload error:', err);
-      setImageUploadError('Failed to add images');
-      toast.error('Image upload failed');
-    } finally {
-      setIsUploading(false);
-    }
+    
+    // Only process the first file for cropping
+    const file = files[0];
+    setCurrentFile(file);
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      setOriginalImage(event.target.result);
+      setImageCropModalOpen(true);
+    };
+    
+    reader.readAsDataURL(file);
   };
 
   const handleRemoveImage = (index) => {
@@ -608,7 +659,6 @@ export default function ProductCatalog() {
                   <input
                     type="file"
                     accept="image/*"
-                    multiple
                     onChange={handleImageUpload}
                     className={`block w-full text-sm ${
                       darkMode ? 'text-gray-300' : 'text-gray-700'
@@ -709,6 +759,60 @@ export default function ProductCatalog() {
               </form>
             </div>
           </div>
+        )}
+
+        {/* Image Cropping Modal */}
+        {imageCropModalOpen && (
+          <Modal
+            isOpen={imageCropModalOpen}
+            onRequestClose={() => setImageCropModalOpen(false)}
+            className={`fixed inset-0 flex items-center justify-center p-4 ${
+              darkMode ? 'bg-gray-900 bg-opacity-75' : 'bg-white bg-opacity-90'
+            }`}
+            overlayClassName="fixed inset-0"
+            ariaHideApp={false}
+          >
+            <div className={`rounded-lg shadow-xl p-6 w-full max-w-2xl ${
+              darkMode ? 'bg-gray-800' : 'bg-white'
+            }`}>
+              <h2 className={`text-xl font-bold mb-4 ${
+                darkMode ? 'text-white' : 'text-gray-800'
+              }`}>
+                Crop Image
+              </h2>
+              
+              {originalImage && (
+                <ReactCrop
+                  crop={crop}
+                  onChange={newCrop => setCrop(newCrop)}
+                  onImageLoaded={setImageToCrop}
+                  src={originalImage}
+                  ruleOfThirds
+                  className="max-h-[60vh]"
+                />
+              )}
+              
+              <div className="mt-4 flex justify-end space-x-3">
+                <button
+                  onClick={() => setImageCropModalOpen(false)}
+                  className={`px-4 py-2 rounded ${
+                    darkMode 
+                      ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
+                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleImageCropped}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                  disabled={!imageToCrop}
+                >
+                  Apply Crop
+                </button>
+              </div>
+            </div>
+          </Modal>
         )}
 
       </div>
