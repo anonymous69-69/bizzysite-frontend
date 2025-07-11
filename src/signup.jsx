@@ -435,13 +435,24 @@ export default function LoginPage() {
                           const result = await signInWithPopup(auth, provider);
                           const user = result.user;
 
+                          // Validate and log user info before sending to API
+                          const uid = String(user.uid || '').trim();
+                          const name = String(user.displayName || '').trim();
+                          const emailAddr = String(user.email || '').trim();
+
+                          console.log("Google user info:", { uid, name, email: emailAddr });
+
+                          if (!uid || !emailAddr) {
+                            throw new Error("Invalid Google user data. Please try again.");
+                          }
+
                           const res = await fetch('https://bizzysite.shop/api/google-login', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                              uid: user.uid,
-                              name: user.displayName,
-                              email: user.email
+                              uid,
+                              name,
+                              email: emailAddr
                             }),
                           });
 
