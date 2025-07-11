@@ -24,29 +24,48 @@ export default function LoginPage() {
       ...(isLogin ? {} : { name }),
     };
     try {
-      const response = await fetch(`https://bizzysite.shop/api/${isLogin ? 'login' : 'signup'}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
+      // Defensive fetch for login/signup
+      let url = `https://bizzysite.shop/api/${isLogin ? 'login' : 'signup'}`;
+      let response;
+      try {
+        response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } catch (fetchErr) {
+        console.error("Fetch error (login/signup):", fetchErr, url);
+        throw new Error('Failed to connect to server.');
+      }
       if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong');
+        const errMsg = await response.text();
+        throw new Error(errMsg || 'Something went wrong');
+      }
+      const data = await response.json();
+      // Validate and store userId as string
+      const userId = String(data.userId || '').trim();
+      if (!userId) {
+        console.error("Invalid or missing userId in response", data);
+        throw new Error('Invalid user ID received from server.');
       }
       // Save user data to localStorage
-      localStorage.setItem('userId', data.userId);
-      localStorage.setItem('token', data.userId || '');
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('token', userId);
       localStorage.setItem('userEmail', data.email || '');
       localStorage.setItem('userName', data.name || '');
       localStorage.setItem('userPhone', data.phone || '');
       localStorage.setItem('userRole', 'vendor');
       if (!isLogin) {
+        // Ensure userId is present and valid for store creation
+        if (!userId) {
+          throw new Error("Missing user ID for store creation.");
+        }
         try {
           const businessRes = await fetch('https://bizzysite.shop/api/business', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${data.userId}`
+              'Authorization': `Bearer ${userId}`
             },
             body: JSON.stringify({
               type: 'business',
