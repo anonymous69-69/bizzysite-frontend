@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { useTheme } from './ThemeContext';
 
-
-
 export default function CustomizeStore() {
   const [activeTab, setActiveTab] = useState('Customize');
   const { darkMode } = useTheme();
@@ -17,56 +15,57 @@ export default function CustomizeStore() {
   const [storeId, setStoreId] = useState('');
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
+    const userId = localStorage.getItem('userId');
+    
+    if (!userId) {
+      navigate('/login');
+      return;
+    }
+
     if (savedStoreId) {
       setStoreId(savedStoreId);
+      fetchCustomization(savedStoreId);
     }
-    
-    // Fetch user name
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      fetch(`https://bizzysite.onrender.com/api/user`, {
-        headers: {
-          Authorization: `Bearer ${userId}`
-        }
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data?.name) setUserName(data.name);
-        })
-        .catch(err => console.error('Failed to fetch user info:', err));
-    }
-  }, []);
 
-  {/* useEffect(() => {
-    if (activeTab === 'Customize' && storeId) {
-      fetchCustomization(storeId);
-    }
-  }, [activeTab, storeId]);*/}
+    fetch(`https://bizzysite.onrender.com/api/user`, {
+      headers: {
+        Authorization: `Bearer ${userId}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.name) setUserName(data.name);
+      })
+      .catch(err => console.error('Failed to fetch user info:', err))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const fetchCustomization = async (storeId) => {
     const userId = localStorage.getItem('userId');
     if (!userId || !storeId) return;
 
     try {
-      const response = await fetch(`https://bizzysite.onrender.com/api/store`, {
+      const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${userId}`,
           'x-store-id': storeId
         }
       });
+      
       if (response.ok) {
         const data = await response.json();
-        const c = data?.customize ?? {};
-        setPrimaryColor(c.primaryColor || '#3b82f6');
-        setSecondaryColor(c.secondaryColor || '#8b5cf6');
-        setFontFamily(c.fontFamily || 'Inter');
-        setHeaderStyle(c.headerStyle || 'Modern');
-        setProductLayout(c.productLayout || 'Grid');
+        const customization = data?.customize || {};
+        
+        setPrimaryColor(customization.primaryColor || '#3b82f6');
+        setSecondaryColor(customization.secondaryColor || '#8b5cf6');
+        setFontFamily(customization.fontFamily || 'Inter');
+        setHeaderStyle(customization.headerStyle || 'Modern');
+        setProductLayout(customization.productLayout || 'Grid');
       }
     } catch (err) {
       console.error("Failed to fetch customization:", err);
@@ -164,8 +163,8 @@ export default function CustomizeStore() {
     };
 
     try {
-      const response = await fetch(`https://bizzysite.onrender.com/api/business?storeId=${storeId}`, {
-        method: 'PUT',
+      const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${userId}`,
@@ -187,11 +186,26 @@ export default function CustomizeStore() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
+        <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow space-y-6 animate-pulse">
+          <div className={`h-6 rounded w-1/3 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+          <div className={`h-4 rounded w-1/2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+          <div className={`p-4 sm:p-6 rounded-lg shadow space-y-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className={`h-5 rounded w-1/4 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+            <div className={`h-4 rounded w-3/4 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+            <div className={`h-4 rounded w-full ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
       <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        {/* Header with dark mode */}
         <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
           <div className="flex justify-between items-center mb-2">
             <Link 
@@ -251,7 +265,6 @@ export default function CustomizeStore() {
           </p>
         </div>
 
-        {/* Navigation tabs with dark mode */}
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
             <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${
@@ -289,7 +302,6 @@ export default function CustomizeStore() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           <div className="lg:col-span-2">
-            {/* Color Scheme Section with dark mode */}
             <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 ${
               darkMode ? 'bg-gray-800' : 'bg-white'
             }`}>
@@ -411,7 +423,6 @@ export default function CustomizeStore() {
               </div>
             </div>
 
-            {/* Typography & Layout Section with dark mode */}
             <div className={`rounded-lg shadow p-4 sm:p-6 ${
               darkMode ? 'bg-gray-800' : 'bg-white'
             }`}>
@@ -500,7 +511,6 @@ export default function CustomizeStore() {
             </div>
           </div>
 
-          {/* Live Preview Section with dark mode */}
           <div className={`rounded-lg shadow p-4 sm:p-6 lg:sticky lg:top-6 ${
             darkMode ? 'bg-gray-800' : 'bg-white'
           }`}>
