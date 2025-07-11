@@ -137,7 +137,7 @@ export default function LoginPage() {
                 background: ["#bbd0ff", "#b8c0ff", "#c8b6ff"][i % 3],
                 borderRadius: "9999px",
                 opacity: 0.4,
-                filter: "blur(20px)"
+                filter: "blur(12px)"
               }}
             />
           );
@@ -280,7 +280,7 @@ export default function LoginPage() {
           onClick={() => setShowModal(false)}
         >
           <div 
-            className="bg-white/80 backdrop-blur-lg rounded-lg shadow-xl max-w-md w-full border border-white/30"
+            className="bg-white/40 backdrop-blur-md rounded-lg shadow-xl max-w-md w-full border border-white/20"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 py-4">
