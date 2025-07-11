@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useTheme } from './ThemeContext';
 import ReactCrop from 'react-image-crop';
-import 'react-image-crop/dist/ReactCrop.css';
 import Modal from 'react-modal';
+import 'react-image-crop/dist/ReactCrop.css'; // Corrected CSS import path
 
 export default function ProductCatalog() {
   const API_BASE_URL = 'https://bizzysite.onrender.com/api';
