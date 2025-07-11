@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { useTheme } from './ThemeContext';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function CustomizeStore() {
   const [activeTab, setActiveTab] = useState('Customize');
@@ -16,6 +17,7 @@ export default function CustomizeStore() {
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
@@ -42,7 +44,7 @@ export default function CustomizeStore() {
       })
       .catch(err => console.error('Failed to fetch user info:', err))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [navigate]);
 
   const fetchCustomization = async (storeId) => {
     const userId = localStorage.getItem('userId');
