@@ -114,7 +114,8 @@ export default function LoginPage() {
           const size = Math.floor(Math.random() * 60) + 60;
           const left = Math.random() * 100;
           const top = Math.random() * 100;
-          const duration = Math.random() * 20 + 15;
+          // Lower duration range to 6-12s for faster bubbles
+          const duration = Math.random() * 6 + 6;
           const delay = Math.random() * 5;
 
           return (
@@ -279,8 +280,15 @@ export default function LoginPage() {
           className="fixed inset-0 bg-gray-500/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
           onClick={() => setShowModal(false)}
         >
-          <div 
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="bg-white/40 backdrop-blur-md rounded-lg shadow-xl max-w-md w-full border border-white/20"
+            style={{
+              boxShadow: "0 0 20px rgba(122, 111, 240, 0.6)",
+              border: "1px solid rgba(255, 255, 255, 0.2)"
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 py-4">
