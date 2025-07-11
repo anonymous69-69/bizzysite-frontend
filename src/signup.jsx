@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, provider } from './firebase';
 import { signInWithPopup } from 'firebase/auth';
+import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   const [showModal, setShowModal] = useState(false);
@@ -11,44 +12,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const navigate = useNavigate();
-  const containerRef = useRef(null);
-
-  // Enhanced animated background effect
-  useEffect(() => {
-    const colors = ['#bbd0ff', '#b8c0ff', '#c8b6ff'];
-    const container = containerRef.current;
-    
-    if (container) {
-      // Clear any existing bubbles
-      container.innerHTML = '';
-      
-      // Create floating bubbles with all colors
-      for (let i = 0; i < 20; i++) {
-        const bubble = document.createElement('div');
-        const size = Math.random() * 120 + 40; // Smaller size range
-        const color = colors[i % colors.length]; // Cycle through colors
-        
-        bubble.style.position = 'fixed';
-        bubble.style.width = `${size}px`;
-        bubble.style.height = `${size}px`;
-        bubble.style.background = color;
-        bubble.style.borderRadius = '50%';
-        bubble.style.opacity = '0.4';
-        bubble.style.filter = 'blur(20px)'; // Reduced blur
-        bubble.style.left = `${Math.random() * 100}%`;
-        bubble.style.top = `${Math.random() * 100}%`;
-        
-        // Unique animation for each bubble
-        const duration = Math.random() * 30 + 20;
-        const delay = Math.random() * 5;
-        bubble.style.animation = `float ${duration}s ${delay}s infinite ease-in-out`;
-        bubble.style.willChange = 'transform';
-        bubble.style.transform = 'translateY(0)';
-        
-        container.appendChild(bubble);
-      }
-    }
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -145,18 +108,41 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Animated background */}
-      <div ref={containerRef} className="fixed inset-0 -z-10"></div>
-      
-      {/* Global styles for the animated background */}
-      <style>{`
-        @keyframes float {
-          0%   { transform: translateY(0) rotate(0deg); opacity: 0.4; }
-          50%  { transform: translateY(-30px) rotate(180deg); opacity: 0.6; }
-          100% { transform: translateY(0) rotate(360deg); opacity: 0.4; }
-        }
-      `}</style>
-      
+      {/* Animated background using Framer Motion */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        {Array.from({ length: 20 }).map((_, i) => {
+          const size = Math.floor(Math.random() * 60) + 60;
+          const left = Math.random() * 100;
+          const top = Math.random() * 100;
+          const duration = Math.random() * 20 + 15;
+          const delay = Math.random() * 5;
+
+          return (
+            <motion.div
+              key={i}
+              initial={{ y: 0, rotate: 0 }}
+              animate={{ y: [0, -20, 0], rotate: [0, 180, 360] }}
+              transition={{
+                duration,
+                delay,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              style={{
+                position: "absolute",
+                top: `${top}%`,
+                left: `${left}%`,
+                width: `${size}px`,
+                height: `${size}px`,
+                background: ["#bbd0ff", "#b8c0ff", "#c8b6ff"][i % 3],
+                borderRadius: "9999px",
+                opacity: 0.4,
+                filter: "blur(20px)"
+              }}
+            />
+          );
+        })}
+      </div>
       <Toaster position="top-right" />
       <header className="bg-white/70 backdrop-blur-md shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
