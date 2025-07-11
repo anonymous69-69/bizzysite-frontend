@@ -109,24 +109,23 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated background using Framer Motion */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         {Array.from({ length: 20 }).map((_, i) => {
           const size = Math.floor(Math.random() * 60) + 60;
           const left = Math.random() * 100;
           const top = Math.random() * 100;
-          // Lower duration range to 6-12s for faster bubbles
-          const duration = Math.random() * 6 + 6;
           const delay = Math.random() * 5;
 
           return (
             <motion.div
               key={i}
-              initial={{ y: 0, rotate: 0 }}
-              animate={{ y: [0, -20, 0], rotate: [0, 180, 360] }}
+              initial={{ y: 0, opacity: 0.4 }}
+              animate={{ y: [-20, 20, -20] }}
               transition={{
-                duration,
+                duration: 5,
                 delay,
                 repeat: Infinity,
+                repeatType: "loop",
                 ease: "easeInOut"
               }}
               style={{
@@ -135,10 +134,10 @@ export default function LoginPage() {
                 left: `${left}%`,
                 width: `${size}px`,
                 height: `${size}px`,
-                background: ["#bbd0ff", "#b8c0ff", "#c8b6ff"][i % 3],
+                backgroundColor: ["#bbd0ff", "#b8c0ff", "#c8b6ff"][i % 3],
                 borderRadius: "9999px",
-                opacity: 0.4,
-                filter: "blur(12px)"
+                filter: "blur(10px)",
+                opacity: 0.5
               }}
             />
           );
@@ -148,16 +147,16 @@ export default function LoginPage() {
       <header className="bg-white/70 backdrop-blur-md shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">BizzySite</h1>
-          <div className="flex space-x-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-center">
             <button 
               onClick={() => openModal(true)}
-              className="px-4 py-2 text-gray-700 font-medium hover:text-[#7a6ff0] transition-colors"
+              className="px-4 py-2 text-gray-700 font-medium hover:text-[#7a6ff0] transition-colors w-full sm:w-auto"
             >
               Login
             </button>
             <button 
               onClick={() => openModal(false)}
-              className="px-4 py-2 bg-white/70 backdrop-blur-md border border-white/30 text-[#7a6ff0] font-medium rounded-md hover:bg-white/80 transition-all shadow-sm"
+              className="px-4 py-2 bg-white/70 backdrop-blur-md border border-white/30 text-[#7a6ff0] font-medium rounded-md hover:bg-white/80 transition-all shadow-sm w-full sm:w-auto"
             >
               Sign Up
             </button>
@@ -167,21 +166,21 @@ export default function LoginPage() {
 
       <div className="relative py-16 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl font-extrabold text-gray-900 mb-4">BizzySite</h1>
-          <p className="text-2xl font-semibold text-gray-800 mb-6">Build your online store with ease</p>
-          <p className="text-lg text-gray-700 max-w-3xl mx-auto mb-8">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 mb-4">BizzySite</h1>
+          <p className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">Build your online store with ease</p>
+          <p className="text-base sm:text-lg text-gray-700 max-w-3xl mx-auto mb-8">
             Empower your small business with a beautiful ecommerce website, fast checkout, and integrated payments.
           </p>
-          <div className="flex justify-center space-x-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center items-center">
             <button 
               onClick={() => openModal(false)}
-              className="px-6 py-3 bg-white/70 backdrop-blur-md border border-white/30 text-[#7a6ff0] font-medium rounded-md hover:bg-white/80 transition-all shadow-lg"
+              className="px-6 py-3 bg-white/70 backdrop-blur-md border border-white/30 text-[#7a6ff0] font-medium rounded-md hover:bg-white/80 transition-all shadow-lg w-full sm:w-auto"
             >
               Sign Up
             </button>
             <button 
               onClick={() => openModal(true)}
-              className="px-6 py-3 bg-transparent border-2 border-[#7a6ff0] text-[#7a6ff0] font-medium rounded-md hover:bg-[#7a6ff0]/10 transition-colors"
+              className="px-6 py-3 bg-transparent border-2 border-[#7a6ff0] text-[#7a6ff0] font-medium rounded-md hover:bg-[#7a6ff0]/10 transition-colors w-full sm:w-auto"
             >
               Login
             </button>
@@ -191,8 +190,8 @@ export default function LoginPage() {
 
       <div className="relative py-16 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Features</h2>
-          <p className="text-lg text-gray-700 mb-8">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-4">Features</h2>
+          <p className="text-base sm:text-lg text-gray-700 mb-8">
             Everything you need to get started is built in – no coding required.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
@@ -201,25 +200,25 @@ export default function LoginPage() {
               { icon: "👥", title: "Customer Management", desc: "Track orders and manage customer relationships easily" },
               { icon: "🎨", title: "Easy Customization", desc: "Customize colors, fonts, and layout without any coding" }
             ].map((feature, idx) => (
-              <div key={idx} className="bg-white/70 backdrop-blur-md p-6 rounded-lg shadow-sm border border-white/30">
+              <div key={idx} className="bg-white/70 backdrop-blur-md p-6 rounded-lg shadow-sm border border-white/30 text-center">
                 <div className="text-[#7a6ff0] text-3xl mb-4">{feature.icon}</div>
-                <h4 className="text-xl font-semibold mb-2 text-gray-800">{feature.title}</h4>
-                <p className="text-gray-700">
+                <h4 className="text-lg sm:text-xl font-semibold mb-2 text-gray-800">{feature.title}</h4>
+                <p className="text-gray-700 text-base sm:text-lg">
                   {feature.desc}
                 </p>
               </div>
             ))}
           </div>
 
-          <div className="bg-white/70 backdrop-blur-md p-8 rounded-lg shadow-sm border border-white/30 max-w-4xl mx-auto">
-            <h3 className="text-xl font-semibold text-center mb-6 text-gray-800">
+          <div className="bg-white/70 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-sm border border-white/30 max-w-4xl mx-auto">
+            <h3 className="text-lg sm:text-xl font-semibold text-center mb-6 text-gray-800">
               Why Small Businesses Choose BizzySite
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               {["All-in-one ecommerce platform", "No hidden fees or locked-in contracts", "24/7 customer support", "Free SSL and hosting"].map((feature, idx) => (
-                <div key={idx} className="flex items-center mb-4">
-                  <div className="text-[#7a6ff0] text-3xl mr-3">✓</div>
-                  <p className="ml-2 text-gray-700">{feature}</p>
+                <div key={idx} className="flex items-center justify-center mb-4">
+                  <div className="text-[#7a6ff0] text-2xl sm:text-3xl mr-3">✓</div>
+                  <p className="ml-2 text-gray-700 text-base sm:text-lg">{feature}</p>
                 </div>
               ))}
             </div>
@@ -284,15 +283,15 @@ export default function LoginPage() {
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="bg-white/40 backdrop-blur-md rounded-lg shadow-xl max-w-md w-full border border-white/20"
+            className="bg-white/40 backdrop-blur-md rounded-lg shadow-xl max-w-sm sm:max-w-md w-full border border-white/20"
             style={{
               boxShadow: "0 0 20px rgba(122, 111, 240, 0.6)",
               border: "1px solid rgba(255, 255, 255, 0.2)"
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-6 py-4">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">{isLogin ? 'Login' : 'Create Account'}</h2>
+            <div className="px-4 sm:px-6 py-4 sm:py-6">
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">{isLogin ? 'Login' : 'Create Account'}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
                   <div>
@@ -430,6 +429,41 @@ export default function LoginPage() {
           </motion.div>
         </div>
       )}
+      {/* Background Animated Bubbles */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        {Array.from({ length: 20 }).map((_, i) => {
+          const size = Math.floor(Math.random() * 60) + 60;
+          const left = Math.random() * 90;
+          const top = Math.random() * 80;
+          const delay = Math.random() * 3;
+
+          return (
+            <motion.div
+              key={i}
+              initial={{ y: 0, opacity: 0.4 }}
+              animate={{ y: [-40, 40, -40] }}
+              transition={{
+                duration: 1,
+                delay,
+                repeat: Infinity,
+                repeatType: "loop",
+                ease: "easeInOut"
+              }}
+              style={{
+                position: "absolute",
+                top: `${top}%`,
+                left: `${left}%`,
+                width: `${size}px`,
+                height: `${size}px`,
+                backgroundColor: ["#bbd0ff", "#b8c0ff", "#c8b6ff"][i % 3],
+                borderRadius: "9999px",
+                filter: "blur(10px)",
+                opacity: 0.4
+              }}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
