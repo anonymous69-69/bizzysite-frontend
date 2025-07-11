@@ -443,7 +443,7 @@ export default function LoginPage() {
               initial={{ y: 0, opacity: 0.4 }}
               animate={{ y: [-40, 40, -40] }}
               transition={{
-                duration: 1,
+                duration: 3,
                 delay,
                 repeat: Infinity,
                 repeatType: "loop",
