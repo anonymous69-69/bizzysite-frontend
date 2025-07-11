@@ -37,11 +37,20 @@ export default function LoginPage() {
         console.error("Fetch error (login/signup):", fetchErr, url);
         throw new Error('Failed to connect to server.');
       }
-      if (!response.ok) {
-        const errMsg = await response.text();
-        throw new Error(errMsg || 'Something went wrong');
+      // Defensive: check content-type before .json()
+      const contentType = response.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const raw = await response.text();
+        console.error("Non-JSON response from server:", raw);
+        throw new Error("Unexpected server response. Please try again.");
       }
-      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message || 'Something went wrong');
+      }
       // Validate and store userId as string
       const userId = String(data.userId || '').trim();
       if (!userId) {
@@ -435,24 +444,13 @@ export default function LoginPage() {
                           const result = await signInWithPopup(auth, provider);
                           const user = result.user;
 
-                          // Validate and log user info before sending to API
-                          const uid = String(user.uid || '').trim();
-                          const name = String(user.displayName || '').trim();
-                          const emailAddr = String(user.email || '').trim();
-
-                          console.log("Google user info:", { uid, name, email: emailAddr });
-
-                          if (!uid || !emailAddr) {
-                            throw new Error("Invalid Google user data. Please try again.");
-                          }
-
                           const res = await fetch('https://bizzysite.shop/api/google-login', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                              uid,
-                              name,
-                              email: emailAddr
+                              uid: user.uid,
+                              name: user.displayName,
+                              email: user.email
                             }),
                           });
 
