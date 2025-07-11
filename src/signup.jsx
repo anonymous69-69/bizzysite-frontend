@@ -41,7 +41,9 @@ export default function LoginPage() {
         // Unique animation for each bubble
         const duration = Math.random() * 30 + 20;
         const delay = Math.random() * 5;
-        bubble.style.animation = `float ${duration}s ${delay}s infinite linear`;
+        bubble.style.animation = `float ${duration}s ${delay}s infinite ease-in-out`;
+        bubble.style.willChange = 'transform';
+        bubble.style.transform = 'translateY(0)';
         
         container.appendChild(bubble);
       }
@@ -149,26 +151,9 @@ export default function LoginPage() {
       {/* Global styles for the animated background */}
       <style>{`
         @keyframes float {
-          0% {
-            transform: translate(0, 0) rotate(0deg);
-            opacity: 0.4;
-          }
-          25% {
-            transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(90deg);
-            opacity: 0.5;
-          }
-          50% {
-            transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(180deg);
-            opacity: 0.6;
-          }
-          75% {
-            transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(270deg);
-            opacity: 0.5;
-          }
-          100% {
-            transform: translate(0, 0) rotate(360deg);
-            opacity: 0.4;
-          }
+          0%   { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+          50%  { transform: translateY(-30px) rotate(180deg); opacity: 0.6; }
+          100% { transform: translateY(0) rotate(360deg); opacity: 0.4; }
         }
       `}</style>
       
