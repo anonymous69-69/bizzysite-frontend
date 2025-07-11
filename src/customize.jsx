@@ -18,35 +18,34 @@ export default function CustomizeStore() {
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
   
-  
+
+  {/*useEffect(() => {
+    const savedStoreId = localStorage.getItem('storeId');
+    if (savedStoreId) {
+      setStoreId(savedStoreId);
+    }
+    
+    // Fetch user name
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      fetch(`https://bizzysite.onrender.com/api/user`, {
+        headers: {
+          Authorization: `Bearer ${userId}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data?.name) setUserName(data.name);
+        })
+        .catch(err => console.error('Failed to fetch user info:', err));
+    }
+  }, []);*/}
 
   useEffect(() => {
-    const fetchCustomization = async () => {
-      try {
-        const userId = localStorage.getItem('userId');
-        const storeId = localStorage.getItem('storeId');
-  
-        if (!userId || !storeId) return;
-  
-        const response = await fetch('https://bizzysite.onrender.com/api/business', {
-          headers: {
-            Authorization: `Bearer ${userId}`,
-            'x-store-id': storeId
-          }
-        });
-  
-        if (!response.ok) throw new Error('Failed to fetch customization');
-  
-        const data = await response.json();
-        setCustomizeSettings(data.customize || {});
-      } catch (err) {
-        console.error(err);
-        toast.error('Could not load customization settings');
-      }
-    };
-  
-    fetchCustomization();
-  }, []);
+    if (activeTab === 'Customize' && storeId) {
+      fetchCustomization(storeId);
+    }
+  }, [activeTab, storeId]);
 
   const fetchCustomization = async (storeId) => {
     const userId = localStorage.getItem('userId');
