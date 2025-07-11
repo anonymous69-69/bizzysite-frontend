@@ -25,36 +25,64 @@ export default function PaymentMethodForm() {
   const [userName, setUserName] = useState('User');
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchPaymentSettings = async () => {
       try {
         const res = await fetch(`${BASE_URL}/api/business`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
         });
         const data = await res.json();
-        if (data?.payments) {
-          setUpiEnabled(data.payments.upiEnabled || false);
-          setBankEnabled(data.payments.bankEnabled || false);
-          setUpiId(data.payments.upiId || '');
-          setAccountHolderName(data.payments.accountHolderName || '');
-          setAccountNumber(data.payments.accountNumber || '');
-          setIfscCode(data.payments.ifscCode || '');
-        }
-      } catch (err) {
-        console.error('Failed to fetch payment settings', err);
+        const payments = data?.payments || {};
+
+        setUpiEnabled(payments.upiEnabled || false);
+        setBankEnabled(payments.bankEnabled || false);
+        setUpiId(payments.upiId || '');
+        setAccountHolderName(payments.accountHolderName || '');
+        setAccountNumber(payments.accountNumber || '');
+        setIfscCode(payments.ifscCode || '');
+      } catch (error) {
+        console.error('Failed to load payment settings:', error);
       }
     };
-  
-    fetchData();
+
+    fetchPaymentSettings();
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setPaymentDetails(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      upiEnabled,
+      bankEnabled,
+      upiId,
+      accountHolderName,
+      accountNumber,
+      ifscCode
+    };
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/business`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          type: 'payments',
+          data: payload
+        })
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        setSuccessMessage('Payment settings saved successfully!');
+      } else {
+        console.error(result.message || 'Error saving payment settings');
+      }
+    } catch (err) {
+      console.error('Submission error:', err);
+    }
   };
 
   const handleToggleChange = (field) => {
