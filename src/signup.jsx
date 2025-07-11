@@ -111,7 +111,7 @@ export default function LoginPage() {
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated background using Framer Motion */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {Array.from({ length: 20 }).map((_, i) => {
+        {Array.from({ length: 10 }).map((_, i) => {
           const size = Math.floor(Math.random() * 60) + 60;
           const left = Math.random() * 100;
           const top = Math.random() * 100;
@@ -137,7 +137,7 @@ export default function LoginPage() {
                 height: `${size}px`,
                 backgroundColor: ["#bbd0ff", "#b8c0ff", "#c8b6ff"][i % 3],
                 borderRadius: "9999px",
-                filter: "blur(10px)",
+                filter: "blur(6px)",
                 opacity: 0.5
               }}
             />
@@ -285,23 +285,26 @@ export default function LoginPage() {
       </footer>
 
       {showModal && (
-        <div 
-          className="fixed inset-0 bg-gray-500/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end p-0 sm:p-4 z-50"
           onClick={() => setShowModal(false)}
         >
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="bg-white/40 backdrop-blur-md rounded-lg shadow-xl max-w-sm sm:max-w-md w-full border border-white/20"
+            className="bg-white/40 backdrop-blur-md rounded-t-2xl shadow-xl max-w-lg w-full mx-auto border border-white/20 sm:rounded-lg sm:max-w-md"
             style={{
-              boxShadow: "0 0 20px rgba(122, 111, 240, 0.6)",
-              border: "1px solid rgba(255, 255, 255, 0.2)"
+              boxShadow: "0 0 12px rgba(122, 111, 240, 0.4)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              willChange: "transform"
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-4 sm:px-6 py-4 sm:py-6">
-              <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">{isLogin ? 'Login' : 'Create Account'}</h2>
+            <div className="pt-4 px-4 sm:px-6 pb-6 sm:py-6 flex flex-col">
+              {/* Drag handle bar */}
+              <div className="w-12 h-1.5 bg-gray-400 rounded-full mx-auto mb-4" />
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800 text-center">{isLogin ? 'Login' : 'Create Account'}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
                   <div>
@@ -319,7 +322,7 @@ export default function LoginPage() {
                     />
                   </div>
                 )}
-                
+
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email address
@@ -334,7 +337,7 @@ export default function LoginPage() {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                     Password
@@ -396,7 +399,7 @@ export default function LoginPage() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-6 grid grid-cols-1 gap-3">
                     <button
                       type="button"
@@ -429,8 +432,8 @@ export default function LoginPage() {
                     onClick={() => setIsLogin(!isLogin)}
                     className="text-[#7a6ff0] hover:text-[#5a50d0] text-sm font-medium transition-colors"
                   >
-                    {isLogin 
-                      ? "Don't have an account? Sign up" 
+                    {isLogin
+                      ? "Don't have an account? Sign up"
                       : "Already have an account? Sign in"}
                   </button>
                 </div>
@@ -441,7 +444,7 @@ export default function LoginPage() {
       )}
       {/* Background Animated Bubbles */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {Array.from({ length: 20 }).map((_, i) => {
+        {Array.from({ length: 10 }).map((_, i) => {
           const size = Math.floor(Math.random() * 60) + 60;
           const left = Math.random() * 90;
           const top = Math.random() * 80;
@@ -467,7 +470,7 @@ export default function LoginPage() {
                 height: `${size}px`,
                 backgroundColor: ["#bbd0ff", "#b8c0ff", "#c8b6ff"][i % 3],
                 borderRadius: "9999px",
-                filter: "blur(10px)",
+                filter: "blur(6px)",
                 opacity: 0.4
               }}
             />
