@@ -51,7 +51,7 @@ export default function ProductCatalog() {
           'x-store-id': storeId
         }
       });
-      
+
       // FIX: Corrected data path to products array
       const products = response.data?.products || [];
       setProducts(Array.isArray(products) ? products : []);
@@ -67,7 +67,7 @@ export default function ProductCatalog() {
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
     const savedUserId = localStorage.getItem('userId');
-    
+
     if (savedUserId) {
       setUserId(savedUserId);
       // Fetch user name
@@ -81,7 +81,7 @@ export default function ProductCatalog() {
           if (data?.name) setUserName(data.name);
         })
         .catch(err => console.error('Failed to fetch user info:', err));
-  
+
       if (savedStoreId) {
         setStoreId(savedStoreId);
         fetchProducts(savedStoreId, savedUserId);
@@ -244,22 +244,22 @@ export default function ProductCatalog() {
     } catch (err) {
       console.error('Save product error:', err);
       let errorMsg = 'Failed to save product. Please try again.';
-      
+
       if (err.response) {
         if (err.response.status === 401) {
           navigate('/login');
           return;
         }
-        
-        errorMsg = err.response.data?.message || 
-                   err.response.data?.error?.message || 
-                   `Server error: ${err.response.status}`;
+
+        errorMsg = err.response.data?.message ||
+          err.response.data?.error?.message ||
+          `Server error: ${err.response.status}`;
       } else if (err.request) {
         errorMsg = 'Network error. Please check your connection.';
       } else {
         errorMsg = err.message || errorMsg;
       }
-      
+
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -274,7 +274,7 @@ export default function ProductCatalog() {
     setIsLoading(true);
     try {
       const updatedProducts = products.filter(p => p._id !== productId);
-      
+
       await axios.put(`${API_BASE_URL}/business`, {
         type: 'products',
         data: updatedProducts
@@ -284,7 +284,7 @@ export default function ProductCatalog() {
           'x-store-id': storeId
         }
       });
-      
+
       setProducts(updatedProducts);
       toast.success('Product deleted successfully!');
     } catch (err) {
@@ -302,11 +302,10 @@ export default function ProductCatalog() {
         {/* Header with dark mode */}
         <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
           <div className="flex justify-between items-center mb-2">
-            <Link 
-              to="/signup" 
-              className={`text-2xl sm:text-3xl font-bold transition-colors ${
-                darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'
-              }`}
+            <Link
+              to="/signup"
+              className={`text-2xl sm:text-3xl font-bold transition-colors ${darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'
+                }`}
             >
               BizzySite
             </Link>
@@ -323,9 +322,8 @@ export default function ProductCatalog() {
                   />
                 </button>
                 {showMenu && (
-                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 dark:text-white ${
-                    darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'
-                  }`}>
+                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 dark:text-white ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'
+                    }`}>
                     <Link
                       to="/profile"
                       className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -345,16 +343,14 @@ export default function ProductCatalog() {
               </div>
             </div>
           </div>
-          
-          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${
-            darkMode ? 'text-gray-300' : 'text-gray-600'
-          }`}>
+
+          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'
+            }`}>
             Welcome to your business dashboard
           </h2>
-          
-          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${
-            darkMode ? 'text-gray-400' : 'text-gray-700'
-          }`}>
+
+          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${darkMode ? 'text-gray-400' : 'text-gray-700'
+            }`}>
             Set up your online store in minutes and start selling today
           </p>
         </div>
@@ -362,9 +358,8 @@ export default function ProductCatalog() {
         {/* Navigation tabs with dark mode */}
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${
-              darkMode ? 'bg-gray-800' : 'bg-gray-50'
-            }`}>
+            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'
+              }`}>
               {[
                 { name: 'Setup', icon: '📊', path: '/storefront' },
                 { name: 'Products', icon: '📦', path: '/products' },
@@ -376,15 +371,14 @@ export default function ProductCatalog() {
                 <Link
                   to={tab.path}
                   key={tab.name}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
-                    activeTab === tab.name
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${activeTab === tab.name
                       ? darkMode
                         ? 'bg-indigo-800 text-white'
                         : 'bg-purple-100 text-indigo-700'
                       : darkMode
                         ? 'text-gray-300 hover:text-indigo-300'
                         : 'text-gray-500 hover:text-indigo-600'
-                  }`}
+                    }`}
                   onClick={() => setActiveTab(tab.name)}
                 >
                   <span className="text-lg">{tab.icon}</span>
@@ -398,14 +392,12 @@ export default function ProductCatalog() {
         {/* Product catalog header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
           <div>
-            <h1 className={`text-2xl sm:text-3xl font-bold ${
-              darkMode ? 'text-white' : 'text-gray-800'
-            }`}>
+            <h1 className={`text-2xl sm:text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'
+              }`}>
               Product Catalog
             </h1>
-            <p className={`text-sm sm:text-base ${
-              darkMode ? 'text-gray-400' : 'text-gray-600'
-            }`}>
+            <p className={`text-sm sm:text-base ${darkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
               Manage your products and inventory
             </p>
           </div>
@@ -418,15 +410,23 @@ export default function ProductCatalog() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="p-4 border border-gray-200 rounded-lg shadow-md animate-pulse bg-white"
+              >
+                <div className="w-full h-40 bg-gray-200 rounded mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            ))}
           </div>
         ) : error ? (
-          <div className={`border rounded mb-6 px-4 py-3 ${
-            darkMode ? 'bg-red-900 border-red-700 text-red-100' : 'bg-red-100 border-red-400 text-red-700'
-          }`}>
+          <div className={`border rounded mb-6 px-4 py-3 ${darkMode ? 'bg-red-900 border-red-700 text-red-100' : 'bg-red-100 border-red-400 text-red-700'
+            }`}>
             <strong>Error:</strong> {error}
-            <button 
+            <button
               className={`ml-4 text-sm underline ${darkMode ? 'text-red-200' : 'text-red-800'}`}
               onClick={() => setError('')}
             >
@@ -434,14 +434,12 @@ export default function ProductCatalog() {
             </button>
           </div>
         ) : products.length === 0 ? (
-          <div className={`rounded-lg shadow p-6 sm:p-8 text-center ${
-            darkMode ? 'bg-gray-800' : 'bg-white'
-          }`}>
+          <div className={`rounded-lg shadow p-6 sm:p-8 text-center ${darkMode ? 'bg-gray-800' : 'bg-white'
+            }`}>
             <div className="max-w-md mx-auto">
               <svg
-                className={`mx-auto h-12 w-12 ${
-                  darkMode ? 'text-gray-500' : 'text-gray-400'
-                }`}
+                className={`mx-auto h-12 w-12 ${darkMode ? 'text-gray-500' : 'text-gray-400'
+                  }`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -453,9 +451,8 @@ export default function ProductCatalog() {
                   strokeWidth={2}
                 />
               </svg>
-              <p className={`mt-4 ${
-                darkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}>
+              <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>
                 No products yet.
               </p>
             </div>
@@ -464,8 +461,8 @@ export default function ProductCatalog() {
           // Product cards with larger images
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {products.map((product) => (
-              <div 
-                key={product._id} 
+              <div
+                key={product._id}
                 className="bg-white rounded-lg shadow overflow-hidden transition-transform hover:scale-[1.02]"
               >
                 {/* Image container with reduced padding */}
@@ -475,9 +472,9 @@ export default function ProductCatalog() {
                       src={product.images[0]}
                       alt={product.name}
                       className="w-full h-full object-cover"
-                      onError={(e) => { 
-                        e.target.onerror = null; 
-                        e.target.src = 'https://via.placeholder.com/300x200?text=Image+Error'; 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/300x200?text=Image+Error';
                       }}
                     />
                   ) : (
@@ -486,18 +483,17 @@ export default function ProductCatalog() {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Product info */}
                 <div className="p-4">
                   <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
                   <p className="text-gray-600 mt-1 text-sm line-clamp-2">{product.description}</p>
                   <div className="mt-3 flex justify-between items-center">
                     <p className="text-gray-800 font-bold">{product.currency}{product.price}</p>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      product.inStock 
-                        ? 'bg-green-100 text-green-800' 
+                    <span className={`px-2 py-1 text-xs rounded-full ${product.inStock
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
-                    }`}>
+                      }`}>
                       {product.inStock ? 'In Stock' : 'Out of Stock'}
                     </span>
                   </div>
@@ -524,13 +520,11 @@ export default function ProductCatalog() {
         {/* Product Modal */}
         {showProductModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className={`rounded-lg shadow-lg max-w-lg w-full p-6 ${
-              darkMode ? 'bg-gray-800' : 'bg-white'
-            }`}>
+            <div className={`rounded-lg shadow-lg max-w-lg w-full p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'
+              }`}>
               <div className="flex justify-between items-center mb-4">
-                <h2 className={`text-xl font-semibold ${
-                  darkMode ? 'text-white' : 'text-gray-800'
-                }`}>
+                <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'
+                  }`}>
                   {products.some(p => p._id === currentProduct._id) ? 'Edit Product' : 'Add New Product'}
                 </h2>
                 <button
@@ -551,9 +545,8 @@ export default function ProductCatalog() {
                     value={currentProduct.name}
                     onChange={handleInputChange}
                     required
-                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${
-                      darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                      }`}
                   />
                 </div>
 
@@ -565,9 +558,8 @@ export default function ProductCatalog() {
                     name="description"
                     value={currentProduct.description}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${
-                      darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                      }`}
                   />
                 </div>
 
@@ -580,9 +572,8 @@ export default function ProductCatalog() {
                       name="currency"
                       value={currentProduct.currency}
                       onChange={handleInputChange}
-                      className={`px-3 py-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${
-                        darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
-                      }`}
+                      className={`px-3 py-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
+                        }`}
                     >
                       {currencies.map(curr => (
                         <option key={curr.symbol} value={curr.symbol}>{curr.name}</option>
@@ -594,9 +585,8 @@ export default function ProductCatalog() {
                       value={currentProduct.price}
                       onChange={handleInputChange}
                       required
-                      className={`w-full px-3 py-2 border border-l-0 rounded-r focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${
-                        darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border border-l-0 rounded-r focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                        }`}
                     />
                   </div>
                 </div>
@@ -610,13 +600,11 @@ export default function ProductCatalog() {
                     accept="image/*"
                     multiple
                     onChange={handleImageUpload}
-                    className={`block w-full text-sm ${
-                      darkMode ? 'text-gray-300' : 'text-gray-700'
-                    } file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold ${
-                      darkMode 
-                        ? 'file:bg-indigo-900 file:text-indigo-200 hover:file:bg-indigo-800' 
+                    className={`block w-full text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'
+                      } file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold ${darkMode
+                        ? 'file:bg-indigo-900 file:text-indigo-200 hover:file:bg-indigo-800'
                         : 'file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100'
-                    }`}
+                      }`}
                   />
                   {isUploading && (
                     <div className="mt-2 text-center">
@@ -626,13 +614,13 @@ export default function ProductCatalog() {
                       </span>
                     </div>
                   )}
-                  
+
                   {imageUploadError && (
                     <p className={`mt-2 text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
                       {imageUploadError}
                     </p>
                   )}
-                  
+
                   {imagePreviews.length > 0 && (
                     <div className="mt-4 grid grid-cols-3 gap-2">
                       {imagePreviews.map((preview, index) => (
@@ -659,9 +647,8 @@ export default function ProductCatalog() {
                   )}
                 </div>
 
-                <div className={`border-t my-4 sm:my-6 ${
-                  darkMode ? 'border-gray-700' : 'border-gray-200'
-                }`}></div>
+                <div className={`border-t my-4 sm:my-6 ${darkMode ? 'border-gray-700' : 'border-gray-200'
+                  }`}></div>
 
                 <div className="mb-4 sm:mb-6">
                   <label className="inline-flex items-center">
@@ -673,13 +660,11 @@ export default function ProductCatalog() {
                         ...prev,
                         inStock: !prev.inStock
                       }))}
-                      className={`h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded ${
-                        darkMode ? 'border-gray-600' : 'border-gray-300'
-                      }`}
+                      className={`h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded ${darkMode ? 'border-gray-600' : 'border-gray-300'
+                        }`}
                     />
-                    <span className={`ml-2 text-sm sm:text-base ${
-                      darkMode ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
+                    <span className={`ml-2 text-sm sm:text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
                       In Stock
                     </span>
                   </label>
@@ -689,11 +674,10 @@ export default function ProductCatalog() {
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className={`mr-3 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base ${
-                      darkMode 
-                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                    className={`mr-3 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm sm:text-base ${darkMode
+                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
                         : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                     disabled={isLoading || isUploading}
                   >
                     Cancel
@@ -739,9 +723,8 @@ export default function ProductCatalog() {
               </ul>
             </div>
           </div>
-          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${
-            darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'
-          }`}>
+          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'
+            }`}>
             <p>© 2024 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
