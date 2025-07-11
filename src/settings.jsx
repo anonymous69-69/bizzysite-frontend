@@ -11,6 +11,10 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showMenu, setShowMenu] = useState(false);
+
+  // Modal states for delete account
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Settings states
   const { darkMode, setDarkMode } = useTheme();
@@ -379,14 +383,9 @@ export default function SettingsPage() {
                 <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   Permanently delete your account and all store data
                 </p>
-                <button 
+                <button
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to permanently delete your account? This cannot be undone.')) {
-                      toast.success('Account deletion requested');
-                      // Actual deletion would call: axios.delete('/api/user')
-                    }
-                  }}
+                  onClick={() => setShowDeleteModal(true)}
                 >
                   Delete My Account
                 </button>
@@ -395,6 +394,55 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-semibold mb-4">Delete Account</h2>
+            <p className="mb-6 text-sm">
+              Are you sure you want to permanently delete your account? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setIsDeleting(true);
+                  try {
+                    const userId = localStorage.getItem('userId');
+                    if (!userId) {
+                      toast.error('User ID not found');
+                      return;
+                    }
+
+                    await axios.delete('https://bizzysite.onrender.com/api/user', {
+                      headers: { Authorization: `Bearer ${userId}` }
+                    });
+
+                    toast.success('Account deleted successfully');
+                    localStorage.clear();
+                    navigate('/signup');
+                  } catch (error) {
+                    console.error('Delete account error:', error);
+                    toast.error('Failed to delete account');
+                  } finally {
+                    setIsDeleting(false);
+                    setShowDeleteModal(false);
+                  }
+                }}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-800 text-white'}`}>
         <div className="max-w-7xl mx-auto">

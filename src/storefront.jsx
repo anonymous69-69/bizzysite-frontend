@@ -38,7 +38,7 @@ export default function BusinessDashboard() {
     }
   
     // Fetch user info
-    fetch(`https://bizzysite.onrender.com/api/user`, {
+    fetch(`https://bizzysite.shop/api/user`, {
       headers: {
         Authorization: `Bearer ${userId}`
       }
@@ -68,7 +68,7 @@ export default function BusinessDashboard() {
       }
       
       // Use correct endpoint WITHOUT query parameter
-      const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
+      const response = await fetch(`https://bizzysite.shop/api/business`, {
         headers: {
           Authorization: `Bearer ${userId}`,
           'x-store-id': storeId  // Add store ID to headers
@@ -128,7 +128,7 @@ export default function BusinessDashboard() {
       };
 
       const method = storeId ? 'PUT' : 'POST';
-      const url = 'https://bizzysite.onrender.com/api/business';
+      const url = 'https://bizzysite.shop/api/business';
       
       const res = await fetch(url, {
         method,

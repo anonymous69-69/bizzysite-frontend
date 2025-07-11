@@ -24,7 +24,7 @@ export default function LoginPage() {
       ...(isLogin ? {} : { name }),
     };
     try {
-      const response = await fetch(`https://bizzysite.onrender.com/api/${isLogin ? 'login' : 'signup'}`, {
+      const response = await fetch(`https://bizzysite.shop/api/${isLogin ? 'login' : 'signup'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -42,7 +42,7 @@ export default function LoginPage() {
       localStorage.setItem('userRole', 'vendor');
       if (!isLogin) {
         try {
-          const businessRes = await fetch('https://bizzysite.onrender.com/api/business', {
+          const businessRes = await fetch('https://bizzysite.shop/api/business', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export default function LoginPage() {
           } else {
             throw new Error("Store ID not received from server");
           }
-          await fetch('https://bizzysite.onrender.com/api/send-welcome-email', {
+          await fetch('https://bizzysite.shop/api/send-welcome-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, name }),
@@ -360,7 +360,7 @@ export default function LoginPage() {
                         const emailPrompt = prompt("Enter your email to reset your password:");
                         if (emailPrompt) {
                           try {
-                            const res = await fetch("https://bizzysite.onrender.com/api/request-password-reset", {
+                            const res = await fetch("https://bizzysite.shop/api/request-password-reset", {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({ email: emailPrompt })
@@ -416,7 +416,7 @@ export default function LoginPage() {
                           const result = await signInWithPopup(auth, provider);
                           const user = result.user;
 
-                          const res = await fetch('https://bizzysite.onrender.com/api/google-login', {
+                          const res = await fetch('https://bizzysite.shop/api/google-login', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
