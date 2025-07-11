@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, provider } from './firebase';
@@ -11,6 +11,37 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const navigate = useNavigate();
+
+  // Animated background effect
+  useEffect(() => {
+    const colors = ['#bbd0ff', '#b8c0ff', '#c8b6ff'];
+    const container = document.querySelector('.background-container');
+    
+    if (container) {
+      // Clear any existing bubbles
+      container.innerHTML = '';
+      
+      // Create floating bubbles
+      for (let i = 0; i < 15; i++) {
+        const bubble = document.createElement('div');
+        const size = Math.random() * 200 + 100;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        bubble.style.position = 'absolute';
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.background = color;
+        bubble.style.borderRadius = '50%';
+        bubble.style.opacity = '0.6';
+        bubble.style.filter = 'blur(40px)';
+        bubble.style.left = `${Math.random() * 100}%`;
+        bubble.style.top = `${Math.random() * 100}%`;
+        bubble.style.animation = `float ${Math.random() * 20 + 10}s infinite alternate ease-in-out`;
+        
+        container.appendChild(bubble);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,10 +75,8 @@ export default function LoginPage() {
       
       toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
   
-      // STORE CREATION - CRITICAL FIXES
       if (!isLogin) {
         try {
-          // Create business with default values
           const businessRes = await fetch('https://bizzysite.onrender.com/api/business', {
             method: 'POST',
             headers: {
@@ -72,7 +101,6 @@ export default function LoginPage() {
             throw new Error(businessData.message || "Failed to create store");
           }
   
-          // FIX: Handle store ID - save to localStorage
           const storeId = businessData.storeId;
           if (storeId) {
             localStorage.setItem('storeId', storeId);
@@ -80,7 +108,6 @@ export default function LoginPage() {
             throw new Error("Store ID not received from server");
           }
   
-          // Send welcome email
           await fetch('https://bizzysite.onrender.com/api/send-welcome-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -110,21 +137,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated background */}
+      <div className="background-container fixed inset-0 -z-10"></div>
+      
+      {/* Global styles for the animated background */}
+      <style>{`
+        @keyframes float {
+          0% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(${Math.random() * 50 - 25}px, ${Math.random() * 50 - 25}px) rotate(${Math.random() * 10 - 5}deg); }
+          100% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 20 - 10}deg); }
+        }
+      `}</style>
+      
       <Toaster position="top-right" />
-      <header className="bg-white shadow-sm">
+      <header className="bg-white/70 backdrop-blur-md shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">BizzySite</h1>
           <div className="flex space-x-4">
             <button 
               onClick={() => openModal(true)}
-              className="px-4 py-2 text-gray-700 font-medium hover:text-pink-600 transition-colors"
+              className="px-4 py-2 text-gray-700 font-medium hover:text-[#7a6ff0] transition-colors"
             >
               Login
             </button>
             <button 
               onClick={() => openModal(false)}
-              className="px-4 py-2 bg-[#fa6da4] text-white font-medium rounded-md hover:bg-pink-700 transition-colors"
+              className="px-4 py-2 bg-white/70 backdrop-blur-md border border-white/30 text-[#7a6ff0] font-medium rounded-md hover:bg-white/80 transition-all shadow-sm"
             >
               Sign Up
             </button>
@@ -132,23 +171,23 @@ export default function LoginPage() {
         </div>
       </header>
 
-      <div className="bg-white py-16 px-4 sm:px-6 lg:px-8 flex-grow">
+      <div className="relative py-16 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-4">BizzySite</h1>
-          <p className="text-2xl font-semibold text-gray-700 mb-6">Build your online store with ease</p>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
+          <h1 className="text-5xl font-extrabold text-gray-900 mb-4">BizzySite</h1>
+          <p className="text-2xl font-semibold text-gray-800 mb-6">Build your online store with ease</p>
+          <p className="text-lg text-gray-700 max-w-3xl mx-auto mb-8">
             Empower your small business with a beautiful ecommerce website, fast checkout, and integrated payments.
           </p>
           <div className="flex justify-center space-x-4">
             <button 
               onClick={() => openModal(false)}
-              className="px-6 py-3 bg-[#fa6da4] text-white font-medium rounded-md hover:bg-pink-700 transition-colors"
+              className="px-6 py-3 bg-white/70 backdrop-blur-md border border-white/30 text-[#7a6ff0] font-medium rounded-md hover:bg-white/80 transition-all shadow-lg"
             >
               Sign Up
             </button>
             <button 
               onClick={() => openModal(true)}
-              className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 transition-colors"
+              className="px-6 py-3 bg-transparent border-2 border-[#7a6ff0] text-[#7a6ff0] font-medium rounded-md hover:bg-[#7a6ff0]/10 transition-colors"
             >
               Login
             </button>
@@ -156,44 +195,36 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="bg-gray-50 py-16 px-4 sm:px-6 lg:px-8 flex-grow">
+      <div className="relative py-16 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Features</h2>
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="text-lg text-gray-700 mb-8">
             Everything you need to get started is built in – no coding required.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <div className="bg-[#f9d3e0] p-6 rounded-lg shadow-sm">
-              <div className="text-pink-800 text-3xl mb-4">⚡</div>
-              <h4 className="text-xl font-semibold mb-2">Quick Setup</h4>
-              <p className="text-gray-700">
-                Get your store online in under 10 minutes with our simple wizard
-              </p>
-            </div>
-            <div className="bg-[#f9d3e0] p-6 rounded-lg shadow-sm">
-              <div className="text-pink-800 text-3xl mb-4">👥</div>
-              <h4 className="text-xl font-semibold mb-2">Customer Management</h4>
-              <p className="text-gray-700">
-                Track orders and manage customer relationships easily
-              </p>
-            </div>
-            <div className="bg-[#f9d3e0] p-6 rounded-lg shadow-sm">
-              <div className="text-pink-800 text-3xl mb-4">🎨</div>
-              <h4 className="text-xl font-semibold mb-2">Easy Customization</h4>
-              <p className="text-gray-700">
-                Customize colors, fonts, and layout without any coding
-              </p>
-            </div>
+            {[
+              { icon: "⚡", title: "Quick Setup", desc: "Get your store online in under 10 minutes with our simple wizard" },
+              { icon: "👥", title: "Customer Management", desc: "Track orders and manage customer relationships easily" },
+              { icon: "🎨", title: "Easy Customization", desc: "Customize colors, fonts, and layout without any coding" }
+            ].map((feature, idx) => (
+              <div key={idx} className="bg-white/70 backdrop-blur-md p-6 rounded-lg shadow-sm border border-white/30">
+                <div className="text-[#7a6ff0] text-3xl mb-4">{feature.icon}</div>
+                <h4 className="text-xl font-semibold mb-2 text-gray-800">{feature.title}</h4>
+                <p className="text-gray-700">
+                  {feature.desc}
+                </p>
+              </div>
+            ))}
           </div>
 
-          <div className="bg-[#f9d3e0] p-8 rounded-lg shadow-sm max-w-4xl mx-auto">
-            <h3 className="text-xl font-semibold text-center mb-6">
+          <div className="bg-white/70 backdrop-blur-md p-8 rounded-lg shadow-sm border border-white/30 max-w-4xl mx-auto">
+            <h3 className="text-xl font-semibold text-center mb-6 text-gray-800">
               Why Small Businesses Choose BizzySite
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               {["All-in-one ecommerce platform", "No hidden fees or locked-in contracts", "24/7 customer support", "Free SSL and hosting"].map((feature, idx) => (
                 <div key={idx} className="flex items-center mb-4">
-                  <div className="text-pink-800 text-3xl mr-3">✓</div>
+                  <div className="text-[#7a6ff0] text-3xl mr-3">✓</div>
                   <p className="ml-2 text-gray-700">{feature}</p>
                 </div>
               ))}
@@ -201,7 +232,7 @@ export default function LoginPage() {
             <div className="text-center">
               <button
                 onClick={() => openModal(false)}
-                className="inline-block px-6 py-3 bg-[#fa6da4] text-white font-medium rounded-md hover:bg-pink-700 transition-colors"
+                className="inline-block px-6 py-3 bg-white/80 backdrop-blur-md border border-white/30 text-[#7a6ff0] font-medium rounded-md hover:bg-white transition-all shadow-md"
               >
                 Get Started
               </button>
@@ -210,7 +241,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <footer className="bg-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="bg-gray-800/80 backdrop-blur-md text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -252,15 +283,15 @@ export default function LoginPage() {
 
       {showModal && (
         <div 
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-gray-500/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
           onClick={() => setShowModal(false)}
         >
           <div 
-            className="bg-white rounded-lg shadow-xl max-w-md w-full"
+            className="bg-white/80 backdrop-blur-lg rounded-lg shadow-xl max-w-md w-full border border-white/30"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 py-4">
-              <h2 className="text-2xl font-bold mb-4">{isLogin ? 'Login' : 'Create Account'}</h2>
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">{isLogin ? 'Login' : 'Create Account'}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
                   <div>
@@ -273,7 +304,7 @@ export default function LoginPage() {
                       name="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#fa6da4]"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] bg-white/70"
                       required
                     />
                   </div>
@@ -289,7 +320,7 @@ export default function LoginPage() {
                     name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#fa6da4]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] bg-white/70"
                     required
                   />
                 </div>
@@ -304,7 +335,7 @@ export default function LoginPage() {
                     name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#fa6da4]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] bg-white/70"
                     required
                   />
                 </div>
@@ -329,7 +360,7 @@ export default function LoginPage() {
                           }
                         }
                       }}
-                      className="text-sm text-[#fa6da4] hover:text-pink-700 transition-colors"
+                      className="text-sm text-[#7a6ff0] hover:text-[#5a50d0] transition-colors"
                     >
                       Forgot Password?
                     </button>
@@ -338,7 +369,7 @@ export default function LoginPage() {
                 <div>
                   <button
                     type="submit"
-                    className="w-full px-4 py-2 bg-[#fa6da4] text-white font-medium rounded-md hover:bg-pink-700 focus:ring-2 focus:ring-offset-2 focus:ring-[#fa6da4] transition-colors"
+                    className="w-full px-4 py-2 bg-[#7a6ff0] text-white font-medium rounded-md hover:bg-[#5a50d0] focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0] transition-colors shadow-md"
                   >
                     {isLogin ? 'Sign in' : 'Create account'}
                   </button>
@@ -350,7 +381,7 @@ export default function LoginPage() {
                       <div className="w-full border-t border-gray-300"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-gray-500">
+                      <span className="px-2 bg-white/70 text-gray-500">
                         Or continue with
                       </span>
                     </div>
@@ -372,7 +403,7 @@ export default function LoginPage() {
                           toast.error('Google sign-in failed');
                         }
                       }}
-                      className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fa6da4]"
+                      className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md bg-white/70 hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0]"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12.545 10.239v3.821h5.445c-0.261 1.353-1.126 2.471-2.381 3.229l3.845 2.979c2.246-2.071 3.538-5.116 3.538-8.579 0-0.741-0.071-1.457-0.202-2.155h-8.245z" />
@@ -386,7 +417,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setIsLogin(!isLogin)}
-                    className="text-[#fa6da4] hover:text-pink-700 text-sm font-medium transition-colors"
+                    className="text-[#7a6ff0] hover:text-[#5a50d0] text-sm font-medium transition-colors"
                   >
                     {isLogin 
                       ? "Don't have an account? Sign up" 
