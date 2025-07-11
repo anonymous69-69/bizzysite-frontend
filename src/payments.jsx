@@ -62,9 +62,9 @@ export default function PaymentMethodForm() {
           const data = await response.json();
           setPaymentDetails(prev => ({
             ...prev,
-            upiEnabled: typeof data.upiEnabled === 'boolean' ? data.upiEnabled : false,
+            upiEnabled: typeof business.upiEnabled === 'boolean' ? business.upiEnabled : false,
             bankEnabled: typeof data.bankEnabled === 'boolean' ? data.bankEnabled : false,
-            upiId: data.upiId || '',
+            upiId: business.upiId || '',
             accountHolderName: data.accountHolderName || '',
             accountNumber: data.accountNumber || '',
             ifscCode: data.ifscCode || ''
