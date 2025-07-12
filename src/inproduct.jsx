@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 
 
 const InProduct = () => {
-  const { id, slug } = useParams();
+  const { productId, slug } = useParams();
   const navigate = useNavigate();
   const [businessData, setBusinessData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,40 +49,40 @@ const InProduct = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-    setError(null);
+        setError(null);
 
-    console.log("Fetching product with ID:", id);
-    const res = await fetch(`https://bizzysite.onrender.com/api/products/${id}`);
+        console.log("Fetching product with ID:", productId);
+        const res = await fetch(`https://bizzysite.onrender.com/api/store/slug/${slug}/product/${productId}`);
 
-    if (!res.ok) {
-      throw new Error(`Product not found (status: ${res.status})`);
-    }
+        if (!res.ok) {
+          throw new Error(`Product not found (status: ${res.status})`);
+        }
 
-    const data = await res.json();
-    console.log("Received product data:", data);
+        const data = await res.json();
+        console.log("Received product data:", data);
 
-    if (!data) {
-      throw new Error("No product data received");
-    }
+        if (!data) {
+          throw new Error("No product data received");
+        }
 
-    // Ensure we have _id and images array
-    setProduct({
-      ...data,
-      _id: data._id, // Should already be set by backend
-      images: Array.isArray(data.images) ? data.images : []
-    });
-  } catch (err) {
-    console.error("Error fetching product:", err);
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
+        // Ensure we have _id and images array
+        setProduct({
+          ...data,
+          _id: data._id, // Should already be set by backend
+          images: Array.isArray(data.images) ? data.images : []
+        });
+      } catch (err) {
+        console.error("Error fetching product:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (id && id !== 'undefined') {
+    if (productId && productId !== 'undefined') {
       fetchProduct();
     }
-  }, [id]);
+  }, [productId, slug]);
 
   // Add to cart function
   const addToCart = (product) => {
