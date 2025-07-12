@@ -630,7 +630,7 @@ const ViewSite = () => {
                   >
                     <button
                       onClick={() =>
-                        navigate(`/store/${slug}/product/${product._id}`) // Changed from storeId to slug
+                        navigate(`/${slug}/product/${product._id}`) // Changed from storeId to slug
                       }
                       className="w-full text-left"
                     >
