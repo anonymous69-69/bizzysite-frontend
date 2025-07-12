@@ -14,7 +14,6 @@ import NavView from './navview';
 import Profile from './profile';
 import ResetPassword from './resetpassword';
 import Settings from './settings';
-import ProductPage from './productpage';
 
 
 function App() {
@@ -57,7 +56,7 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/store/:storeName" element={<ViewSite />} />
         <Route path="/store/:slug" element={<ViewSite />} />
-        <Route path="/store/:slug/product/:productId" element={<ProductPage />} />
+        <Route path="/store/:slug/product/:productId" element={<InProduct />} />
 
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>

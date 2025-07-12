@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 
 
 const InProduct = () => {
-  const { id,storeId } = useParams();
+  const { id, slug } = useParams();
   const navigate = useNavigate();
   const [businessData, setBusinessData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ const InProduct = () => {
   // Extracted fetchProducts function
   const fetchProducts = async () => {
     try {
-      const response = await fetch(`https://bizzysite.onrender.com/api/business/${storeId}`, { 
+      const response = await fetch(`https://bizzysite.onrender.com/api/store/slug/${slug}`, { 
         cache: "no-store",
         headers: {
           'Content-Type': 'application/json',
@@ -333,7 +333,7 @@ const InProduct = () => {
           </div>
         
 <Link
-  to={`/shop/${storeId}/orderform`}
+  to={`/shop/${slug}/orderform`}
   state={{
     cart,
     total: cart.reduce((total, item) => total + (item.price * item.quantity), 0)
