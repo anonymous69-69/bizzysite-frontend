@@ -71,8 +71,7 @@ export default function NavView() {
   }, []);
 
   const handleCopyLink = () => {
-    const businessName = localStorage.getItem('businessName');
-    const link = `https://bizzysite.shop/store/${(businessName || userName).toLowerCase().replace(/\s+/g, '')}`;
+    const link = `https://bizzysite.shop/store/${userName.toLowerCase().replace(/\s+/g, '')}`;
     navigator.clipboard.writeText(link)
       .then(() => {
         toast.success('Store link copied to clipboard', {
@@ -86,8 +85,7 @@ export default function NavView() {
   };
 
   const handleViewSite = () => {
-    const businessName = localStorage.getItem('businessName');
-    const storeName = (businessName || userName).toLowerCase().replace(/\s+/g, '');
+    const storeName = userName.toLowerCase().replace(/\s+/g, '');
     const link = `https://bizzysite.shop/store/${storeName}`;
     window.open(link, '_blank', 'noopener,noreferrer');
   };
@@ -275,7 +273,7 @@ export default function NavView() {
                   <p className={`mt-3 text-xs break-words ${
                     darkMode ? 'text-gray-400' : 'text-gray-500'
                   }`}>
-                    Your store URL: https://bizzysite.shop/store/{(localStorage.getItem('businessName') || userName).toLowerCase().replace(/\s+/g, '')}
+                    Your store URL: https://bizzysite.shop/store/{userName.toLowerCase().replace(/\s+/g, '')}
                   </p>
                 )}
               </div>
