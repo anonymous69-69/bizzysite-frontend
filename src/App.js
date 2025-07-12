@@ -14,6 +14,7 @@ import NavView from './navview';
 import Profile from './profile';
 import ResetPassword from './resetpassword';
 import Settings from './settings';
+import ProductPage from './productpage';
 
 
 function App() {

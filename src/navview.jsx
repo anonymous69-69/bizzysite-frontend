@@ -12,6 +12,7 @@ export default function NavView() {
   const { darkMode } = useTheme();
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
+  const storeSlug = localStorage.getItem('storeSlug');
 
   useEffect(() => {
     const localStoreId = localStorage.getItem('storeId');
