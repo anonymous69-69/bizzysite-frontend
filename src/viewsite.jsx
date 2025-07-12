@@ -38,31 +38,50 @@ const ViewSite = () => {
   const [slug, setSlug] = useState(localStorage.getItem('storeSlug') || ''); // Added storeId state
   const navigate = useNavigate();
 
-  // Fetch business data using slug from URL
   useEffect(() => {
     const fetchBusiness = async () => {
       try {
         setLoading(true);
         setError(null);
-    
-        console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
-    
-        const res = await fetch(`https://bizzysite.shop/api/store/slug/${slug}`);
-        // ... rest of the fetch logic
+        
+        // Get slug from URL path (first segment)
+        const pathSlug = window.location.pathname.split('/')[1];
+        // Use URL slug if available, otherwise use state slug
+        const finalSlug = pathSlug || slug;
+        
+        if (!finalSlug) {
+          setError("Store slug is missing");
+          setLoading(false);
+          return;
+        }
+        
+        console.log(`[ViewSite] Fetching store data for slug: ${finalSlug}`);
+        
+        // Use your actual backend URL
+        const res = await fetch(`https://bizzysite.onrender.com/api/store/slug/${finalSlug}`);
+        
+        if (res.status === 404) {
+          setError("Store not found");
+          setBusiness(null);
+        } else if (!res.ok) {
+          throw new Error("Failed to fetch store data");
+        } else {
+          const data = await res.json();
+          setBusiness(data);
+          // Update slug in state if we used pathSlug
+          if (pathSlug && pathSlug !== slug) {
+            setSlug(pathSlug);
+          }
+        }
       } catch (err) {
         console.error("[ViewSite] Error loading store:", err);
-        setError(err.message || "Could not load this store. Please try again later.");
+        setError(err.message || "Could not load this store");
       } finally {
         setLoading(false);
       }
     };
-    
-    if (slug) {
-      fetchBusiness();
-    } else {
-      setError("Store name is missing from URL");
-      setLoading(false);
-    }
+  
+    fetchBusiness();
   }, [slug]);
 
   // Add to cart function

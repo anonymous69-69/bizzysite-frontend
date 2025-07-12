@@ -12,126 +12,64 @@ export default function NavView() {
   const { darkMode } = useTheme();
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
-  const [storeSlug, setStoreSlug] = useState(localStorage.getItem('storeSlug') || '');
-
+  const [storeSlug, setStoreSlug] = useState('');
 
   useEffect(() => {
-    const localStoreId = localStorage.getItem('storeId');
-    const userId = localStorage.getItem('userId');
+    const fetchStoreData = async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        const localStoreId = localStorage.getItem('storeId');
 
-    // Fetch user name
-    if (userId) {
-      fetch(`https://bizzysite.onrender.com/api/user`, {
-        headers: {
-          Authorization: `Bearer ${userId}`
+        if (!userId) {
+          setLoading(false);
+          return;
         }
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data?.name) setUserName(data.name);
-        })
-        .catch(err => console.error('Failed to fetch user info:', err));
-    }
 
-    if (localStoreId) {
-      setStoreId(localStoreId);
-      setLoading(false);
-      return;
-    }
-
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    fetch('https://bizzysite.onrender.com/api/store', {
-      headers: {
-        'Authorization': `Bearer ${userId}`,
-        'x-store-id': localStoreId
-      }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch store data');
-        return res.json();
-      })
-      .then(data => {
-        if (data?.storeId || data?.business?.storeId) {
-          const sid = data.storeId || data.business.storeId;
-          if (sid) {
-            setStoreId(sid);
-            localStorage.setItem('storeId', sid);
-          }
+        // Fetch user info
+        const userRes = await fetch(`https://bizzysite.onrender.com/api/user`, {
+          headers: { Authorization: `Bearer ${userId}` }
+        });
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          if (userData?.name) setUserName(userData.name);
         }
-        // Store storeSlug in localStorage if present, otherwise fallback to /api/business
-        if (data?.slug) {
-          localStorage.setItem('storeSlug', data.slug);
-        } else {
-          // fallback: try to fetch slug from business endpoint
-          fetch('https://bizzysite.onrender.com/api/business', {
-            method: 'GET',
+
+        // Fetch store data
+        if (localStoreId) {
+          setStoreId(localStoreId);
+          const storeRes = await fetch(`https://bizzysite.onrender.com/api/business`, {
             headers: {
               'Authorization': `Bearer ${userId}`,
               'x-store-id': localStoreId
             }
-          })
-            .then(res => res.json())
-            .then(businessData => {
-              if (businessData?.data?.slug) {
-                localStorage.setItem('storeSlug', businessData.data.slug);
-              }
-            })
-            .catch(err => {
-              console.warn('Fallback slug fetch failed:', err);
-            });
+          });
+          
+          if (storeRes.ok) {
+            const storeData = await storeRes.json();
+            const slug = storeData.slug || storeData.business?.name?.toLowerCase().replace(/\s+/g, '-');
+            if (slug) {
+              setStoreSlug(slug);
+              localStorage.setItem('storeSlug', slug);
+            }
+          }
         }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to fetch storeId:', err);
+      } catch (err) {
+        console.error('Error fetching store data:', err);
         setError('Failed to load store information');
+      } finally {
         setLoading(false);
-      });
-  }, []);
-
-  const handleCopyLink = () => {
-    if (!storeSlug) {
-      toast.error('Please set up your business name first');
-      return;
-    }
-
-    const link = `https://bizzysite.shop/${storeSlug}`;
-    navigator.clipboard.writeText(link)
-      .then(() => {
-        toast.success('Store link copied to clipboard');
-      });
-  };
-
-  const handleViewSite = () => {
-    const slug = localStorage.getItem('storeSlug');
-    if (!slug) {
-      toast.error('Please set up your business name first and save the changes');
-      return;
-    }
-  
-    const link = `https://bizzysite.shop/${slug}`;
-    window.open(link, '_blank');
-  };
-
-  useEffect(() => {
-    const handleSlugUpdate = (event) => {
-      const newSlug = event.detail?.slug || localStorage.getItem('storeSlug');
-      if (newSlug) {
-        setStoreSlug(newSlug);
       }
     };
-  
-    // Set initial slug from localStorage
-    const initialSlug = localStorage.getItem('storeSlug');
-    if (initialSlug) {
-      setStoreSlug(initialSlug);
-    }
-  
+
+    fetchStoreData();
+
+    const handleSlugUpdate = (event) => {
+      if (event.detail?.slug) {
+        setStoreSlug(event.detail.slug);
+        localStorage.setItem('storeSlug', event.detail.slug);
+      }
+    };
+
     window.addEventListener('storeSlugUpdated', handleSlugUpdate);
     
     return () => {
@@ -139,25 +77,42 @@ export default function NavView() {
     };
   }, []);
 
+  const handleCopyLink = () => {
+    const slugToUse = storeSlug || localStorage.getItem('storeSlug');
+    if (!slugToUse) {
+      toast.error('Please set up your business name first');
+      return;
+    }
+
+    const link = `https://bizzysite.shop/${slugToUse}`;
+    navigator.clipboard.writeText(link)
+      .then(() => toast.success('Store link copied to clipboard'))
+      .catch(() => toast.error('Failed to copy link'));
+  };
+
+  const handleViewSite = () => {
+    const slugToUse = storeSlug || localStorage.getItem('storeSlug');
+    if (!slugToUse) {
+      toast.error('Please set up your business name first');
+      return;
+    }
+    window.open(`https://bizzysite.shop/${slugToUse}`, '_blank');
+  };
+
   return (
     <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        {/* Header with dark mode */}
         <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
           <div className="flex justify-between items-center mb-2">
             <Link
               to="/signup"
-              className={`text-2xl sm:text-3xl font-bold transition-colors ${darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'
-                }`}
+              className={`text-2xl sm:text-3xl font-bold transition-colors ${darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'}`}
             >
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <button
-                  onClick={() => setShowMenu(!showMenu)}
-                  className="focus:outline-none"
-                >
+                <button onClick={() => setShowMenu(!showMenu)} className="focus:outline-none">
                   <img
                     src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=4f46e5&color=fff&bold=true`}
                     alt="Profile"
@@ -165,8 +120,7 @@ export default function NavView() {
                   />
                 </button>
                 {showMenu && (
-                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 dark:text-white ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'
-                    }`}>
+                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'}`}>
                     <Link
                       to="/profile"
                       className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -187,22 +141,18 @@ export default function NavView() {
             </div>
           </div>
 
-          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'
-            }`}>
+          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
             Website Preview
           </h2>
 
-          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${darkMode ? 'text-gray-400' : 'text-gray-700'
-            }`}>
+          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
             Preview and share your online store
           </p>
         </div>
 
-        {/* Navigation tabs with dark mode */}
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'
-              }`}>
+            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
               {[
                 { name: 'Setup', icon: '📊', path: '/storefront' },
                 { name: 'Products', icon: '📦', path: '/products' },
@@ -214,14 +164,15 @@ export default function NavView() {
                 <Link
                   to={tab.path}
                   key={tab.name}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${activeTab === tab.name
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
+                    activeTab === tab.name
                       ? darkMode
                         ? 'bg-indigo-800 text-white'
                         : 'bg-purple-100 text-indigo-700'
                       : darkMode
                         ? 'text-gray-300 hover:text-indigo-300'
                         : 'text-gray-500 hover:text-indigo-600'
-                    }`}
+                  }`}
                   onClick={() => setActiveTab(tab.name)}
                 >
                   <span className="text-lg">{tab.icon}</span>
@@ -232,10 +183,8 @@ export default function NavView() {
           </div>
         </div>
 
-        {/* Preview Section with dark mode */}
         {error && (
-          <div className={`border rounded mb-6 px-4 py-3 ${darkMode ? 'bg-red-900 border-red-700 text-red-100' : 'bg-red-100 border-red-400 text-red-700'
-            }`}>
+          <div className={`border rounded mb-6 px-4 py-3 ${darkMode ? 'bg-red-900 border-red-700 text-red-100' : 'bg-red-100 border-red-400 text-red-700'}`}>
             <strong>Error:</strong> {error}
             <button
               className={`ml-4 text-sm underline ${darkMode ? 'text-red-200' : 'text-red-800'}`}
@@ -246,8 +195,7 @@ export default function NavView() {
           </div>
         )}
 
-        <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${darkMode ? 'bg-gray-800' : 'bg-white'
-          }`}>
+        <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
           <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
             Website Preview Options
           </h3>
@@ -257,16 +205,14 @@ export default function NavView() {
 
           {loading ? (
             <div className="text-center py-8">
-              <div className={`animate-spin rounded-full h-8 w-8 border-b-2 mx-auto ${darkMode ? 'border-indigo-400' : 'border-indigo-600'
-                }`}></div>
+              <div className={`animate-spin rounded-full h-8 w-8 border-b-2 mx-auto ${darkMode ? 'border-indigo-400' : 'border-indigo-600'}`}></div>
               <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 Loading your store information...
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'
-                }`}>
+              <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                 <h4 className={`font-medium mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                   Preview Your Website
                 </h4>
@@ -276,17 +222,16 @@ export default function NavView() {
                 <button
                   onClick={handleViewSite}
                   className={`px-4 py-2 rounded-md transition-colors ${!storeId
-                      ? 'bg-gray-500 cursor-not-allowed'
-                      : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                    }`}
+                    ? 'bg-gray-500 cursor-not-allowed'
+                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                  }`}
                   disabled={!storeId}
                 >
                   View Site
                 </button>
               </div>
 
-              <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'
-                }`}>
+              <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                 <h4 className={`font-medium mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                   Share Your Store Link
                 </h4>
@@ -296,11 +241,11 @@ export default function NavView() {
                 <button
                   onClick={handleCopyLink}
                   className={`px-4 py-2 rounded-md ${!storeId
-                      ? 'border border-gray-500 text-gray-500 cursor-not-allowed'
-                      : darkMode
-                        ? 'bg-indigo-900 text-indigo-200 hover:bg-indigo-800'
-                        : 'border border-indigo-300 text-indigo-600 bg-white hover:bg-indigo-50'
-                    }`}
+                    ? 'border border-gray-500 text-gray-500 cursor-not-allowed'
+                    : darkMode
+                      ? 'bg-indigo-900 text-indigo-200 hover:bg-indigo-800'
+                      : 'border border-indigo-300 text-indigo-600 bg-white hover:bg-indigo-50'
+                  }`}
                   disabled={!storeId}
                 >
                   Copy Link
@@ -341,8 +286,7 @@ export default function NavView() {
               </ul>
             </div>
           </div>
-          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'
-            }`}>
+          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'}`}>
             <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>

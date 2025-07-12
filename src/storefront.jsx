@@ -145,12 +145,9 @@ export default function BusinessDashboard() {
         setStoreId(newStoreId);
       }
 
-      if (result.data?.business) {
-        const updated = result.data.business;
-        let slug = result.slug;
-        if (!slug && updated.name) {
-          slug = updated.name.toLowerCase().replace(/\s+/g, '-');
-        }
+      if (result.data?.business || result.slug) {
+        const updated = result.data?.business || {};
+        const newSlug = result.slug || (updated.name ? updated.name.toLowerCase().replace(/\s+/g, '-') : slug);
         
         setBusinessInfo(prev => ({
           ...prev,
@@ -159,21 +156,20 @@ export default function BusinessDashboard() {
           shippingCharge: typeof updated.shippingCharge === 'number' ? updated.shippingCharge : prev.shippingCharge
         }));
         
-        localStorage.setItem('businessName', updated.name || '');
+        if (updated.name) localStorage.setItem('businessName', updated.name);
         
-        if (slug) {
-          localStorage.setItem('storeSlug', slug);
-          localStorage.setItem('storePath', slug);
-
-          // Dispatch custom event for slug update
+        if (newSlug) {
+          localStorage.setItem('storeSlug', newSlug);
+          // Dispatch event with actual slug value
           window.dispatchEvent(new CustomEvent('storeSlugUpdated', {
-            detail: { slug }
+            detail: { slug: newSlug }
           }));
         }
         
-        localStorage.setItem('businessEmail', updated.email || '');
-        localStorage.setItem('businessPhone', updated.phone || '');
+        if (updated.email) localStorage.setItem('businessEmail', updated.email);
+        if (updated.phone) localStorage.setItem('businessPhone', updated.phone);
       }
+      
       toast.success('Business information saved successfully!');
     } catch (err) {
       setError(`Save failed: ${err.message}`);
