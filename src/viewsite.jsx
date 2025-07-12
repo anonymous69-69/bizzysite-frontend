@@ -40,7 +40,7 @@ const ViewSite = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [cart, setCart] = useState([]);
-  const { storeId } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const { storeName } = useParams();
   
