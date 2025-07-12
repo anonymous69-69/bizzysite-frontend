@@ -58,7 +58,6 @@ export default function BusinessDashboard() {
     }
   }, [navigate]);
 
-  // FIXED: Updated API endpoint and added headers
   const fetchBusinessInfo = async (storeId) => {
     try {
       const userId = localStorage.getItem("userId");
@@ -67,11 +66,10 @@ export default function BusinessDashboard() {
         return;
       }
       
-      // Use correct endpoint WITHOUT query parameter
       const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
         headers: {
           Authorization: `Bearer ${userId}`,
-          'x-store-id': storeId  // Add store ID to headers
+          'x-store-id': storeId
         }
       });
       
@@ -104,28 +102,8 @@ export default function BusinessDashboard() {
     }));
   };
 
-  // FIXED: Added storeId to headers
   const handleSave = async (e) => {
     e.preventDefault();
-    if (result.data?.business) {
-      const updated = result.data.business;
-      const slug = result.slug; // Get slug from response
-      
-      // Store slug in localStorage
-      localStorage.setItem('storeSlug', slug);
-      
-      setBusinessInfo(prev => ({
-        ...prev,
-        ...updated,
-        shippingCharge: typeof updated.shippingCharge === 'number' 
-          ? updated.shippingCharge 
-          : prev.shippingCharge
-      }));
-      
-      // Also store other business info
-      localStorage.setItem('businessName', updated.name || '');
-      localStorage.setItem('storeSlug', slug); // Add this
-    }
 
     try {
       setLoading(true);
@@ -139,7 +117,7 @@ export default function BusinessDashboard() {
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${userId}`,
-        'x-store-id': storeId  // Add store ID to headers
+        'x-store-id': storeId
       };
 
       const method = storeId ? 'PUT' : 'POST';
@@ -168,18 +146,25 @@ export default function BusinessDashboard() {
 
       if (result.data?.business) {
         const updated = result.data.business;
+        let slug = result.slug;
+        if (!slug && updated.name) {
+          slug = updated.name.toLowerCase().replace(/\s+/g, '-');
+        }
+        
         setBusinessInfo(prev => ({
           ...prev,
           ...updated,
           description: typeof updated.description === 'string' ? updated.description : '',
           shippingCharge: typeof updated.shippingCharge === 'number' ? updated.shippingCharge : prev.shippingCharge
         }));
+        
         localStorage.setItem('businessName', updated.name || '');
-        // Store the formatted store path slug in localStorage
-        if (updated.name) {
-          const slug = updated.name.toLowerCase().replace(/\s+/g, '-');
+        
+        if (slug) {
+          localStorage.setItem('storeSlug', slug);
           localStorage.setItem('storePath', slug);
         }
+        
         localStorage.setItem('businessEmail', updated.email || '');
         localStorage.setItem('businessPhone', updated.phone || '');
       }
@@ -231,7 +216,7 @@ export default function BusinessDashboard() {
           </div>
         )}
 
-<div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
+        <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
           <div className="flex justify-between items-center mb-2">
             <Link 
               to="/signup" 
@@ -395,7 +380,22 @@ export default function BusinessDashboard() {
               />
             </div>
 
-            
+            <div className="mb-6">
+              <label htmlFor="description" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Business Description
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={businessInfo.description}
+                onChange={handleChange}
+                placeholder="Tell us about your business"
+                rows={3}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
+                }`}
+              />
+            </div>
 
             <div className="mb-6">
               <label htmlFor="address" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
