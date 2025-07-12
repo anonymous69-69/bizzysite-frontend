@@ -163,6 +163,8 @@ export default function BusinessDashboard() {
         if (slug) {
           localStorage.setItem('storeSlug', slug);
           localStorage.setItem('storePath', slug);
+
+          window.dispatchEvent(new Event('storeSlugUpdated'));
         }
         
         localStorage.setItem('businessEmail', updated.email || '');

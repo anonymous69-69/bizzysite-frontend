@@ -12,7 +12,8 @@ export default function NavView() {
   const { darkMode } = useTheme();
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
-  const storeSlug = localStorage.getItem('storeSlug');
+  const [storeSlug, setStoreSlug] = useState(localStorage.getItem('storeSlug') || '');
+
 
   useEffect(() => {
     const localStoreId = localStorage.getItem('storeId');
@@ -94,7 +95,6 @@ export default function NavView() {
   }, []);
 
   const handleCopyLink = () => {
-    const storeSlug = localStorage.getItem('storeSlug');
     if (!storeSlug) {
       toast.error('Please set up your business name first');
       return;
@@ -108,7 +108,6 @@ export default function NavView() {
   };
 
   const handleViewSite = () => {
-    const storeSlug = localStorage.getItem('storeSlug');
     if (!storeSlug) {
       toast.error('Please set up your business name first');
       return;
@@ -117,6 +116,21 @@ export default function NavView() {
     const link = `https://bizzysite.shop/store/${storeSlug}`;
     window.open(link, '_blank');
   };
+
+  useEffect(() => {
+    const handleSlugUpdate = () => {
+      const newSlug = localStorage.getItem('storeSlug');
+      if (newSlug) {
+        setStoreSlug(newSlug);
+      }
+    };
+
+    window.addEventListener('storeSlugUpdated', handleSlugUpdate);
+    
+    return () => {
+      window.removeEventListener('storeSlugUpdated', handleSlugUpdate);
+    };
+  }, []);
 
   return (
     <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
