@@ -41,6 +41,7 @@ const ViewSite = () => {
   useEffect(() => {
     const fetchBusiness = async () => {
       try {
+        const res = await fetch(`https://bizzysite.onrender.com/api/store/slug/${slug}`);
         setLoading(true);
         setError(null);
         
@@ -69,9 +70,7 @@ const ViewSite = () => {
           const data = await res.json();
           setBusiness(data);
           // Update slug in state if we used pathSlug
-          if (pathSlug && pathSlug !== slug) {
-            setSlug(pathSlug);
-          }
+          // Slug comes from URL; no need to update it in state
         }
       } catch (err) {
         console.error("[ViewSite] Error loading store:", err);
