@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 
-
-
 const ProductSkeleton = ({ layout }) => {
   const isListLayout = layout === "List";
   const isCardLayout = layout === "Card";
   
-
   return (
     <div
       className={`bg-white rounded-lg overflow-hidden shadow-md ${
@@ -30,8 +27,6 @@ const ProductSkeleton = ({ layout }) => {
   );
 };
 
-
-
 const ViewSite = () => {
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,12 +35,11 @@ const ViewSite = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [cart, setCart] = useState([]);
+  const [storeId, setStoreId] = useState(''); // Added storeId state
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { storeName } = useParams();
-  
 
-  // Fetch business data using storeId from URL
+  // Fetch business data using slug from URL
   useEffect(() => {
     const fetchBusiness = async () => {
       try {
@@ -74,7 +68,7 @@ const ViewSite = () => {
         const data = await res.json();
         console.log("[ViewSite] Store data received:", data);
         setBusiness(data);
-        // Store the storeId from the response in case we need it
+        // Store the storeId from the response
         if (data.storeId) {
           setStoreId(data.storeId);
         }
@@ -92,7 +86,7 @@ const ViewSite = () => {
       setError("Store name is missing from URL");
       setLoading(false);
     }
-  }, [slug]); // Changed dependency from storeId to slug
+  }, [slug]);
 
   // Add to cart function
   const addToCart = (product) => {
@@ -132,10 +126,7 @@ const ViewSite = () => {
     );
   };
 
-
   const productLayout = business?.customize?.productLayout || "Grid";
-
-
 
   if (loading) {
     return (
@@ -184,7 +175,7 @@ const ViewSite = () => {
           </h3>
           <p className="mt-2 text-gray-600">{error}</p>
           <p className="mt-3 text-sm text-gray-500">
-            Store ID: <code className="bg-gray-100 px-2 py-1 rounded">{storeId || "N/A"}</code>
+            Store URL: <code className="bg-gray-100 px-2 py-1 rounded">{slug || "N/A"}</code>
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -225,7 +216,7 @@ const ViewSite = () => {
             Store not found
           </h3>
           <p className="mt-2 text-gray-600">
-            The store ID <code className="bg-gray-100 px-2 py-1 rounded">{storeId}</code> does not exist.
+            The store URL <code className="bg-gray-100 px-2 py-1 rounded">{slug}</code> does not exist.
           </p>
           <p className="mt-3 text-sm text-gray-500">
             Make sure you've completed your store setup.
@@ -444,7 +435,7 @@ const ViewSite = () => {
           <button
             onClick={() => {
               setIsCartOpen(false);
-              navigate(`/shop/${storeId}/orderform`, {
+              navigate(`/shop/${slug}/orderform`, { // Changed from storeId to slug
                 state: {
                   cart,
                   total: cart.reduce(
@@ -644,7 +635,7 @@ const ViewSite = () => {
                   >
                     <button
                       onClick={() =>
-                        navigate(`/store/${storeId}/product/${product._id}`)
+                        navigate(`/store/${slug}/product/${product._id}`) // Changed from storeId to slug
                       }
                       className="w-full text-left"
                     >
@@ -751,28 +742,28 @@ const ViewSite = () => {
       </section>
 
       {/* Footer */}
-<footer className="bg-gray-800 text-white py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-  <div className="max-w-7xl mx-auto">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-      <div>
-        <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
-        <p className="text-gray-300 mb-4 text-sm sm:text-base">
-          Made with BizzySite. A free website builder for small businesses.
-        </p>
-      </div>
-      <div>
-        <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
-        <ul className="space-y-2 text-gray-300 text-sm sm:text-base">
-          <li>Email: rhythmsarma66@gmail.com</li>
-          <li>Phone: +91 7086758292</li>
-        </ul>
-      </div>
-    </div>
-    <div className="border-t border-gray-700 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
-      <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
-    </div>
-  </div>
-</footer>
+      <footer className="bg-gray-800 text-white py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            <div>
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
+              <p className="text-gray-300 mb-4 text-sm sm:text-base">
+                Made with BizzySite. A free website builder for small businesses.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
+              <ul className="space-y-2 text-gray-300 text-sm sm:text-base">
+                <li>Email: rhythmsarma66@gmail.com</li>
+                <li>Phone: +91 7086758292</li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-700 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
+            <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
