@@ -35,8 +35,7 @@ const ViewSite = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [cart, setCart] = useState([]);
-  const [storeId, setStoreId] = useState(''); // Added storeId state
-  const { slug } = useParams();
+  const [slug, setSlug] = useState(localStorage.getItem('storeSlug') || ''); // Added storeId state
   const navigate = useNavigate();
 
   // Fetch business data using slug from URL
@@ -45,33 +44,11 @@ const ViewSite = () => {
       try {
         setLoading(true);
         setError(null);
-  
+    
         console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
-  
+    
         const res = await fetch(`https://bizzysite.shop/api/store/slug/${slug}`);
-        console.log(`[ViewSite] API response status: ${res.status}`);
-  
-        if (!res.ok) {
-          let errorMsg = `Failed to load store (Status: ${res.status})`;
-  
-          try {
-            const errorData = await res.json();
-            console.log("[ViewSite] Error response body:", errorData);
-            errorMsg = errorData.message || errorData.error || errorMsg;
-          } catch (e) {
-            console.error("[ViewSite] Failed to parse error response:", e);
-          }
-  
-          throw new Error(errorMsg);
-        }
-  
-        const data = await res.json();
-        console.log("[ViewSite] Store data received:", data);
-        setBusiness(data);
-        // Store the storeId from the response
-        if (data.storeId) {
-          setStoreId(data.storeId);
-        }
+        // ... rest of the fetch logic
       } catch (err) {
         console.error("[ViewSite] Error loading store:", err);
         setError(err.message || "Could not load this store. Please try again later.");
@@ -79,7 +56,7 @@ const ViewSite = () => {
         setLoading(false);
       }
     };
-  
+    
     if (slug) {
       fetchBusiness();
     } else {

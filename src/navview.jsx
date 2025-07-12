@@ -100,7 +100,7 @@ export default function NavView() {
       return;
     }
 
-    const link = `https://bizzysite.shop/store/${storeSlug}`;
+    const link = `https://bizzysite.shop/${storeSlug}`;
     navigator.clipboard.writeText(link)
       .then(() => {
         toast.success('Store link copied to clipboard');
@@ -108,23 +108,30 @@ export default function NavView() {
   };
 
   const handleViewSite = () => {
-    if (!storeSlug) {
-      toast.error('Please set up your business name first');
+    const slug = localStorage.getItem('storeSlug');
+    if (!slug) {
+      toast.error('Please set up your business name first and save the changes');
       return;
     }
-
-    const link = `https://bizzysite.shop/store/${storeSlug}`;
+  
+    const link = `https://bizzysite.shop/${slug}`;
     window.open(link, '_blank');
   };
 
   useEffect(() => {
-    const handleSlugUpdate = () => {
-      const newSlug = localStorage.getItem('storeSlug');
+    const handleSlugUpdate = (event) => {
+      const newSlug = event.detail?.slug || localStorage.getItem('storeSlug');
       if (newSlug) {
         setStoreSlug(newSlug);
       }
     };
-
+  
+    // Set initial slug from localStorage
+    const initialSlug = localStorage.getItem('storeSlug');
+    if (initialSlug) {
+      setStoreSlug(initialSlug);
+    }
+  
     window.addEventListener('storeSlugUpdated', handleSlugUpdate);
     
     return () => {
@@ -300,7 +307,7 @@ export default function NavView() {
                 </button>
                 {storeSlug && (
                   <p className={`mt-3 text-xs break-words ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Your store URL: https://bizzysite.shop/store/{storeSlug}
+                    Your store URL: https://bizzysite.shop/{storeSlug}
                   </p>
                 )}
               </div>

@@ -94,17 +94,9 @@ export default function BusinessDashboard() {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setBusinessInfo(prev => ({
-      ...prev,
-      [name]: name === 'shippingCharge' ? (value === '' ? '' : parseFloat(value)) : value
-    }));
-  };
-
   const handleSave = async (e) => {
     e.preventDefault();
-
+  
     try {
       setLoading(true);
       setError('');
@@ -119,7 +111,7 @@ export default function BusinessDashboard() {
         'Authorization': `Bearer ${userId}`,
         'x-store-id': storeId
       };
-
+  
       const method = storeId ? 'PUT' : 'POST';
       const url = 'https://bizzysite.onrender.com/api/business';
       
@@ -131,25 +123,23 @@ export default function BusinessDashboard() {
           data: { ...businessInfo }
         })
       });
-
+  
       const result = await res.json();
-
+  
       if (!res.ok) {
         throw new Error(result.message || "Failed to save business information");
       }
-
+  
       const newStoreId = result.storeId || (result.data && result.data.storeId);
       if (newStoreId) {
         localStorage.setItem('storeId', newStoreId);
         setStoreId(newStoreId);
       }
-
+  
       if (result.data?.business) {
         const updated = result.data.business;
-        let slug = result.slug;
-        if (!slug && updated.name) {
-          slug = updated.name.toLowerCase().replace(/\s+/g, '-');
-        }
+        // Generate slug from business name if not provided by the server
+        let slug = result.slug || updated.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
         
         setBusinessInfo(prev => ({
           ...prev,
@@ -162,9 +152,8 @@ export default function BusinessDashboard() {
         
         if (slug) {
           localStorage.setItem('storeSlug', slug);
-          localStorage.setItem('storePath', slug);
-
-          window.dispatchEvent(new Event('storeSlugUpdated'));
+          // Dispatch event to notify other components of the slug update
+          window.dispatchEvent(new CustomEvent('storeSlugUpdated', { detail: { slug } }));
         }
         
         localStorage.setItem('businessEmail', updated.email || '');
