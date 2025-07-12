@@ -71,12 +71,7 @@ export default function NavView() {
   }, []);
 
   const handleCopyLink = () => {
-    if (!storeId) {
-      toast.error('Please save your business information first');
-      return;
-    }
-    
-    const link = `https://bizzysite-frontend.onrender.com/site/${storeId}`;
+    const link = `https://bizzysite.shop/store/${userName.toLowerCase().replace(/\s+/g, '')}`;
     navigator.clipboard.writeText(link)
       .then(() => {
         toast.success('Store link copied to clipboard', {
@@ -90,16 +85,9 @@ export default function NavView() {
   };
 
   const handleViewSite = () => {
-    if (!storeId) {
-      toast.error('Please save your business information first');
-      return;
-    }
-    
-    window.open(
-      `https://bizzysite-frontend.onrender.com/site/${storeId}`,
-      '_blank',
-      'noopener,noreferrer'
-    );
+    const storeName = userName.toLowerCase().replace(/\s+/g, '');
+    const link = `https://bizzysite.shop/store/${storeName}`;
+    window.open(link, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -285,7 +273,7 @@ export default function NavView() {
                   <p className={`mt-3 text-xs break-words ${
                     darkMode ? 'text-gray-400' : 'text-gray-500'
                   }`}>
-                   Your store URL: https://bizzysite-frontend.onrender.com/site/{storeId}
+                    Your store URL: https://bizzysite.shop/store/{userName.toLowerCase().replace(/\s+/g, '')}
                   </p>
                 )}
               </div>

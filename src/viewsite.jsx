@@ -6,6 +6,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 const ProductSkeleton = ({ layout }) => {
   const isListLayout = layout === "List";
   const isCardLayout = layout === "Card";
+  const { storeName } = useParams();
 
   return (
     <div
@@ -52,7 +53,7 @@ const ViewSite = () => {
 
         console.log(`[ViewSite] Fetching store data for storeId: ${storeId}`);
 
-        const res = await fetch(`https://bizzysite.onrender.com/api/store/${storeId}`);
+        const res = await fetch(`https://bizzysite.shop/api/store-name/${storeName}`);
         console.log(`[ViewSite] API response status: ${res.status}`);
 
         if (!res.ok) {

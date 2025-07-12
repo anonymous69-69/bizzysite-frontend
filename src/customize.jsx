@@ -425,7 +425,7 @@ export default function CustomizeStore() {
               </div>
             </div>
 
-           <div className={`rounded-lg shadow p-4 sm:p-6 ${
+            <div className={`rounded-lg shadow p-4 sm:p-6 ${
               darkMode ? 'bg-gray-800' : 'bg-white'
             }`}>
               <h2 className={`text-xl font-bold mb-2 ${
