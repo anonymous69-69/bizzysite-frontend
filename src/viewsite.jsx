@@ -6,7 +6,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 const ProductSkeleton = ({ layout }) => {
   const isListLayout = layout === "List";
   const isCardLayout = layout === "Card";
-  const { storeName } = useParams();
+  
 
   return (
     <div
@@ -42,6 +42,7 @@ const ViewSite = () => {
   const [cart, setCart] = useState([]);
   const { storeId } = useParams();
   const navigate = useNavigate();
+  const { storeName } = useParams();
   
 
   // Fetch business data using storeId from URL
