@@ -62,9 +62,27 @@ export default function NavView() {
             localStorage.setItem('storeId', sid);
           }
         }
-        // Store storeSlug in localStorage if present
+        // Store storeSlug in localStorage if present, otherwise fallback to /api/business
         if (data?.slug) {
           localStorage.setItem('storeSlug', data.slug);
+        } else {
+          // fallback: try to fetch slug from business endpoint
+          fetch('https://bizzysite.onrender.com/api/business', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${userId}`,
+              'x-store-id': localStoreId
+            }
+          })
+            .then(res => res.json())
+            .then(businessData => {
+              if (businessData?.data?.slug) {
+                localStorage.setItem('storeSlug', businessData.data.slug);
+              }
+            })
+            .catch(err => {
+              console.warn('Fallback slug fetch failed:', err);
+            });
         }
         setLoading(false);
       })
