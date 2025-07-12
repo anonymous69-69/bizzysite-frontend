@@ -22,6 +22,7 @@ export default function BusinessDashboard() {
   const [showMenu, setShowMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userName, setUserName] = useState('User');
+  const [storeSlug, setStoreSlug] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
@@ -169,7 +170,7 @@ export default function BusinessDashboard() {
         if (updated.email) localStorage.setItem('businessEmail', updated.email);
         if (updated.phone) localStorage.setItem('businessPhone', updated.phone);
       }
-      
+
       toast.success('Business information saved successfully!');
     } catch (err) {
       setError(`Save failed: ${err.message}`);
