@@ -425,7 +425,7 @@ export default function CustomizeStore() {
               </div>
             </div>
 
-            <div className={`rounded-lg shadow p-4 sm:p-6 ${
+           {/*<div className={`rounded-lg shadow p-4 sm:p-6 ${
               darkMode ? 'bg-gray-800' : 'bg-white'
             }`}>
               <h2 className={`text-xl font-bold mb-2 ${
@@ -485,7 +485,7 @@ export default function CustomizeStore() {
                     </option>
                   ))}
                 </select>
-              </div>
+              </div>  
 
               <div>
                 <label htmlFor="product-layout" className={`block text-sm font-medium mb-2 ${
@@ -511,7 +511,7 @@ export default function CustomizeStore() {
                 </select>
               </div>
             </div>
-          </div>
+          </div>*/}
 
           <div className={`rounded-lg shadow p-4 sm:p-6 lg:sticky lg:top-6 ${
             darkMode ? 'bg-gray-800' : 'bg-white'
