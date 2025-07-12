@@ -160,6 +160,11 @@ export default function BusinessDashboard() {
           shippingCharge: typeof updated.shippingCharge === 'number' ? updated.shippingCharge : prev.shippingCharge
         }));
         localStorage.setItem('businessName', updated.name || '');
+        // Store the formatted store path slug in localStorage
+        if (updated.name) {
+          const slug = updated.name.toLowerCase().replace(/\s+/g, '-');
+          localStorage.setItem('storePath', slug);
+        }
         localStorage.setItem('businessEmail', updated.email || '');
         localStorage.setItem('businessPhone', updated.phone || '');
       }
