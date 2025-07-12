@@ -53,10 +53,11 @@ function App() {
         <Route path="/shop/:storeId/product/:id" element={<InProduct />} />
         <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
         <Route path="/navview" element={userId ? <NavView /> : <Navigate to="/signup" />} />
+        <Route path="/:slug/product/:productId" element={<InProduct />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/store/:storeName" element={<ViewSite />} />
         <Route path="/store/:slug" element={<ViewSite />} />
-        <Route path="/:slug/product/:productId" element={<InProduct />} />
+        
         <Route path="/:slug" element={<ViewSite />} />
 
         <Route path="*" element={<div>404 Not Found</div>} />
