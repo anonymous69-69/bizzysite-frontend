@@ -63,15 +63,14 @@ export default function NavView() {
 
     fetchStoreData();
 
-    const handleSlugUpdate = (event) => {
-      if (event.detail?.slug) {
-        setStoreSlug(event.detail.slug);
-        localStorage.setItem('storeSlug', event.detail.slug);
+    // Listen for storeSlugUpdated event for real-time slug updates
+    const handleSlugUpdate = (e) => {
+      if (e.detail?.slug) {
+        setStoreSlug(e.detail.slug);
+        localStorage.setItem('storeSlug', e.detail.slug);
       }
     };
-
     window.addEventListener('storeSlugUpdated', handleSlugUpdate);
-    
     return () => {
       window.removeEventListener('storeSlugUpdated', handleSlugUpdate);
     };
@@ -221,11 +220,11 @@ export default function NavView() {
                 </p>
                 <button
                   onClick={handleViewSite}
-                  className={`px-4 py-2 rounded-md transition-colors ${!storeId
+                  className={`px-4 py-2 rounded-md transition-colors ${!storeSlug
                     ? 'bg-gray-500 cursor-not-allowed'
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
                   }`}
-                  disabled={!storeId}
+                  disabled={!storeSlug}
                 >
                   View Site
                 </button>
@@ -240,13 +239,13 @@ export default function NavView() {
                 </p>
                 <button
                   onClick={handleCopyLink}
-                  className={`px-4 py-2 rounded-md ${!storeId
+                  className={`px-4 py-2 rounded-md ${!storeSlug
                     ? 'border border-gray-500 text-gray-500 cursor-not-allowed'
                     : darkMode
                       ? 'bg-indigo-900 text-indigo-200 hover:bg-indigo-800'
                       : 'border border-indigo-300 text-indigo-600 bg-white hover:bg-indigo-50'
                   }`}
-                  disabled={!storeId}
+                  disabled={!storeSlug}
                 >
                   Copy Link
                 </button>
