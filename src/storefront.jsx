@@ -106,7 +106,7 @@ export default function BusinessDashboard() {
 
   const handleSave = async (e) => {
     e.preventDefault();
-
+  
     try {
       setLoading(true);
       setError('');
@@ -121,7 +121,7 @@ export default function BusinessDashboard() {
         'Authorization': `Bearer ${userId}`,
         'x-store-id': storeId
       };
-
+  
       const method = storeId ? 'PUT' : 'POST';
       const url = 'https://bizzysite.onrender.com/api/business';
       
@@ -133,22 +133,22 @@ export default function BusinessDashboard() {
           data: { ...businessInfo }
         })
       });
-
+  
       const result = await res.json();
-
+  
       if (!res.ok) {
         throw new Error(result.message || "Failed to save business information");
       }
-
+  
       const newStoreId = result.storeId || (result.data && result.data.storeId);
       if (newStoreId) {
         localStorage.setItem('storeId', newStoreId);
         setStoreId(newStoreId);
       }
-
+  
       if (result.data?.business || result.slug) {
         const updated = result.data?.business || {};
-        const newSlug = result.slug || (updated.name ? updated.name.toLowerCase().replace(/\s+/g, '-') : slug);
+        const newSlug = result.slug || (updated.name ? updated.name.toLowerCase().replace(/\s+/g, '-') : storeSlug);
         
         setBusinessInfo(prev => ({
           ...prev,
@@ -160,6 +160,7 @@ export default function BusinessDashboard() {
         if (updated.name) localStorage.setItem('businessName', updated.name);
         
         if (newSlug) {
+          setStoreSlug(newSlug);
           localStorage.setItem('storeSlug', newSlug);
           // Dispatch event with actual slug value
           window.dispatchEvent(new CustomEvent('storeSlugUpdated', {
@@ -170,7 +171,7 @@ export default function BusinessDashboard() {
         if (updated.email) localStorage.setItem('businessEmail', updated.email);
         if (updated.phone) localStorage.setItem('businessPhone', updated.phone);
       }
-
+  
       toast.success('Business information saved successfully!');
     } catch (err) {
       setError(`Save failed: ${err.message}`);
