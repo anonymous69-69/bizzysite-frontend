@@ -35,7 +35,7 @@ const ViewSite = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [cart, setCart] = useState([]);
-  const [slug, setSlug] = useState(localStorage.getItem('storeSlug') || ''); // Added storeId state
+  const { slug } = useParams(); // Added storeId state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,10 +55,10 @@ const ViewSite = () => {
           return;
         }
         
-        console.log(`[ViewSite] Fetching store data for slug: ${finalSlug}`);
+        console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
         
         // Use your actual backend URL
-        const res = await fetch(`https://bizzysite.onrender.com/api/store/slug/${finalSlug}`);
+        
         
         if (res.status === 404) {
           setError("Store not found");

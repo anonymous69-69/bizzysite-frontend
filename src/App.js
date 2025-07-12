@@ -57,6 +57,7 @@ function App() {
         <Route path="/store/:storeName" element={<ViewSite />} />
         <Route path="/store/:slug" element={<ViewSite />} />
         <Route path="/store/:slug/product/:productId" element={<InProduct />} />
+        <Route path="/:slug" element={<ViewSite />} />
 
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
