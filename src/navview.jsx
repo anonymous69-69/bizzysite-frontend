@@ -62,6 +62,10 @@ export default function NavView() {
             localStorage.setItem('storeId', sid);
           }
         }
+        // Store storeSlug in localStorage if present
+        if (data?.slug) {
+          localStorage.setItem('storeSlug', data.slug);
+        }
         setLoading(false);
       })
       .catch(err => {
