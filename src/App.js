@@ -8,8 +8,8 @@ import Orders from './orders';
 import Signup from './signup';
 import ViewSite from './viewsite';
 import Payment from './payments';
-import InProduct from './inproduct'; 
-import OrderForm from './orderform.jsx'; 
+import InProduct from './inproduct';
+import OrderForm from './orderform.jsx';
 import NavView from './navview';
 import Profile from './profile';
 import ResetPassword from './resetpassword';
@@ -55,6 +55,8 @@ function App() {
         <Route path="/navview" element={userId ? <NavView /> : <Navigate to="/signup" />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/store/:storeName" element={<ViewSite />} />
+        <Route path="/store/:slug" element={<ViewSite />} />
+        <Route path="/store/:slug/product/:productId" element={<ProductPage />} />
 
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>

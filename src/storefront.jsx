@@ -107,9 +107,24 @@ export default function BusinessDashboard() {
   // FIXED: Added storeId to headers
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!businessInfo.name.trim()) {
-      alert('Business name is required');
-      return;
+    if (result.data?.business) {
+      const updated = result.data.business;
+      const slug = result.slug; // Get slug from response
+      
+      // Store slug in localStorage
+      localStorage.setItem('storeSlug', slug);
+      
+      setBusinessInfo(prev => ({
+        ...prev,
+        ...updated,
+        shippingCharge: typeof updated.shippingCharge === 'number' 
+          ? updated.shippingCharge 
+          : prev.shippingCharge
+      }));
+      
+      // Also store other business info
+      localStorage.setItem('businessName', updated.name || '');
+      localStorage.setItem('storeSlug', slug); // Add this
     }
 
     try {

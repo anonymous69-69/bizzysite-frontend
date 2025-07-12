@@ -51,15 +51,15 @@ const ViewSite = () => {
       try {
         setLoading(true);
         setError(null);
-
-        console.log(`[ViewSite] Fetching store data for storeId: ${storeId}`);
-
-        const res = await fetch(`https://bizzysite.shop/api/store-name/${storeName}`);
+  
+        console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
+  
+        const res = await fetch(`https://bizzysite.shop/api/store/slug/${slug}`);
         console.log(`[ViewSite] API response status: ${res.status}`);
-
+  
         if (!res.ok) {
           let errorMsg = `Failed to load store (Status: ${res.status})`;
-
+  
           try {
             const errorData = await res.json();
             console.log("[ViewSite] Error response body:", errorData);
@@ -67,13 +67,17 @@ const ViewSite = () => {
           } catch (e) {
             console.error("[ViewSite] Failed to parse error response:", e);
           }
-
+  
           throw new Error(errorMsg);
         }
-
+  
         const data = await res.json();
         console.log("[ViewSite] Store data received:", data);
         setBusiness(data);
+        // Store the storeId from the response in case we need it
+        if (data.storeId) {
+          setStoreId(data.storeId);
+        }
       } catch (err) {
         console.error("[ViewSite] Error loading store:", err);
         setError(err.message || "Could not load this store. Please try again later.");
@@ -81,14 +85,14 @@ const ViewSite = () => {
         setLoading(false);
       }
     };
-
-    if (storeId) {
+  
+    if (slug) {
       fetchBusiness();
     } else {
-      setError("Store ID is missing from URL");
+      setError("Store name is missing from URL");
       setLoading(false);
     }
-  }, [storeId]);
+  }, [slug]); // Changed dependency from storeId to slug
 
   // Add to cart function
   const addToCart = (product) => {
