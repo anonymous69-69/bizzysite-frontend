@@ -78,7 +78,10 @@ const OrderForm = () => {
       // Step 1: Create Razorpay Order
       const createOrderRes = await fetch("https://bizzysite.onrender.com/api/create-order", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("userId")}`
+        },
         body: JSON.stringify({
           amount: Math.round(orderTotal * 100),
           storeId: storeId, // FIX: Use storeId from params
