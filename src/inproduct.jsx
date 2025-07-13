@@ -119,10 +119,13 @@ const InProduct = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your website...</p>
+      <div className="min-h-screen bg-gray-100 animate-pulse p-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="h-12 bg-gray-300 rounded w-1/3"></div>
+          <div className="h-96 bg-gray-300 rounded"></div>
+          <div className="h-6 bg-gray-300 rounded w-1/2"></div>
+          <div className="h-6 bg-gray-300 rounded w-2/3"></div>
+          <div className="h-10 bg-gray-300 rounded w-1/4 mt-4"></div>
         </div>
       </div>
     );
