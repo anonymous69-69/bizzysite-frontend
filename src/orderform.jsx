@@ -96,7 +96,7 @@ const OrderForm = () => {
         key: "rzp_live_QIjpR4yQhX9L3h",
         amount: razorOrder.amount,
         currency: razorOrder.currency,
-        name: business?.name || "My Store",
+        name: "my store",
         description: "Order Payment",
         order_id: razorOrder.id,
         notes: {
