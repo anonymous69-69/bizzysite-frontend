@@ -13,15 +13,23 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const laptopRef = useRef(null);
+  const screenRef = useRef(null);
+  const contentRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Auto-scroll the laptop screen content
+    let scrollPos = 0;
+    const scrollInterval = setInterval(() => {
+      if (contentRef.current) {
+        scrollPos += 0.2;
+        if (scrollPos > 300) scrollPos = 0;
+        contentRef.current.style.transform = `translateY(-${scrollPos}px)`;
+      }
+    }, 30);
+    
+    return () => clearInterval(scrollInterval);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -132,79 +140,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden bg-gradient-to-b from-gray-50 to-indigo-50">
-      {/* Floating laptop animation - Fixed and Visible */}
-      <motion.div 
-        className="fixed top-[30%] right-[10%] z-20 w-[600px]"
-        initial={{ y: 100, opacity: 0, rotateZ: -5, rotateY: -15 }}
-        animate={{ 
-          y: scrollY * -0.1 - 50, 
-          opacity: 1,
-          rotateZ: -5,
-          rotateY: -15
-        }}
-        transition={{ duration: 1 }}
-        style={{
-          transformStyle: 'preserve-3d',
-          willChange: 'transform'
-        }}
-      >
-        {/* Laptop Screen Container */}
-        <div style={{ transform: 'perspective(1000px) rotateY(-15deg) rotateZ(-5deg)' }}>
-          {/* Screen Content */}
-          <div className="absolute top-[6%] left-[13%] w-[74%] h-[78%] rounded-md overflow-hidden bg-white shadow-lg">
-            <div className="h-full w-full overflow-hidden">
-              <motion.div
-                className="h-[200%] w-full"
-                animate={{
-                  y: [-100, 0],
-                  transition: {
-                    duration: 15,
-                    repeat: Infinity,
-                    repeatType: 'loop',
-                    ease: 'linear'
-                  }
-                }}
-              >
-                {/* Ecommerce Demo Content */}
-                <div className="p-4">
-                  <div className="bg-indigo-600 text-white p-3 rounded-t-md flex justify-between">
-                    <span>MyStore</span>
-                    <div className="flex gap-2">
-                      <div className="w-3 h-3 rounded-full bg-white/30"></div>
-                      <div className="w-3 h-3 rounded-full bg-white/30"></div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 p-3">
-                    {[1,2,3,4,5,6].map(item => (
-                      <div key={item} className="border rounded-md p-2">
-                        <div className="bg-gray-100 h-20 mb-1"></div>
-                        <p className="text-sm">Product {item}</p>
-                        <p className="text-xs text-gray-500">$29.99</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="h-[300px] bg-gray-50 p-4">
-                    <p className="text-center py-10">More products...</p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-          
-          {/* Laptop Body */}
-          <svg viewBox="0 0 800 500" className="w-full h-auto">
-            <path 
-              d="M100,100 C100,50 700,50 700,100 L700,400 C700,450 100,450 100,400 Z" 
-              fill="#f1f5f9" 
-              stroke="#e2e8f0"
-            />
-            <rect x="150" y="110" width="500" height="280" rx="4" fill="#f8fafc" />
-            <rect x="250" y="410" width="300" height="8" rx="2" fill="#e2e8f0" />
-          </svg>
-        </div>
-      </motion.div>
-
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-gray-50 to-indigo-50">
       {/* Floating background elements */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         {Array.from({ length: 15 }).map((_, i) => {
@@ -271,9 +207,9 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <div className="min-h-screen flex flex-col justify-center pt-16 pb-32 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* Hero Section with Floating Laptop */}
+      <div className="min-h-screen flex flex-col justify-center items-center pt-16 pb-32 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center mb-16">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -300,7 +236,7 @@ export default function LoginPage() {
             className="text-xl sm:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto"
           />
           
-          <div className="flex justify-center items-center">
+          <div className="flex justify-center items-center mb-20">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -310,6 +246,125 @@ export default function LoginPage() {
               Get Started Free
             </motion.button>
           </div>
+
+          {/* Floating Laptop - Fixed Position Below Button */}
+          <motion.div 
+            className="relative w-full max-w-3xl mx-auto mt-16"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            <div className="relative" style={{ perspective: "1000px" }}>
+              <motion.div 
+                className="relative mx-auto"
+                animate={{ 
+                  rotateX: 5,
+                  rotateY: -15,
+                  rotateZ: -3,
+                }}
+                transition={{ 
+                  duration: 1,
+                  ease: "easeOut"
+                }}
+              >
+                {/* Laptop Screen */}
+                <div 
+                  ref={screenRef}
+                  className="absolute inset-0 w-[76%] h-[80%] mx-auto rounded-lg overflow-hidden shadow-2xl border-4 border-gray-800"
+                  style={{ 
+                    top: "5%",
+                    left: "12%",
+                    backgroundColor: "#f0f0f0",
+                    zIndex: 10
+                  }}
+                >
+                  <div className="absolute inset-0 bg-white flex flex-col">
+                    {/* Ecommerce website mockup that scrolls */}
+                    <div 
+                      ref={contentRef}
+                      className="w-full h-[200%] transition-transform duration-300"
+                    >
+                      {/* Header */}
+                      <div className="bg-indigo-600 text-white p-4 flex justify-between items-center">
+                        <div className="font-bold">MyStore</div>
+                        <div className="flex space-x-4">
+                          <div className="w-6 h-6 rounded-full bg-white/20"></div>
+                          <div className="w-6 h-6 rounded-full bg-white/20"></div>
+                        </div>
+                      </div>
+                      
+                      {/* Hero section */}
+                      <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-8 text-center">
+                        <h3 className="text-xl font-bold mb-2">Summer Collection</h3>
+                        <p className="text-sm opacity-80">New arrivals just in</p>
+                      </div>
+                      
+                      {/* Products grid */}
+                      <div className="grid grid-cols-2 gap-4 p-4">
+                        {[1, 2, 3, 4, 5, 6].map((item) => (
+                          <div key={item} className="border rounded-lg overflow-hidden">
+                            <div className="bg-gray-100 h-24"></div>
+                            <div className="p-2">
+                              <div className="text-sm font-medium">Product {item}</div>
+                              <div className="text-xs text-gray-500">$29.99</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* More products */}
+                      <div className="p-4">
+                        <div className="text-center py-4 text-gray-500">More products...</div>
+                        <div className="grid grid-cols-2 gap-4">
+                          {[7, 8, 9, 10].map((item) => (
+                            <div key={item} className="border rounded-lg overflow-hidden">
+                              <div className="bg-gray-100 h-20"></div>
+                              <div className="p-2">
+                                <div className="text-sm font-medium">Product {item}</div>
+                                <div className="text-xs text-gray-500">$29.99</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Laptop Body */}
+                <div 
+                  className="relative w-full"
+                  style={{ zIndex: 5 }}
+                >
+                  <svg viewBox="0 0 800 500" className="w-full h-auto">
+                    <path 
+                      d="M100,100 C100,50 700,50 700,100 L700,400 C700,450 100,450 100,400 Z" 
+                      fill="#f3f4f6" 
+                      stroke="#d1d5db" 
+                      strokeWidth="2"
+                    />
+                    <rect x="150" y="110" width="500" height="280" rx="5" fill="#ffffff" />
+                    {/* Keyboard area */}
+                    <rect 
+                      x="180" y="400" 
+                      width="440" height="60" 
+                      rx="5" 
+                      fill="#e5e7eb" 
+                      stroke="#d1d5db"
+                      strokeWidth="1"
+                    />
+                    {/* Trackpad */}
+                    <rect 
+                      x="320" y="410" 
+                      width="160" height="40" 
+                      rx="3" 
+                      fill="#d1d5db" 
+                    />
+                  </svg>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
         </div>
       </div>
 
