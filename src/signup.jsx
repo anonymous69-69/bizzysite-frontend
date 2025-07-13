@@ -4,7 +4,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { auth, provider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
-import { motion } from "framer-motion";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 
 export default function LoginPage() {
