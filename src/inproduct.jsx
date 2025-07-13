@@ -346,19 +346,27 @@ const InProduct = () => {
             </span>
           </div>
         
-<Link
-  to={`/shop/${slug}/orderform`}
-  state={{
-    cart,
-    total: cart.reduce((total, item) => total + (item.price * item.quantity), 0),
-    shippingCharge: business.shippingCharge || 0,
-    currency: product.currency || '$'
-  }}
-  className="w-full py-2 text-white rounded-md font-medium text-center block"
-  style={{ backgroundColor: primaryColor }}
->
-  Checkout
-</Link>
+          <button
+            onClick={() => {
+              setIsCartOpen(false);
+              navigate(`/shop/${slug}/orderform`, {
+                // Changed from storeId to slug
+                state: {
+                  cart,
+                  total: cart.reduce(
+                    (total, item) =>
+                      total + parseFloat(item.price) * item.quantity,
+                    0
+                  ),
+                  shippingCharge: business.shippingCharge || 50,
+                },
+              });
+            }}
+            className="w-full py-2 text-white rounded-md font-medium text-center"
+            style={{ backgroundColor: primaryColor }}
+          >
+            Checkout
+          </button>
         </div>
       </div>
 
