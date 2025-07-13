@@ -36,6 +36,7 @@ const ViewSite = () => {
   const [cart, setCart] = useState([]);
   const { slug } = useParams(); // Added storeId state
   const navigate = useNavigate();
+  const [textColor, setTextColor] = useState('white');
 
   useEffect(() => {
     const fetchBusiness = async () => {
@@ -454,6 +455,7 @@ const ViewSite = () => {
           }`}
         style={{ backgroundColor: primaryColor }}
       >
+
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
             {/* Mobile menu button (hamburger icon) */}
@@ -557,12 +559,11 @@ const ViewSite = () => {
 
       {/* Hero Section */}
       <section
-  id="home"
-  className={`py-8 md:py-12 px-4 text-center ${
-    textColor === 'white' ? 'text-white' : 'text-black'
-  }`}
-  style={{ backgroundColor: secondaryColor }}
->
+        id="home"
+        className={`py-8 md:py-12 px-4 text-center ${textColor === 'white' ? 'text-white' : 'text-black'
+          }`}
+        style={{ backgroundColor: secondaryColor }}
+      >
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-2xl md:text-4xl font-bold mb-4">
             {business.name || "Welcome to Our Store"}
@@ -712,8 +713,8 @@ const ViewSite = () => {
                             }`}
                             style={{ backgroundColor: primaryColor }}
                           >
-                            Add to Cart
-                          </button>
+                              Add to Cart
+                            </button>
                           )
                         ) : (
                           <button

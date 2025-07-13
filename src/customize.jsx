@@ -65,9 +65,6 @@ export default function CustomizeStore() {
         setPrimaryColor(customization.primaryColor || '#3b82f6');
         setSecondaryColor(customization.secondaryColor || '#8b5cf6');
         setTextColor(customization.textColor || 'white');
-        setFontFamily(customization.fontFamily || 'Inter');
-        setHeaderStyle(customization.headerStyle || 'Modern');
-        setProductLayout(customization.productLayout || 'Grid');
       }
     } catch (err) {
       console.error("Failed to fetch customization:", err);
@@ -456,8 +453,11 @@ export default function CustomizeStore() {
               <div className={`border rounded-lg overflow-hidden ${darkMode ? 'border-gray-700' : 'border-gray-200'
                 }`}>
                 <header
-                  className="flex items-center justify-between p-3 sm:p-4 text-white text-lg sm:text-xl font-semibold"
-                  style={{ backgroundColor: primaryColor, fontFamily }}
+                  className="flex items-center justify-between p-3 sm:p-4 text-lg sm:text-xl font-semibold"
+                  style={{
+                    backgroundColor: primaryColor,
+                    color: textColor === 'white' ? 'white' : 'black'
+                  }}
                 >
                   <div className="space-y-1">
                     <div className="w-4 h-0.5 sm:w-6" style={{ backgroundColor: secondaryColor }} />
@@ -475,7 +475,7 @@ export default function CustomizeStore() {
                         }`}
                       style={{
                         border: `2px solid ${secondaryColor}`,
-                        fontFamily
+                        
                       }}
                     >
                       <h4 className={`text-base sm:text-lg font-medium mb-1 sm:mb-2 ${darkMode ? 'text-white' : 'text-gray-800'
