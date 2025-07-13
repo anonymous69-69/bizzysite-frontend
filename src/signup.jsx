@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TypeAnimation } from 'react-type-animation';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,9 +15,16 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const navigate = useNavigate();
+  const screenContentRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+      if (screenContentRef.current) {
+        const scrollProgress = Math.min(window.scrollY / 500, 1);
+        screenContentRef.current.style.transform = `translateY(-${scrollProgress * 100}px)`;
+      }
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -31,7 +38,6 @@ export default function LoginPage() {
       ...(isLogin ? {} : { name }),
     };
     try {
-      // Defensive fetch for login/signup
       let url = ` https://bizzysite.onrender.com/api/${isLogin ? 'login' : 'signup'}`;
       let response;
       try {
@@ -44,7 +50,6 @@ export default function LoginPage() {
         console.error("Fetch error (login/signup):", fetchErr, url);
         throw new Error('Failed to connect to server.');
       }
-      // Defensive: check content-type before .json()
       const contentType = response.headers.get("content-type");
       let data;
       if (contentType && contentType.includes("application/json")) {
@@ -58,13 +63,11 @@ export default function LoginPage() {
       if (!response.ok) {
         throw new Error(data?.message || 'Something went wrong');
       }
-      // Validate and store userId as string
       const userId = String(data.userId || '').trim();
       if (!userId) {
         console.error("Invalid or missing userId in response", data);
         throw new Error('Invalid user ID received from server.');
       }
-      // Save user data to localStorage
       localStorage.setItem('userId', userId);
       localStorage.setItem('token', userId);
       localStorage.setItem('userEmail', data.email || '');
@@ -72,7 +75,6 @@ export default function LoginPage() {
       localStorage.setItem('userPhone', data.phone || '');
       localStorage.setItem('userRole', 'vendor');
       if (!isLogin) {
-        // Ensure userId is present and valid for store creation
         if (!userId) {
           throw new Error("Missing user ID for store creation.");
         }
@@ -116,7 +118,6 @@ export default function LoginPage() {
           return;
         }
       }
-      // Only show success toast after everything succeeds
       toast.success(data.message || (isLogin ? 'Login successful' : 'Signup successful'));
       setIsLoading(false);
       setShowModal(false);
@@ -139,34 +140,76 @@ export default function LoginPage() {
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-gray-50 to-indigo-50">
       {/* Floating laptop animation */}
       <motion.div 
-        className="fixed top-1/2 right-1/4 -z-10 w-[800px] max-w-[70vw]"
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: scrollY * -0.1 - 50, opacity: 1 }}
+        className="fixed top-1/3 right-[15%] -z-10 w-[800px] max-w-[60vw]"
+        initial={{ y: 100, opacity: 0, rotateZ: -5, rotateY: -15 }}
+        animate={{ 
+          y: scrollY * -0.1 - 50, 
+          opacity: 1,
+          rotateZ: -5,
+          rotateY: -15
+        }}
         transition={{ duration: 0.8, ease: "easeOut" }}
+        style={{
+          perspective: '1000px',
+          transformStyle: 'preserve-3d'
+        }}
       >
-        <div className="relative">
+        <div className="relative" style={{ transform: 'rotateY(-15deg) rotateZ(-5deg)' }}>
           {/* Laptop screen */}
           <div className="absolute top-[5%] left-[12%] w-[76%] h-[80%] rounded-lg overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <div className="text-white text-center p-6">
-                <div className="text-4xl mb-4">✨</div>
-                <h3 className="text-xl font-bold mb-2">BizzySite Dashboard</h3>
-                <p className="opacity-80">Your beautiful online store</p>
+            <div className="absolute inset-0 bg-white flex flex-col">
+              {/* Ecommerce website mockup that scrolls */}
+              <div 
+                ref={screenContentRef}
+                className="w-full h-[200%] transition-transform duration-300"
+              >
+                {/* Header */}
+                <div className="bg-indigo-600 text-white p-4 flex justify-between items-center">
+                  <div className="font-bold">MyStore</div>
+                  <div className="flex space-x-4">
+                    <div className="w-6 h-6 rounded-full bg-white/20"></div>
+                    <div className="w-6 h-6 rounded-full bg-white/20"></div>
+                  </div>
+                </div>
+                
+                {/* Hero section */}
+                <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-8 text-center">
+                  <h3 className="text-xl font-bold mb-2">Summer Collection</h3>
+                  <p className="text-sm opacity-80">New arrivals just in</p>
+                </div>
+                
+                {/* Products grid */}
+                <div className="grid grid-cols-2 gap-4 p-4">
+                  {[1, 2, 3, 4, 5, 6].map((item) => (
+                    <div key={item} className="border rounded-lg overflow-hidden">
+                      <div className="bg-gray-100 h-24"></div>
+                      <div className="p-2">
+                        <div className="text-sm font-medium">Product {item}</div>
+                        <div className="text-xs text-gray-500">$29.99</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Footer */}
+                <div className="bg-gray-100 p-4 text-center text-xs">
+                  © 2024 MyStore. All rights reserved.
+                </div>
               </div>
             </div>
-            {/* Mock UI elements */}
+            {/* Screen controls */}
             <div className="absolute top-4 left-4 right-4 flex justify-between">
-              <div className="h-2 w-12 bg-white/20 rounded-full"></div>
+              <div className="h-2 w-12 bg-gray-400/20 rounded-full"></div>
               <div className="flex space-x-2">
-                <div className="h-2 w-2 bg-white/40 rounded-full"></div>
-                <div className="h-2 w-2 bg-white/40 rounded-full"></div>
-                <div className="h-2 w-2 bg-white/40 rounded-full"></div>
+                <div className="h-2 w-2 bg-gray-400/40 rounded-full"></div>
+                <div className="h-2 w-2 bg-gray-400/40 rounded-full"></div>
+                <div className="h-2 w-2 bg-gray-400/40 rounded-full"></div>
               </div>
             </div>
           </div>
           
           {/* Laptop body */}
-          <div className="relative">
+          <div className="relative" style={{ transform: 'rotateY(-15deg) rotateZ(-5deg)' }}>
             <svg viewBox="0 0 800 500" className="w-full h-auto">
               <path 
                 d="M100,100 C100,50 700,50 700,100 L700,400 C700,450 100,450 100,400 Z" 
@@ -276,7 +319,7 @@ export default function LoginPage() {
             className="text-xl sm:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto"
           />
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex justify-center items-center">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -285,25 +328,6 @@ export default function LoginPage() {
             >
               Get Started Free
             </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => openModal(true)}
-              className="px-8 py-4 bg-white text-gray-800 font-medium rounded-lg border border-gray-200 hover:border-gray-300 shadow-md transition-all"
-            >
-              Live Demo
-            </motion.button>
-          </div>
-          
-          <div className="mt-16 flex flex-wrap justify-center gap-10">
-            {["No credit card needed", "Free 14-day trial", "Cancel anytime"].map((item, idx) => (
-              <div key={idx} className="flex items-center text-gray-600">
-                <svg className="w-5 h-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                {item}
-              </div>
-            ))}
           </div>
         </div>
       </div>
@@ -336,21 +360,6 @@ export default function LoginPage() {
                 icon: "📱", 
                 title: "Mobile Optimized", 
                 desc: "Beautiful storefront that works perfectly on all devices" 
-              },
-              { 
-                icon: "📊", 
-                title: "Sales Analytics", 
-                desc: "Track your performance with real-time sales reports" 
-              },
-              { 
-                icon: "📦", 
-                title: "Inventory Management", 
-                desc: "Easily track and manage your product inventory" 
-              },
-              { 
-                icon: "🌐", 
-                title: "Global Selling", 
-                desc: "Sell to customers worldwide with multi-currency support" 
               }
             ].map((feature, idx) => (
               <motion.div
@@ -526,7 +535,6 @@ export default function LoginPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="pt-4 px-4 sm:px-6 pb-6 sm:py-6 flex flex-col">
-              {/* Drag handle bar */}
               <div className="w-12 h-1.5 bg-gray-400 rounded-full mx-auto mb-4" />
               <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800 text-center">{isLogin ? 'Login' : 'Create Account'}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
