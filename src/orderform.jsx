@@ -30,24 +30,23 @@ const OrderForm = () => {
   const platformFee = total * 0.03;
   const orderTotal = total + shippingCharge + platformFee;
 
-  // Handle pincode lookup (mock implementation)
+  // Handle pincode lookup using postalpincode.in API
   const handlePincodeLookup = async (pincode) => {
     if (pincode.length === 6) {
-      // This is a mock implementation - in a real app you'd call an API
-      const mockData = {
-        "110001": { city: "New Delhi", state: "Delhi", country: "India" },
-        "400001": { city: "Mumbai", state: "Maharashtra", country: "India" },
-        "700001": { city: "Kolkata", state: "West Bengal", country: "India" },
-        "600001": { city: "Chennai", state: "Tamil Nadu", country: "India" }
-      };
-
-      if (mockData[pincode]) {
-        setFormData(prev => ({
-          ...prev,
-          city: mockData[pincode].city,
-          state: mockData[pincode].state,
-          country: mockData[pincode].country
-        }));
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+        const data = await res.json();
+        if (data[0].Status === "Success") {
+          const locationInfo = data[0].PostOffice[0];
+          setFormData(prev => ({
+            ...prev,
+            city: locationInfo.District,
+            state: locationInfo.State,
+            country: "India"
+          }));
+        }
+      } catch (err) {
+        console.error("Pincode lookup failed:", err);
       }
     }
   };
@@ -56,7 +55,6 @@ const OrderForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-
     if (name === "pincode") {
       handlePincodeLookup(value);
     }
