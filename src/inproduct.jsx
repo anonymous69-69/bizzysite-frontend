@@ -351,6 +351,7 @@ const InProduct = () => {
   state={{
     cart,
     total: cart.reduce((total, item) => total + (item.price * item.quantity), 0),
+    shippingCharge: business.shippingCharge || 0,
     currency: product.currency || '$'
   }}
   className="w-full py-2 text-white rounded-md font-medium text-center block"

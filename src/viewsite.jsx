@@ -116,6 +116,19 @@ const ViewSite = () => {
     );
   };
 
+ 
+
+useEffect(() => {
+  const storedCart = localStorage.getItem('cart');
+  if (storedCart) {
+    setCart(JSON.parse(storedCart));
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem('cart', JSON.stringify(cart));
+}, [cart]);
+
   // Remove from cart function
   const removeFromCart = (productId) => {
     setCart((prevCart) => prevCart.filter((item) => item._id !== productId));
