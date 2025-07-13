@@ -154,7 +154,7 @@ export default function LoginPage() {
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-gray-50 to-indigo-50">
       {/* Floating laptop animation */}
       <motion.div
-        className="fixed top-1/3 right-[15%] -z-10 w-[800px] max-w-[60vw]"
+        className="fixed top-1/3 right-[15%] z-10 w-[800px] max-w-[60vw]"
         style={{ y: springY }}
         initial={{ opacity: 0, rotateZ: -5, rotateY: -15 }}
         animate={{ opacity: 1 }}
