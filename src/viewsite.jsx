@@ -4,12 +4,11 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 const ProductSkeleton = ({ layout }) => {
   const isListLayout = layout === "List";
   const isCardLayout = layout === "Card";
-  
+
   return (
     <div
-      className={`bg-white rounded-lg overflow-hidden shadow-md ${
-        isListLayout ? "flex flex-col sm:flex-row" : "block"
-      }`}
+      className={`bg-white rounded-lg overflow-hidden shadow-md ${isListLayout ? "flex flex-col sm:flex-row" : "block"
+        }`}
       style={{
         border: isCardLayout ? "2px solid #d1d5db" : "none",
       }}
@@ -44,23 +43,23 @@ const ViewSite = () => {
         const res = await fetch(`https://bizzysite.onrender.com/api/store/slug/${slug}`);
         setLoading(true);
         setError(null);
-        
+
         // Get slug from URL path (first segment)
         const pathSlug = window.location.pathname.split('/')[1];
         // Use URL slug if available, otherwise use state slug
         const finalSlug = pathSlug || slug;
-        
+
         if (!finalSlug) {
           setError("Store slug is missing");
           setLoading(false);
           return;
         }
-        
+
         console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
-        
+
         // Use your actual backend URL
-        
-        
+
+
         if (res.status === 404) {
           setError("Store not found");
           setBusiness(null);
@@ -79,7 +78,7 @@ const ViewSite = () => {
         setLoading(false);
       }
     };
-  
+
     fetchBusiness();
   }, [slug]);
 
@@ -136,7 +135,7 @@ const ViewSite = () => {
             <div className="h-6 bg-gray-300 rounded w-6 animate-pulse"></div>
           </div>
         </header>
-  
+
         {/* Hero Section Skeleton */}
         <section className="py-8 md:py-12 px-4 bg-gray-100">
           <div className="container mx-auto max-w-4xl">
@@ -145,7 +144,7 @@ const ViewSite = () => {
             <div className="h-4 bg-gray-300 rounded w-2/3 mx-auto animate-pulse"></div>
           </div>
         </section>
-  
+
         {/* Products Section Skeleton */}
         <section className="py-12 px-4 bg-gray-50">
           <div className="container mx-auto">
@@ -307,8 +306,8 @@ const ViewSite = () => {
       {/* Contact Modal */}
       <div
         className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 p-6 w-full max-w-md transition-all duration-300 ${isContactModalOpen
-            ? "opacity-100 scale-100"
-            : "opacity-0 scale-95 pointer-events-none"
+          ? "opacity-100 scale-100"
+          : "opacity-0 scale-95 pointer-events-none"
           }`}
       >
         <div className="flex justify-between items-center mb-4">
@@ -451,7 +450,8 @@ const ViewSite = () => {
 
       {/* Header */}
       <header
-        className="sticky top-0 z-20 p-4 text-white shadow-md"
+        className={`sticky top-0 z-20 p-4 shadow-md ${textColor === 'white' ? 'text-white' : 'text-black'
+          }`}
         style={{ backgroundColor: primaryColor }}
       >
         <div className="container mx-auto flex justify-between items-center">
@@ -557,12 +557,12 @@ const ViewSite = () => {
 
       {/* Hero Section */}
       <section
-        id="home"
-        className="py-8 md:py-12 px-4 text-center"
-        style={{
-          backgroundColor: secondaryColor,
-        }}
-      >
+  id="home"
+  className={`py-8 md:py-12 px-4 text-center ${
+    textColor === 'white' ? 'text-white' : 'text-black'
+  }`}
+  style={{ backgroundColor: secondaryColor }}
+>
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-2xl md:text-4xl font-bold mb-4">
             {business.name || "Welcome to Our Store"}
@@ -604,10 +604,10 @@ const ViewSite = () => {
           ) : (
             <div
               className={`grid ${productLayout === "Grid"
-                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3" // Changed from grid-cols-1 to grid-cols-2 for mobile
-                  : productLayout === "List"
-                    ? "grid-cols-1"
-                    : "grid-cols-1 md:grid-cols-2"
+                ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3" // Changed from grid-cols-1 to grid-cols-2 for mobile
+                : productLayout === "List"
+                  ? "grid-cols-1"
+                  : "grid-cols-1 md:grid-cols-2"
                 } gap-4 md:gap-6`}
             >
               {products.map((product, index) => {
@@ -639,8 +639,8 @@ const ViewSite = () => {
                           src={product.images[0]}
                           alt={product.name}
                           className={`${productLayout === "List"
-                              ? "w-full h-48 sm:w-1/3 sm:h-auto object-cover"
-                              : "w-full h-48 object-cover"
+                            ? "w-full h-48 sm:w-1/3 sm:h-auto object-cover"
+                            : "w-full h-48 object-cover"
                             }`}
                         />
                       ) : (
@@ -707,15 +707,13 @@ const ViewSite = () => {
                             </div>
                           ) : (
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                addToCart(product);
-                              }}
-                              className="px-3 py-1 text-sm rounded-md text-white font-medium hover:opacity-90 md:px-4 md:py-2 md:text-base"
-                              style={{ backgroundColor: primaryColor }}
-                            >
-                              Add to Cart
-                            </button>
+                            className={`px-3 py-1 text-sm rounded-md font-medium hover:opacity-90 md:px-4 md:py-2 md:text-base ${
+                              textColor === 'white' ? 'text-white' : 'text-black'
+                            }`}
+                            style={{ backgroundColor: primaryColor }}
+                          >
+                            Add to Cart
+                          </button>
                           )
                         ) : (
                           <button
