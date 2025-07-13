@@ -7,13 +7,18 @@ const ProductSkeleton = ({ layout }) => {
 
   return (
     <div
-      className={`bg-white rounded-lg overflow-hidden shadow-md ${isListLayout ? "flex flex-col sm:flex-row" : "block"
-        }`}
+      className={`bg-white rounded-lg overflow-hidden shadow-md ${
+        isListLayout ? "flex flex-col sm:flex-row" : "block"
+      }`}
       style={{
         border: isCardLayout ? "2px solid #d1d5db" : "none",
       }}
     >
-      <div className={`${isListLayout ? "sm:w-1/3" : "w-full"} h-48 bg-gray-200 animate-pulse`}></div>
+      <div
+        className={`${
+          isListLayout ? "sm:w-1/3" : "w-full"
+        } h-48 bg-gray-200 animate-pulse`}
+      ></div>
       <div className={`p-4 ${isListLayout ? "sm:w-2/3" : ""}`}>
         <div className="h-6 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
         <div className="h-4 bg-gray-200 rounded w-1/2 mb-4 animate-pulse"></div>
@@ -36,17 +41,19 @@ const ViewSite = () => {
   const [cart, setCart] = useState([]);
   const { slug } = useParams(); // Added storeId state
   const navigate = useNavigate();
-  const [textColor, setTextColor] = useState('white');
+  const [textColor, setTextColor] = useState("white");
 
   useEffect(() => {
     const fetchBusiness = async () => {
       try {
-        const res = await fetch(`https://bizzysite.onrender.com/api/store/slug/${slug}`);
+        const res = await fetch(
+          `https://bizzysite.onrender.com/api/store/slug/${slug}`
+        );
         setLoading(true);
         setError(null);
 
         // Get slug from URL path (first segment)
-        const pathSlug = window.location.pathname.split('/')[1];
+        const pathSlug = window.location.pathname.split("/")[1];
         // Use URL slug if available, otherwise use state slug
         const finalSlug = pathSlug || slug;
 
@@ -59,7 +66,6 @@ const ViewSite = () => {
         console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
 
         // Use your actual backend URL
-
 
         if (res.status === 404) {
           setError("Store not found");
@@ -86,9 +92,7 @@ const ViewSite = () => {
   // Add to cart function
   const addToCart = (product) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find(
-        (item) => item._id === product._id
-      );
+      const existingItem = prevCart.find((item) => item._id === product._id);
       if (existingItem) {
         return prevCart.map((item) =>
           item._id === product._id
@@ -107,18 +111,14 @@ const ViewSite = () => {
 
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item._id === productId
-          ? { ...item, quantity: newQuantity }
-          : item
+        item._id === productId ? { ...item, quantity: newQuantity } : item
       )
     );
   };
 
   // Remove from cart function
   const removeFromCart = (productId) => {
-    setCart((prevCart) =>
-      prevCart.filter((item) => item._id !== productId)
-    );
+    setCart((prevCart) => prevCart.filter((item) => item._id !== productId));
   };
 
   const productLayout = business?.customize?.productLayout || "Grid";
@@ -170,7 +170,10 @@ const ViewSite = () => {
           </h3>
           <p className="mt-2 text-gray-600">{error}</p>
           <p className="mt-3 text-sm text-gray-500">
-            Store URL: <code className="bg-gray-100 px-2 py-1 rounded">{slug || "N/A"}</code>
+            Store URL:{" "}
+            <code className="bg-gray-100 px-2 py-1 rounded">
+              {slug || "N/A"}
+            </code>
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -179,16 +182,10 @@ const ViewSite = () => {
             Try Again
           </button>
           <div className="mt-4 space-y-2">
-            <Link
-              to="/login"
-              className="block text-indigo-600 hover:underline"
-            >
+            <Link to="/login" className="block text-indigo-600 hover:underline">
               Login Again
             </Link>
-            <Link
-              to="/"
-              className="block text-indigo-600 hover:underline"
-            >
+            <Link to="/" className="block text-indigo-600 hover:underline">
               Return to Home
             </Link>
             <a
@@ -207,11 +204,11 @@ const ViewSite = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center p-6 bg-white rounded-lg shadow-md max-w-md">
-          <h3 className="text-lg font-medium text-gray-800">
-            Store not found
-          </h3>
+          <h3 className="text-lg font-medium text-gray-800">Store not found</h3>
           <p className="mt-2 text-gray-600">
-            The store URL <code className="bg-gray-100 px-2 py-1 rounded">{slug}</code> does not exist.
+            The store URL{" "}
+            <code className="bg-gray-100 px-2 py-1 rounded">{slug}</code> does
+            not exist.
           </p>
           <p className="mt-3 text-sm text-gray-500">
             Make sure you've completed your store setup.
@@ -245,15 +242,17 @@ const ViewSite = () => {
     >
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity duration-300 ${isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity duration-300 ${
+          isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={() => setIsMenuOpen(false)}
       ></div>
 
       {/* Mobile Side Menu */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ${
+          isMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="p-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold">{business.name || "Menu"}</h3>
@@ -264,7 +263,9 @@ const ViewSite = () => {
               <button
                 onClick={() => {
                   setIsMenuOpen(false);
-                  document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
+                  document
+                    .getElementById("home")
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className="block py-2 hover:text-indigo-600 w-full text-left"
               >
@@ -275,7 +276,9 @@ const ViewSite = () => {
               <button
                 onClick={() => {
                   setIsMenuOpen(false);
-                  document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+                  document
+                    .getElementById("products")
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className="block py-2 hover:text-indigo-600 w-full text-left"
               >
@@ -299,17 +302,19 @@ const ViewSite = () => {
 
       {/* Contact Modal Overlay */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-70 z-50 transition-opacity duration-300 ${isContactModalOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 bg-black bg-opacity-70 z-50 transition-opacity duration-300 ${
+          isContactModalOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={() => setIsContactModalOpen(false)}
       ></div>
 
       {/* Contact Modal */}
       <div
-        className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 p-6 w-full max-w-md transition-all duration-300 ${isContactModalOpen
-          ? "opacity-100 scale-100"
-          : "opacity-0 scale-95 pointer-events-none"
-          }`}
+        className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 p-6 w-full max-w-md transition-all duration-300 ${
+          isContactModalOpen
+            ? "opacity-100 scale-100"
+            : "opacity-0 scale-95 pointer-events-none"
+        }`}
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-gray-800">
@@ -340,14 +345,16 @@ const ViewSite = () => {
 
       {/* Cart Sidebar with darker background */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-70 z-30 transition-opacity duration-300 ${isCartOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 bg-black bg-opacity-70 z-30 transition-opacity duration-300 ${
+          isCartOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={() => setIsCartOpen(false)}
       ></div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-40 transform transition-transform duration-300 ${isCartOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-40 transform transition-transform duration-300 ${
+          isCartOpen ? "translate-x-0" : "translate-x-full"
+        }`}
       >
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-lg font-semibold">Your Cart ({totalItems})</h3>
@@ -422,7 +429,11 @@ const ViewSite = () => {
             <span className="font-semibold">
               {cart.length > 0 ? cart[0].currency || "$" : "$"}
               {cart
-                .reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0)
+                .reduce(
+                  (total, item) =>
+                    total + parseFloat(item.price) * item.quantity,
+                  0
+                )
                 .toFixed(2)}
             </span>
           </div>
@@ -430,14 +441,16 @@ const ViewSite = () => {
           <button
             onClick={() => {
               setIsCartOpen(false);
-              navigate(`/shop/${slug}/orderform`, { // Changed from storeId to slug
+              navigate(`/shop/${slug}/orderform`, {
+                // Changed from storeId to slug
                 state: {
                   cart,
                   total: cart.reduce(
-                    (total, item) => total + (parseFloat(item.price) * item.quantity),
+                    (total, item) =>
+                      total + parseFloat(item.price) * item.quantity,
                     0
                   ),
-                  shippingCharge: business.shippingCharge || 50
+                  shippingCharge: business.shippingCharge || 50,
                 },
               });
             }}
@@ -451,11 +464,11 @@ const ViewSite = () => {
 
       {/* Header */}
       <header
-        className={`sticky top-0 z-20 p-4 shadow-md ${textColor === 'white' ? 'text-white' : 'text-black'
-          }`}
+        className={`sticky top-0 z-20 p-4 shadow-md ${
+          textColor === "white" ? "text-white" : "text-black"
+        }`}
         style={{ backgroundColor: primaryColor }}
       >
-
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
             {/* Mobile menu button (hamburger icon) */}
@@ -482,13 +495,21 @@ const ViewSite = () => {
           </div>
           <div className="hidden md:flex items-center space-x-6">
             <button
-              onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() =>
+                document
+                  .getElementById("home")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
               className="hover:opacity-80"
             >
               Home
             </button>
             <button
-              onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() =>
+                document
+                  .getElementById("products")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
               className="hover:opacity-80"
             >
               Products
@@ -560,15 +581,20 @@ const ViewSite = () => {
       {/* Hero Section */}
       <section
         id="home"
-        className={`py-8 md:py-12 px-4 text-center ${textColor === 'white' ? 'text-white' : 'text-black'
-          }`}
+        className={`py-8 md:py-12 px-4 text-center ${
+          textColor === "white" ? "text-white" : "text-black"
+        }`}
         style={{ backgroundColor: secondaryColor }}
       >
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-2xl md:text-4xl font-bold mb-4">
             {business.name || "Welcome to Our Store"}
           </h1>
-          <p className="text-base md:text-lg mb-6 md:mb-8 text-gray-700">
+          <p
+            className={`text-base md:text-lg mb-6 md:mb-8 ${
+              textColor === "white" ? "text-white" : "text-black"
+            }`}
+          >
             {business.description ||
               "Discover our amazing products and services"}
           </p>
@@ -604,17 +630,16 @@ const ViewSite = () => {
             </div>
           ) : (
             <div
-              className={`grid ${productLayout === "Grid"
-                ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3" // Changed from grid-cols-1 to grid-cols-2 for mobile
-                : productLayout === "List"
+              className={`grid ${
+                productLayout === "Grid"
+                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3" // Changed from grid-cols-1 to grid-cols-2 for mobile
+                  : productLayout === "List"
                   ? "grid-cols-1"
                   : "grid-cols-1 md:grid-cols-2"
-                } gap-4 md:gap-6`}
+              } gap-4 md:gap-6`}
             >
               {products.map((product, index) => {
-                const cartItem = cart.find(
-                  (item) => item._id === product._id
-                );
+                const cartItem = cart.find((item) => item._id === product._id);
 
                 return (
                   <div
@@ -625,13 +650,16 @@ const ViewSite = () => {
                         productLayout === "Card"
                           ? `2px solid ${secondaryColor}`
                           : "none",
-                      display: productLayout === "List" ? "flex flex-col sm:flex-row" : "block",
+                      display:
+                        productLayout === "List"
+                          ? "flex flex-col sm:flex-row"
+                          : "block",
                       animationDelay: `${index * 0.1}s`, // Staggered animation
                     }}
                   >
                     <button
-                      onClick={() =>
-                        navigate(`/${slug}/product/${product._id}`) // Changed from storeId to slug
+                      onClick={
+                        () => navigate(`/${slug}/product/${product._id}`) // Changed from storeId to slug
                       }
                       className="w-full text-left"
                     >
@@ -639,15 +667,17 @@ const ViewSite = () => {
                         <img
                           src={product.images[0]}
                           alt={product.name}
-                          className={`${productLayout === "List"
-                            ? "w-full h-48 sm:w-1/3 sm:h-auto object-cover"
-                            : "w-full h-48 object-cover"
-                            }`}
+                          className={`${
+                            productLayout === "List"
+                              ? "w-full h-48 sm:w-1/3 sm:h-auto object-cover"
+                              : "w-full h-48 object-cover"
+                          }`}
                         />
                       ) : (
                         <div
-                          className={`${productLayout === "List" ? "sm:w-1/3" : "w-full"
-                            } h-48 bg-gray-200 flex items-center justify-center`}
+                          className={`${
+                            productLayout === "List" ? "sm:w-1/3" : "w-full"
+                          } h-48 bg-gray-200 flex items-center justify-center`}
                         >
                           <span className="text-gray-500">No image</span>
                         </div>
@@ -655,8 +685,9 @@ const ViewSite = () => {
                     </button>
 
                     <div
-                      className={`p-4 ${productLayout === "List" ? "sm:w-2/3" : ""
-                        }`}
+                      className={`p-4 ${
+                        productLayout === "List" ? "sm:w-2/3" : ""
+                      }`}
                     >
                       <h3 className="text-lg font-semibold mb-2">
                         {product.name || "Product Name"}
@@ -708,11 +739,13 @@ const ViewSite = () => {
                             </div>
                           ) : (
                             <button
-                            className={`px-3 py-1 text-sm rounded-md font-medium hover:opacity-90 md:px-4 md:py-2 md:text-base ${
-                              textColor === 'white' ? 'text-white' : 'text-black'
-                            }`}
-                            style={{ backgroundColor: primaryColor }}
-                          >
+                              className={`px-3 py-1 text-sm rounded-md font-medium hover:opacity-90 md:px-4 md:py-2 md:text-base ${
+                                textColor === "white"
+                                  ? "text-white"
+                                  : "text-black"
+                              }`}
+                              style={{ backgroundColor: primaryColor }}
+                            >
                               Add to Cart
                             </button>
                           )
@@ -740,13 +773,18 @@ const ViewSite = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             <div>
-              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+                BizzySite
+              </h3>
               <p className="text-gray-300 mb-4 text-sm sm:text-base">
-                Made with BizzySite. A free website builder for small businesses.
+                Made with BizzySite. A free website builder for small
+                businesses.
               </p>
             </div>
             <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
+              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                Contact
+              </h4>
               <ul className="space-y-2 text-gray-300 text-sm sm:text-base">
                 <li>Email: rhythmsarma66@gmail.com</li>
                 <li>Phone: +91 7086758292</li>
