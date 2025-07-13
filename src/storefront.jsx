@@ -384,22 +384,6 @@ export default function BusinessDashboard() {
               />
             </div>
 
-            <div className="mb-6">
-              <label htmlFor="description" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Business Description
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={businessInfo.description}
-                onChange={handleChange}
-                placeholder="Tell us about your business"
-                rows={3}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
-                }`}
-              />
-            </div>
 
             <div className="mb-6">
               <label htmlFor="address" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>

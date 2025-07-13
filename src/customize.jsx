@@ -417,23 +417,21 @@ export default function CustomizeStore() {
                 <div className="flex gap-4">
                   <button
                     onClick={() => setTextColor('white')}
-                    className={`px-4 py-2 rounded-md border ${textColor === 'white'
+                    className={`p-2 rounded-md border ${textColor === 'white'
                       ? 'ring-2 ring-indigo-500'
                       : 'border-gray-300'
-                      } ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'
-                      }`}
+                      } ${darkMode ? 'bg-gray-700' : 'bg-white'}`}
                   >
-                    White
+                    <div className="w-6 h-6 rounded" style={{ backgroundColor: 'white', border: '1px solid #ccc' }} />
                   </button>
                   <button
                     onClick={() => setTextColor('black')}
-                    className={`px-4 py-2 rounded-md border ${textColor === 'black'
+                    className={`p-2 rounded-md border ${textColor === 'black'
                       ? 'ring-2 ring-indigo-500'
                       : 'border-gray-300'
-                      } ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'
-                      }`}
+                      } ${darkMode ? 'bg-gray-700' : 'bg-white'}`}
                   >
-                    Black
+                    <div className="w-6 h-6 rounded" style={{ backgroundColor: 'black' }} />
                   </button>
                 </div>
               </div>
