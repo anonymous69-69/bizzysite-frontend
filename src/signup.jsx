@@ -275,8 +275,8 @@ export default function LoginPage() {
             animate={{
               opacity: 1,
               y: 0,
-              x: [-10, 10, -10],
-              y: [-10, 10, -10],
+              x: [0, 5, 0],
+              y: [0, 5, 0],
             }}
             transition={{
               delay: 0.3,
@@ -294,15 +294,22 @@ export default function LoginPage() {
                 ease: "easeInOut",
               },
             }}
+            whileInView={{
+              x: window.innerWidth < 768 ? 0 : [0, 5, 0],
+              y: window.innerWidth < 768 ? 0 : [0, 5, 0],
+            }}
+          
           >
             <div className="relative" style={{ perspective: "1000px" }}>
               <motion.div
                 className="relative mx-auto"
                 animate={{
-                  rotateX: 5,
-                  rotateY: -15,
-                  rotateZ: -3,
+                  rotateX: window.innerWidth < 768 ? 0 : 5,
+                  rotateY: window.innerWidth < 768 ? 0 : -15,
+                  rotateZ: window.innerWidth < 768 ? 0 : -3,
                 }}
+          
+                
                 transition={{
                   duration: 1,
                   ease: "easeOut",
@@ -448,7 +455,7 @@ export default function LoginPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
               {
-                title: "Lightning Fast Setup", 
+                title: "Lightning Fast Setup",
                 desc: "Launch your store in minutes with our intuitive setup wizard",
                 animation: (
                   <div className="h-16 flex items-center justify-center mb-6 relative">
@@ -456,94 +463,94 @@ export default function LoginPage() {
                     <motion.div
                       initial={{ y: 0, opacity: 1 }}
                       animate={{ y: -40, opacity: 0 }}
-                      transition={{ 
+                      transition={{
                         duration: 3,
                         repeat: Infinity,
                         repeatDelay: 1.5,
-                        ease: "easeOut"
+                        ease: "easeOut",
                       }}
-                      style={{ position: 'relative', zIndex: 10 }}
+                      style={{ position: "relative", zIndex: 10 }}
                     >
                       <div className="text-4xl">🚀</div>
                     </motion.div>
-                    
+
                     {/* Enhanced smoke effect - now more visible */}
                     <motion.div
-                      initial={{ 
-                        scale: 0.5, 
+                      initial={{
+                        scale: 0.5,
                         opacity: 0.9,
-                        y: 10
+                        y: 10,
                       }}
-                      animate={{ 
-                        scale: 4, 
+                      animate={{
+                        scale: 4,
                         opacity: 0,
-                        y: -20
+                        y: -20,
                       }}
-                      transition={{ 
+                      transition={{
                         duration: 3,
                         repeat: Infinity,
                         repeatDelay: 1.5,
-                        ease: "easeOut"
+                        ease: "easeOut",
                       }}
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         bottom: 0,
-                        left: '50%',
+                        left: "50%",
                         marginLeft: -15,
                         width: 30,
                         height: 30,
-                        borderRadius: '50%',
-                        backgroundColor: 'rgba(120, 120, 120, 0.7)', // Darker gray color
-                        filter: 'blur(8px)', // Increased blur
-                        zIndex: 1
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(120, 120, 120, 0.7)", // Darker gray color
+                        filter: "blur(8px)", // Increased blur
+                        zIndex: 1,
                       }}
                     />
                     {/* Additional smoke particle for more effect */}
                     <motion.div
-                      initial={{ 
-                        scale: 0.3, 
+                      initial={{
+                        scale: 0.3,
                         opacity: 0.7,
                         y: 15,
-                        x: -5
+                        x: -5,
                       }}
-                      animate={{ 
-                        scale: 3, 
+                      animate={{
+                        scale: 3,
                         opacity: 0,
                         y: -10,
-                        x: 5
+                        x: 5,
                       }}
-                      transition={{ 
+                      transition={{
                         duration: 3.5,
                         repeat: Infinity,
                         repeatDelay: 1.5,
-                        ease: "easeOut"
+                        ease: "easeOut",
                       }}
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         bottom: -5,
-                        left: '50%',
+                        left: "50%",
                         width: 25,
                         height: 25,
-                        borderRadius: '50%',
-                        backgroundColor: 'rgba(150, 150, 150, 0.6)', // Medium gray
-                        filter: 'blur(6px)',
-                        zIndex: 1
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(150, 150, 150, 0.6)", // Medium gray
+                        filter: "blur(6px)",
+                        zIndex: 1,
                       }}
                     />
                   </div>
-                )
+                ),
               },
               {
                 title: "Integrated Payments",
                 desc: "Accept credit cards, PayPal, and other payment methods securely",
                 animation: (
                   <div className="h-16 flex items-center justify-center mb-6">
-                    <div 
-                      style={{ 
-                        position: "relative", 
-                        width: 80, 
+                    <div
+                      style={{
+                        position: "relative",
+                        width: 80,
                         height: 40,
-                        filter: "drop-shadow(0 4px 6px rgba(79, 70, 229, 0.2))"
+                        filter: "drop-shadow(0 4px 6px rgba(79, 70, 229, 0.2))",
                       }}
                     >
                       {/* Payment Terminal Base */}
@@ -557,10 +564,11 @@ export default function LoginPage() {
                           height: 30,
                           backgroundColor: "#d1d5db",
                           borderRadius: 4,
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.1)"
+                          boxShadow:
+                            "0 2px 8px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.1)",
                         }}
                       ></div>
-                      
+
                       {/* Credit Card */}
                       <motion.div
                         initial={{ x: 30, y: 0, rotate: 0 }}
@@ -584,30 +592,34 @@ export default function LoginPage() {
                             0 4px 12px rgba(79, 70, 229, 0.15),
                             inset 0 0 0 1px rgba(0,0,0,0.05)
                           `,
-                          zIndex: 10
+                          zIndex: 10,
                         }}
                       >
                         {/* Card Details */}
-                        <div style={{
-                          position: "absolute",
-                          bottom: 4,
-                          left: 4,
-                          right: 4,
-                          height: 4,
-                          backgroundColor: "#e5e7eb",
-                          borderRadius: 2
-                        }}></div>
-                        <div style={{
-                          position: "absolute",
-                          top: 8,
-                          left: 4,
-                          width: 12,
-                          height: 8,
-                          backgroundColor: "#818cf8",
-                          borderRadius: 2
-                        }}></div>
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: 4,
+                            left: 4,
+                            right: 4,
+                            height: 4,
+                            backgroundColor: "#e5e7eb",
+                            borderRadius: 2,
+                          }}
+                        ></div>
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 8,
+                            left: 4,
+                            width: 12,
+                            height: 8,
+                            backgroundColor: "#818cf8",
+                            borderRadius: 2,
+                          }}
+                        ></div>
                       </motion.div>
-                      
+
                       {/* Subtle glow effect */}
                       <motion.div
                         initial={{ opacity: 0 }}
@@ -628,7 +640,7 @@ export default function LoginPage() {
                           borderRadius: "50%",
                           filter: "blur(8px)",
                           transform: "translateX(-50%)",
-                          zIndex: 1
+                          zIndex: 1,
                         }}
                       />
                     </div>
