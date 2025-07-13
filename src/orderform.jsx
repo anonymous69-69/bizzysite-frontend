@@ -25,10 +25,10 @@ const OrderForm = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Order summary
-  const shippingCharge = typeof sc === 'number' ? sc : parseFloat(sc);
-  const platformFee = total * 0.03;
-  const orderTotal = total + shippingCharge + platformFee;
+  // Order summary (safer version to prevent NaN issues)
+  const shippingCharge = !isNaN(parseFloat(sc)) ? parseFloat(sc) : 0;
+  const platformFee = !isNaN(total) ? total * 0.03 : 0;
+  const orderTotal = !isNaN(total + shippingCharge + platformFee) ? total + shippingCharge + platformFee : 0;
 
   // Handle pincode lookup using postalpincode.in API
   const handlePincodeLookup = async (pincode) => {
