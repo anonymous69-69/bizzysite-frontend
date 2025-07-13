@@ -14,6 +14,17 @@ const InProduct = () => {
   const [cart, setCart] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [product, setProduct] = useState(null);
+
+  useEffect(() => {
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
   
 
   // Fetch business data
@@ -331,7 +342,7 @@ const InProduct = () => {
           <div className="flex justify-between mb-4">
             <span className="font-semibold">Total:</span>
             <span className="font-semibold">
-              {cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2)}
+              {(product.currency || '$')}{cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2)}
             </span>
           </div>
         
@@ -339,7 +350,8 @@ const InProduct = () => {
   to={`/shop/${slug}/orderform`}
   state={{
     cart,
-    total: cart.reduce((total, item) => total + (item.price * item.quantity), 0)
+    total: cart.reduce((total, item) => total + (item.price * item.quantity), 0),
+    currency: product.currency || '$'
   }}
   className="w-full py-2 text-white rounded-md font-medium text-center block"
   style={{ backgroundColor: primaryColor }}
