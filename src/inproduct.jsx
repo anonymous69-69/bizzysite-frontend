@@ -365,7 +365,7 @@ const InProduct = () => {
               <span className="block w-6 h-0.5" style={{ backgroundColor: secondaryColor }}></span>
               <span className="block w-6 h-0.5" style={{ backgroundColor: secondaryColor }}></span>
             </button>
-            <h1 className="text-xl font-bold">{business.name || 'Your Business'}</h1>
+            <h1 className="text-xl font-bold">{business.name || businessData.name || 'Your Store'}</h1>
           </div>
           <div className="hidden md:flex items-center space-x-6">
             <Link to="#home" className="hover:opacity-80">Home</Link>
