@@ -14,16 +14,11 @@ export default function LoginPage() {
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const navigate = useNavigate();
-  const screenContentRef = useRef(null);
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
-      if (screenContentRef.current) {
-        const scrollProgress = Math.min(window.scrollY / 500, 1);
-        screenContentRef.current.style.transform = `translateY(-${scrollProgress * 100}px)`;
-      }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -137,10 +132,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-gray-50 to-indigo-50">
-      {/* Floating laptop animation */}
+    <div className="min-h-screen relative overflow-x-hidden bg-gradient-to-b from-gray-50 to-indigo-50">
+      {/* Floating laptop animation - Fixed and Visible */}
       <motion.div 
-        className="fixed top-1/3 right-[15%] -z-10 w-[800px] max-w-[60vw]"
+        className="fixed top-[30%] right-[10%] z-20 w-[600px]"
         initial={{ y: 100, opacity: 0, rotateZ: -5, rotateY: -15 }}
         animate={{ 
           y: scrollY * -0.1 - 50, 
@@ -148,84 +143,70 @@ export default function LoginPage() {
           rotateZ: -5,
           rotateY: -15
         }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 1 }}
         style={{
-          perspective: '1000px',
-          transformStyle: 'preserve-3d'
+          transformStyle: 'preserve-3d',
+          willChange: 'transform'
         }}
       >
-        <div className="relative" style={{ transform: 'rotateY(-15deg) rotateZ(-5deg)' }}>
-          {/* Laptop screen */}
-          <div className="absolute top-[5%] left-[12%] w-[76%] h-[80%] rounded-lg overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-white flex flex-col">
-              {/* Ecommerce website mockup that scrolls */}
-              <div 
-                ref={screenContentRef}
-                className="w-full h-[200%] transition-transform duration-300"
+        {/* Laptop Screen Container */}
+        <div style={{ transform: 'perspective(1000px) rotateY(-15deg) rotateZ(-5deg)' }}>
+          {/* Screen Content */}
+          <div className="absolute top-[6%] left-[13%] w-[74%] h-[78%] rounded-md overflow-hidden bg-white shadow-lg">
+            <div className="h-full w-full overflow-hidden">
+              <motion.div
+                className="h-[200%] w-full"
+                animate={{
+                  y: [-100, 0],
+                  transition: {
+                    duration: 15,
+                    repeat: Infinity,
+                    repeatType: 'loop',
+                    ease: 'linear'
+                  }
+                }}
               >
-                {/* Header */}
-                <div className="bg-indigo-600 text-white p-4 flex justify-between items-center">
-                  <div className="font-bold">MyStore</div>
-                  <div className="flex space-x-4">
-                    <div className="w-6 h-6 rounded-full bg-white/20"></div>
-                    <div className="w-6 h-6 rounded-full bg-white/20"></div>
+                {/* Ecommerce Demo Content */}
+                <div className="p-4">
+                  <div className="bg-indigo-600 text-white p-3 rounded-t-md flex justify-between">
+                    <span>MyStore</span>
+                    <div className="flex gap-2">
+                      <div className="w-3 h-3 rounded-full bg-white/30"></div>
+                      <div className="w-3 h-3 rounded-full bg-white/30"></div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 p-3">
+                    {[1,2,3,4,5,6].map(item => (
+                      <div key={item} className="border rounded-md p-2">
+                        <div className="bg-gray-100 h-20 mb-1"></div>
+                        <p className="text-sm">Product {item}</p>
+                        <p className="text-xs text-gray-500">$29.99</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-[300px] bg-gray-50 p-4">
+                    <p className="text-center py-10">More products...</p>
                   </div>
                 </div>
-                
-                {/* Hero section */}
-                <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-8 text-center">
-                  <h3 className="text-xl font-bold mb-2">Summer Collection</h3>
-                  <p className="text-sm opacity-80">New arrivals just in</p>
-                </div>
-                
-                {/* Products grid */}
-                <div className="grid grid-cols-2 gap-4 p-4">
-                  {[1, 2, 3, 4, 5, 6].map((item) => (
-                    <div key={item} className="border rounded-lg overflow-hidden">
-                      <div className="bg-gray-100 h-24"></div>
-                      <div className="p-2">
-                        <div className="text-sm font-medium">Product {item}</div>
-                        <div className="text-xs text-gray-500">$29.99</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Footer */}
-                <div className="bg-gray-100 p-4 text-center text-xs">
-                  © 2024 MyStore. All rights reserved.
-                </div>
-              </div>
-            </div>
-            {/* Screen controls */}
-            <div className="absolute top-4 left-4 right-4 flex justify-between">
-              <div className="h-2 w-12 bg-gray-400/20 rounded-full"></div>
-              <div className="flex space-x-2">
-                <div className="h-2 w-2 bg-gray-400/40 rounded-full"></div>
-                <div className="h-2 w-2 bg-gray-400/40 rounded-full"></div>
-                <div className="h-2 w-2 bg-gray-400/40 rounded-full"></div>
-              </div>
+              </motion.div>
             </div>
           </div>
           
-          {/* Laptop body */}
-          <div className="relative" style={{ transform: 'rotateY(-15deg) rotateZ(-5deg)' }}>
-            <svg viewBox="0 0 800 500" className="w-full h-auto">
-              <path 
-                d="M100,100 C100,50 700,50 700,100 L700,400 C700,450 100,450 100,400 Z" 
-                fill="#f3f4f6" 
-                stroke="#d1d5db" 
-                strokeWidth="2"
-              />
-              <rect x="150" y="110" width="500" height="280" rx="5" fill="#ffffff" />
-              <rect x="250" y="410" width="300" height="10" rx="5" fill="#e5e7eb" />
-            </svg>
-          </div>
+          {/* Laptop Body */}
+          <svg viewBox="0 0 800 500" className="w-full h-auto">
+            <path 
+              d="M100,100 C100,50 700,50 700,100 L700,400 C700,450 100,450 100,400 Z" 
+              fill="#f1f5f9" 
+              stroke="#e2e8f0"
+            />
+            <rect x="150" y="110" width="500" height="280" rx="4" fill="#f8fafc" />
+            <rect x="250" y="410" width="300" height="8" rx="2" fill="#e2e8f0" />
+          </svg>
         </div>
       </motion.div>
 
       {/* Floating background elements */}
-      <div className="fixed inset-0 -z-20 overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         {Array.from({ length: 15 }).map((_, i) => {
           const size = Math.floor(Math.random() * 40) + 20;
           const left = Math.random() * 100;
