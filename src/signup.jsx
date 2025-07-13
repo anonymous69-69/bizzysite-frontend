@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TypeAnimation } from 'react-type-animation';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,7 +13,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -129,22 +136,68 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Animated background using Framer Motion */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {Array.from({ length: 3 }).map((_, i) => {
-          const size = Math.floor(Math.random() * 60) + 60;
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-gray-50 to-indigo-50">
+      {/* Floating laptop animation */}
+      <motion.div 
+        className="fixed top-1/2 right-1/4 -z-10 w-[800px] max-w-[70vw]"
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: scrollY * -0.1 - 50, opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        <div className="relative">
+          {/* Laptop screen */}
+          <div className="absolute top-[5%] left-[12%] w-[76%] h-[80%] rounded-lg overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <div className="text-white text-center p-6">
+                <div className="text-4xl mb-4">✨</div>
+                <h3 className="text-xl font-bold mb-2">BizzySite Dashboard</h3>
+                <p className="opacity-80">Your beautiful online store</p>
+              </div>
+            </div>
+            {/* Mock UI elements */}
+            <div className="absolute top-4 left-4 right-4 flex justify-between">
+              <div className="h-2 w-12 bg-white/20 rounded-full"></div>
+              <div className="flex space-x-2">
+                <div className="h-2 w-2 bg-white/40 rounded-full"></div>
+                <div className="h-2 w-2 bg-white/40 rounded-full"></div>
+                <div className="h-2 w-2 bg-white/40 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Laptop body */}
+          <div className="relative">
+            <svg viewBox="0 0 800 500" className="w-full h-auto">
+              <path 
+                d="M100,100 C100,50 700,50 700,100 L700,400 C700,450 100,450 100,400 Z" 
+                fill="#f3f4f6" 
+                stroke="#d1d5db" 
+                strokeWidth="2"
+              />
+              <rect x="150" y="110" width="500" height="280" rx="5" fill="#ffffff" />
+              <rect x="250" y="410" width="300" height="10" rx="5" fill="#e5e7eb" />
+            </svg>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Floating background elements */}
+      <div className="fixed inset-0 -z-20 overflow-hidden pointer-events-none">
+        {Array.from({ length: 15 }).map((_, i) => {
+          const size = Math.floor(Math.random() * 40) + 20;
           const left = Math.random() * 100;
           const top = Math.random() * 100;
           const delay = Math.random() * 5;
+          const duration = Math.random() * 5 + 5;
+          const colors = ["#818cf8", "#a78bfa", "#c084fc", "#e879f9", "#f472b6"];
 
           return (
             <motion.div
               key={i}
-              initial={{ y: 0, opacity: 0.4 }}
+              initial={{ y: 0, opacity: 0 }}
               animate={{ y: [-20, 20, -20] }}
               transition={{
-                duration: 5,
+                duration,
                 delay,
                 repeat: Infinity,
                 repeatType: "loop",
@@ -156,29 +209,37 @@ export default function LoginPage() {
                 left: `${left}%`,
                 width: `${size}px`,
                 height: `${size}px`,
-                backgroundColor: ["#bbd0ff", "#b8c0ff", "#c8b6ff"][i % 3],
+                backgroundColor: colors[Math.floor(Math.random() * colors.length)],
                 borderRadius: "9999px",
-                filter: "blur(6px)",
-                opacity: 0.5
+                filter: "blur(10px)",
+                opacity: Math.random() * 0.1 + 0.05
               }}
             />
           );
         })}
       </div>
+
       <Toaster position="top-right" />
-      <header className="bg-white/70 backdrop-blur-md shadow-sm">
+      
+      {/* Header */}
+      <header className="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">BizzySite</h1>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-center">
+          <div className="flex items-center">
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+              <span className="text-white font-bold text-lg">B</span>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">BizzySite</h1>
+          </div>
+          <div className="flex gap-4 items-center">
             <button 
               onClick={() => openModal(true)}
-              className="px-4 py-2 text-gray-700 font-medium hover:text-[#7a6ff0] transition-colors w-full sm:w-auto"
+              className="px-4 py-2 text-gray-700 font-medium hover:text-indigo-600 transition-colors"
             >
               Login
             </button>
             <button 
               onClick={() => openModal(false)}
-              className="px-4 py-2 bg-white/70 backdrop-blur-md border border-white/30 text-[#7a6ff0] font-medium rounded-md hover:bg-white/80 transition-all shadow-sm w-full sm:w-auto"
+              className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-md hover:opacity-90 transition-all shadow-md"
             >
               Sign Up
             </button>
@@ -186,125 +247,260 @@ export default function LoginPage() {
         </div>
       </header>
 
-      <div className="relative py-16 px-4 sm:px-6 lg:px-8 flex-grow">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 mb-4">BizzySite</h1>
+      {/* Hero Section */}
+      <div className="min-h-screen flex flex-col justify-center pt-16 pb-32 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-4xl sm:text-6xl font-extrabold text-gray-900 mb-6"
+          >
+            Build Your Online Store <br />
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Without Coding
+            </span>
+          </motion.h1>
+          
           <TypeAnimation
             sequence={[
-              "Build your online store with ease",
+              "Create beautiful ecommerce sites in minutes",
               2000,
-              "Empower your small business with a beautiful ecommerce website, fast checkout, and integrated payments.",
-              4000,
-              "",
-              1000,
+              "Powerful tools for small businesses",
+              2000,
+              "Easy customization, no technical skills needed",
+              2000
             ]}
             wrapper="p"
             repeat={Infinity}
-            className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6"
+            className="text-xl sm:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto"
           />
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center items-center">
-            <button 
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => openModal(false)}
-              className="px-6 py-3 bg-white/70 backdrop-blur-md border border-white/30 text-[#7a6ff0] font-medium rounded-md hover:bg-white/80 transition-all shadow-lg w-full sm:w-auto"
+              className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:opacity-90 transition-all shadow-xl"
             >
-              Sign Up
-            </button>
-            <button 
+              Get Started Free
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => openModal(true)}
-              className="px-6 py-3 bg-transparent border-2 border-[#7a6ff0] text-[#7a6ff0] font-medium rounded-md hover:bg-[#7a6ff0]/10 transition-colors w-full sm:w-auto"
+              className="px-8 py-4 bg-white text-gray-800 font-medium rounded-lg border border-gray-200 hover:border-gray-300 shadow-md transition-all"
             >
-              Login
-            </button>
+              Live Demo
+            </motion.button>
           </div>
-        </div>
-      </div>
-
-      <div className="relative py-16 px-4 sm:px-6 lg:px-8 flex-grow">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-4">Features</h2>
-          <p className="text-base sm:text-lg text-gray-700 mb-8">
-            Everything you need to get started is built in – no coding required.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            {[
-              { icon: "⚡", title: "Quick Setup", desc: "Get your store online in under 10 minutes with our simple wizard" },
-              { icon: "👥", title: "Customer Management", desc: "Track orders and manage customer relationships easily" },
-              { icon: "🎨", title: "Easy Customization", desc: "Customize colors, fonts, and layout without any coding" }
-            ].map((feature, idx) => (
-              <div key={idx} className="bg-white/70 backdrop-blur-md p-6 rounded-lg shadow-sm border border-white/30 text-center">
-                <div className="text-[#7a6ff0] text-3xl mb-4">{feature.icon}</div>
-                <h4 className="text-lg sm:text-xl font-semibold mb-2 text-gray-800">{feature.title}</h4>
-                <p className="text-gray-700 text-base sm:text-lg">
-                  {feature.desc}
-                </p>
+          
+          <div className="mt-16 flex flex-wrap justify-center gap-10">
+            {["No credit card needed", "Free 14-day trial", "Cancel anytime"].map((item, idx) => (
+              <div key={idx} className="flex items-center text-gray-600">
+                <svg className="w-5 h-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                {item}
               </div>
             ))}
           </div>
+        </div>
+      </div>
 
-          <div className="bg-white/70 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-sm border border-white/30 max-w-4xl mx-auto">
-            <h3 className="text-lg sm:text-xl font-semibold text-center mb-6 text-gray-800">
-              Why Small Businesses Choose BizzySite
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              {["All-in-one ecommerce platform", "No hidden fees or locked-in contracts", "24/7 customer support", "Free SSL and hosting"].map((feature, idx) => (
-                <div key={idx} className="flex items-center justify-center mb-4">
-                  <div className="text-[#7a6ff0] text-2xl sm:text-3xl mr-3">✓</div>
-                  <p className="ml-2 text-gray-700 text-base sm:text-lg">{feature}</p>
-                </div>
-              ))}
-            </div>
-            <div className="text-center">
-              <button
-                onClick={() => openModal(false)}
-                className="inline-block px-6 py-3 bg-white/80 backdrop-blur-md border border-white/30 text-[#7a6ff0] font-medium rounded-md hover:bg-white transition-all shadow-md"
+      {/* Features Section */}
+      <div className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Everything You Need to Succeed Online
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Powerful features designed to help your business grow
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {[
+              { 
+                icon: "🚀", 
+                title: "Lightning Fast Setup", 
+                desc: "Launch your store in minutes with our intuitive setup wizard" 
+              },
+              { 
+                icon: "💳", 
+                title: "Integrated Payments", 
+                desc: "Accept credit cards, PayPal, and other payment methods securely" 
+              },
+              { 
+                icon: "📱", 
+                title: "Mobile Optimized", 
+                desc: "Beautiful storefront that works perfectly on all devices" 
+              },
+              { 
+                icon: "📊", 
+                title: "Sales Analytics", 
+                desc: "Track your performance with real-time sales reports" 
+              },
+              { 
+                icon: "📦", 
+                title: "Inventory Management", 
+                desc: "Easily track and manage your product inventory" 
+              },
+              { 
+                icon: "🌐", 
+                title: "Global Selling", 
+                desc: "Sell to customers worldwide with multi-currency support" 
+              }
+            ].map((feature, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -10 }}
+                className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100"
               >
-                Get Started
-              </button>
-            </div>
+                <div className="text-5xl mb-6">{feature.icon}</div>
+                <h3 className="text-xl font-semibold mb-3 text-gray-900">{feature.title}</h3>
+                <p className="text-gray-600">
+                  {feature.desc}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
 
-      <footer className="bg-gray-800/80 backdrop-blur-md text-white py-12 px-4 sm:px-6 lg:px-8">
+      {/* Testimonial Section */}
+      <div className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+            Trusted by Thousands of Businesses
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 my-16">
+            {[
+              { 
+                text: "BizzySite helped us launch our online store in just 2 days. The setup was incredibly simple!",
+                author: "Sarah Johnson",
+                role: "Owner, Boutique Store" 
+              },
+              { 
+                text: "Our sales increased by 40% after switching to BizzySite. The beautiful storefront really makes a difference.",
+                author: "Michael Chen",
+                role: "Founder, Tech Gadgets" 
+              },
+              { 
+                text: "As a small business owner with no tech skills, BizzySite has been a game-changer for us.",
+                author: "Emma Rodriguez",
+                role: "CEO, Handmade Crafts" 
+              }
+            ].map((testimonial, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: idx * 0.2 }}
+                viewport={{ once: true }}
+                className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20"
+              >
+                <div className="text-3xl mb-4">“</div>
+                <p className="mb-6">{testimonial.text}</p>
+                <div className="font-semibold">{testimonial.author}</div>
+                <div className="text-indigo-200">{testimonial.role}</div>
+              </motion.div>
+            ))}
+          </div>
+          
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => openModal(false)}
+            className="px-8 py-4 bg-white text-indigo-600 font-bold rounded-lg shadow-xl hover:bg-gray-100 transition-all"
+          >
+            Start Your Free Trial
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div>
-              <h3 className="text-xl font-bold mb-4">BizzySite</h3>
-              <p className="text-gray-300 mb-4">
+              <div className="flex items-center mb-6">
+                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-white font-bold text-lg">B</span>
+                </div>
+                <h3 className="text-xl font-bold">BizzySite</h3>
+              </div>
+              <p className="text-gray-400 mb-6">
                 Empowering small businesses to succeed online with simple, powerful tools.
               </p>
+              <div className="flex space-x-4">
+                {['twitter', 'facebook', 'instagram', 'linkedin'].map((social) => (
+                  <a key={social} href="#" className="text-gray-400 hover:text-white transition-colors">
+                    <span className="sr-only">{social}</span>
+                    <div className="w-6 h-6 bg-gray-700 rounded-full flex items-center justify-center">
+                      {social[0].toUpperCase()}
+                    </div>
+                  </a>
+                ))}
+              </div>
             </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li>Email: hello@bizzysite.com</li>
-                <li>Phone: +1 (555) 123-4567</li>
-                <li>Address: 123 Business St, City</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Sales</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><Link to="#" className="hover:text-white">Pricing</Link></li>
-                <li><Link to="#" className="hover:text-white">Features</Link></li>
-                <li><Link to="#" className="hover:text-white">Demo</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><Link to="#" className="hover:text-white">Blog</Link></li>
-                <li><Link to="#" className="hover:text-white">FAQs</Link></li>
-                <li><Link to="#" className="hover:text-white">Support</Link></li>
-              </ul>
-            </div>
+            
+            {[
+              {
+                title: "Product",
+                links: ["Features", "Templates", "Pricing", "Integrations", "Roadmap"]
+              },
+              {
+                title: "Resources",
+                links: ["Blog", "Documentation", "Guides", "Help Center", "API Status"]
+              },
+              {
+                title: "Company",
+                links: ["About", "Careers", "Contact", "Partners", "Legal"]
+              }
+            ].map((section, idx) => (
+              <div key={idx}>
+                <h4 className="text-lg font-semibold mb-6">{section.title}</h4>
+                <ul className="space-y-4">
+                  {section.links.map((link, linkIdx) => (
+                    <li key={linkIdx}>
+                      <Link 
+                        to="#" 
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        {link}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-            <p>© 2024 BizzySite. Made with ❤️ for small businesses.</p>
+          
+          <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-500">© 2024 BizzySite. All rights reserved.</p>
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              <Link to="#" className="text-gray-500 hover:text-white transition-colors">
+                Privacy Policy
+              </Link>
+              <Link to="#" className="text-gray-500 hover:text-white transition-colors">
+                Terms of Service
+              </Link>
+              <Link to="#" className="text-gray-500 hover:text-white transition-colors">
+                Cookies
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
 
+      {/* Modal */}
       {showModal && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end p-0 sm:p-4 z-50"
@@ -498,41 +694,6 @@ export default function LoginPage() {
           </motion.div>
         </div>
       )}
-      {/* Background Animated Bubbles */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {Array.from({ length: 3 }).map((_, i) => {
-          const size = Math.floor(Math.random() * 60) + 60;
-          const left = Math.random() * 90;
-          const top = Math.random() * 80;
-          const delay = Math.random() * 3;
-
-          return (
-            <motion.div
-              key={i}
-              initial={{ y: 0, opacity: 0.4 }}
-              animate={{ y: [-40, 40, -40] }}
-              transition={{
-                duration: 3,
-                delay,
-                repeat: Infinity,
-                repeatType: "loop",
-                ease: "easeInOut"
-              }}
-              style={{
-                position: "absolute",
-                top: `${top}%`,
-                left: `${left}%`,
-                width: `${size}px`,
-                height: `${size}px`,
-                backgroundColor: ["#bbd0ff", "#b8c0ff", "#c8b6ff"][i % 3],
-                borderRadius: "9999px",
-                filter: "blur(6px)",
-                opacity: 0.4
-              }}
-            />
-          );
-        })}
-      </div>
     </div>
   );
 }
