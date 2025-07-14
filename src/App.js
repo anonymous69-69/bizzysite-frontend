@@ -14,7 +14,7 @@ import NavView from './navview';
 import Profile from './profile';
 import ResetPassword from './resetpassword';
 import Settings from './settings';
-
+ 
 
 function App() {
   const [userId, setUserId] = React.useState(null);
@@ -57,6 +57,7 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/store/:storeName" element={<ViewSite />} />
         <Route path="/store/:slug" element={<ViewSite />} />
+        <Route path="/order/:slug" element={<OrderForm />} />
         
         <Route path="/:slug" element={<ViewSite />} />
 
