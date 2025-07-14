@@ -148,7 +148,9 @@ const OrderForm = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "x-requested-with": "XMLHttpRequest", // Add this header
           },
+          credentials: "include", // Add this for cookies if needed
           body: JSON.stringify({
             amount: amountInPaise,
             slug: slug,
