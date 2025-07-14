@@ -6,7 +6,13 @@ const OrderForm = () => {
   const { slug } = useParams(); // Use slug for store identification
   const location = useLocation();
   const navigate = useNavigate();
-  const { cart = [], total = 0, shippingCharge: sc } = location.state || {};
+  const { cart = [], shippingCharge: sc } = location.state || {};
+
+  const total = cart.reduce((sum, item) => {
+    const price = parseFloat(item.price) || 0;
+    const quantity = parseInt(item.quantity) || 0;
+    return sum + price * quantity;
+  }, 0);
 
   // Form state
   const [formData, setFormData] = useState({
