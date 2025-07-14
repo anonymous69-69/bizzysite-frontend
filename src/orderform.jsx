@@ -102,7 +102,7 @@ const OrderForm = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            amount: Math.round((total + shippingCharge + platformFee) * 100),
+            amount: Math.round(orderTotal * 100),
             slug: slug,
             customerName: formData.fullName,
           }),
