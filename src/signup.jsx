@@ -223,7 +223,7 @@ export default function LoginPage() {
       </header>
 
       {/* Hero Section with Floating Laptop */}
-      <div className="min-h-screen flex flex-col justify-center items-center pt-32 pb-32 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex flex-col justify-center items-center pt-24 md:pt-32 pb-0 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-4xl mx-auto text-center mb-12">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -242,22 +242,24 @@ export default function LoginPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <TypeAnimation
-              sequence={[
-                "Create beautiful ecommerce sites in minutes",
-                2000,
-                "Powerful tools for small businesses",
-                2000,
-                "Easy customization, no technical skills needed",
-                2000,
-              ]}
-              wrapper="p"
-              repeat={Infinity}
-              className="text-xl sm:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto"
-            />
+            <div className="min-h-[72px] sm:min-h-[60px] flex justify-center items-center">
+    <TypeAnimation
+      sequence={[
+        "Create beautiful ecommerce sites in minutes",
+        2000,
+        "Powerful tools for small businesses",
+        2000,
+        "Easy customization, no technical skills needed",
+        2000,
+      ]}
+      wrapper="p"
+      repeat={Infinity}
+      className="text-xl sm:text-2xl text-gray-600 max-w-2xl mx-auto text-center"
+    />
+  </div>
           </motion.div>
 
-          <div className="flex justify-center items-center mb-20">
+          <div className="flex justify-center items-center -mb-4 mt-8">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -270,46 +272,34 @@ export default function LoginPage() {
 
           {/* Floating Laptop with Image */}
           <motion.div
-            className="relative w-full max-w-3xl mx-auto mt-16"
+            className="relative w-full max-w-3xl mx-auto mt-8 md:mt-16"
             initial={{ opacity: 0, y: 50 }}
             animate={{
               opacity: 1,
               y: 0,
-              x: [0, 5, 0],
-              y: [0, 5, 0],
+              x:0,
+         
             }}
             transition={{
               delay: 0.3,
-              duration: 0.8,
-              x: {
-                duration: 15,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-              },
-              y: {
-                duration: 10,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-              },
+              duration: 0.8
             }}
           >
             <div className="relative" style={{ perspective: "1500px" }}>
               <motion.div
-                className="relative mx-auto"
+                className="relative mx-auto z-10" 
                 animate={{
                   rotateX: window.innerWidth < 768 ? 0 : 15,
                   rotateY: window.innerWidth < 768 ? 0 : -5,
                   rotateZ: window.innerWidth < 768 ? 0 : -1,
                 }}
-                transition={{
-                  duration: 1,
-                  ease: "easeOut",
+                style={{
+                  transform: window.innerWidth < 768 ? "scale(0.7)" : "none",
+                  transformOrigin: "top center",
                 }}
               >
                 {/* Laptop image container */}
-                <div className="relative w-[800px] h-auto mx-auto">
+                <div className="relative w-full max-w-[800px] h-auto mx-auto px-4">
                   {/* Laptop image */}
                   <img
                     src="/newlaptop.png"
@@ -319,21 +309,30 @@ export default function LoginPage() {
 
                   {/* Screen area for mockup content */}
                   <div
-                    className="absolute w-[76%] h-[62%] overflow-hidden"
+                    className="absolute overflow-hidden"
                     style={{
-                      height: "38%", // Screen width percentage (try 74%-78%)
-                      width: "54%",
-                      top: "7%",
-                      left: "12%",
-                      transform: "perspective(1200px) rotateX(-5deg)", // Counter-tilt to match laptop angle
+                      height: "33.5%",
+                      width: "60.4%",
+                      top: "25.6%",
+                      left: "23.3%",
+                      transform:
+                        window.innerWidth < 768
+                          ? "perspective(1200px) rotateX(-1deg) rotateY(-50deg) rotateZ(-10.5deg) scaleX(1) scaleY(1) skewX(7deg) skewY(-8deg)"
+                          : "perspective(1160px) rotateX(5deg) rotateY(-35deg) rotateZ(-18deg) scaleX(1) scaleY(1) skewX(-0.8deg) skewY(-1deg)",
+                      clipPath:
+                        window.innerWidth < 768
+                          ? "polygon(0% 0%, 97.9% 1%, 100% 100%, 2% 90%)"
+                          : "polygon(8% 1%, 89% 0%, 86.6% 95%, 9% 92%)",
                       transformOrigin: "top center",
                       backfaceVisibility: "hidden",
+                      border: "3px solid #000",
+                     
                     }}
                   >
                     <div className="absolute inset-0 bg-white flex flex-col">
                       <div
                         ref={contentRef}
-                        className="w-full h-[200%] transition-transform duration-300"
+                        className="w-full h-full transition-transform duration-300"
                       >
                         {/* E-commerce mockup content */}
                         <div className="bg-indigo-600 text-white p-4 flex justify-between items-center">
@@ -407,7 +406,7 @@ export default function LoginPage() {
       </div>
 
       {/* Features Section */}
-      <div className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <div className="pt-6 pb-8 -mt-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
