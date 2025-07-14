@@ -97,6 +97,11 @@ const OrderForm = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!slug) {
+      alert("Store information is missing. Please return to the store and try again.");
+      navigate(`/view/${slug}`); // Redirect back to store
+      return;
+    }
     setIsSubmitting(true);
 
     // Validate amount
@@ -125,9 +130,24 @@ const OrderForm = () => {
       );
 
       const razorOrder = await createOrderRes.json();
-      if (!createOrderRes.ok) {
-        throw new Error(razorOrder.message || "Failed to create Razorpay order");
-      }
+if (!createOrderRes.ok) {
+  console.error('Order creation failed:', {
+    status: createOrderRes.status,
+    response: razorOrder,
+    slugUsed: slug
+  });
+  throw new Error(
+    razorOrder.message || 
+    `Payment failed (Status ${createOrderRes.status}). ` +
+    `Please contact support and mention store: ${slug}`
+  );
+}
+console.log('Creating payment order with:', {
+  amount: amountInPaise,
+  slug,
+  customer: formData.fullName,
+  items: cart.length
+});
 
       // Step 2: Launch Razorpay Checkout
       const options = {
@@ -212,11 +232,19 @@ const OrderForm = () => {
 
   // Dynamically add Razorpay script
   useEffect(() => {
+    // Verify slug exists before loading Razorpay
+    if (!slug) return;
+    
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
     document.body.appendChild(script);
-  }, []);
+  
+    return () => {
+      // Cleanup
+      document.body.removeChild(script);
+    };
+  }, [slug]); // Add slug to dependencies
 
   // Handle missing cart or state data
   if (!cart || cart.length === 0 || !location.state) {
