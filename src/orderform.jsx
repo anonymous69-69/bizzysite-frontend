@@ -200,6 +200,7 @@ const OrderForm = () => {
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
     document.body.appendChild(script);
+    console.log("🪵 location.state in OrderForm:", location.state);
   }, []);
 
   if (!cart || cart.length === 0) {
