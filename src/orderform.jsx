@@ -4,14 +4,21 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const OrderForm = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   useEffect(() => {
     if (!slug) {
-      alert("Store slug is missing. Please return to the store.");
-      navigate("/");
+      const storedSlug = localStorage.getItem("bizzySlug");
+      if (storedSlug) {
+        navigate(`/order/${storedSlug}`);
+      } else {
+        alert("Store slug is missing. Please return to the store.");
+        navigate("/");
+      }
+    } else {
+      localStorage.setItem("bizzySlug", slug);
     }
   }, [slug]);
   const location = useLocation();
-  const navigate = useNavigate();
   const [business, setBusiness] = useState(null);
   
   // Use passed state values instead of recalculating
