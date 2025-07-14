@@ -224,7 +224,7 @@ export default function LoginPage() {
 
       {/* Hero Section with Floating Laptop */}
       <div className="min-h-screen flex flex-col justify-center items-center pt-32 pb-32 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center mb-12">
+      <div className="max-w-4xl mx-auto text-center mb-12">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -268,7 +268,7 @@ export default function LoginPage() {
             </motion.button>
           </div>
 
-          {/* Floating Laptop */}
+          {/* Floating Laptop - REVISED */}
           <motion.div
             className="relative w-full max-w-3xl mx-auto mt-16"
             initial={{ opacity: 0, y: 50 }}
@@ -294,11 +294,6 @@ export default function LoginPage() {
                 ease: "easeInOut",
               },
             }}
-            whileInView={{
-              x: window.innerWidth < 768 ? 0 : [0, 5, 0],
-              y: window.innerWidth < 768 ? 0 : [0, 5, 0],
-            }}
-          
           >
             <div className="relative" style={{ perspective: "1000px" }}>
               <motion.div
@@ -308,8 +303,6 @@ export default function LoginPage() {
                   rotateY: window.innerWidth < 768 ? 0 : -15,
                   rotateZ: window.innerWidth < 768 ? 0 : -3,
                 }}
-          
-                
                 transition={{
                   duration: 1,
                   ease: "easeOut",
@@ -317,12 +310,12 @@ export default function LoginPage() {
               >
                 {/* Laptop Screen */}
                 <div
-                  className="absolute inset-0 w-[76%] h-[75%] mx-auto rounded-lg overflow-hidden shadow-2xl border-4 border-gray-800"
+                  className="absolute w-[76%] h-[62%] mx-auto rounded-t-xl overflow-hidden shadow-2xl border-4 border-gray-800"
                   style={{
                     top: "5%",
                     left: "12%",
                     backgroundColor: "#f0f0f0",
-                    zIndex: 10,
+                    zIndex: 20,
                   }}
                 >
                   <div className="absolute inset-0 bg-white flex flex-col">
@@ -330,7 +323,7 @@ export default function LoginPage() {
                       ref={contentRef}
                       className="w-full h-[200%] transition-transform duration-300"
                     >
-                      {/* E-commerce mockup content (keep your existing mockup code) */}
+                      {/* E-commerce mockup content */}
                       <div className="bg-indigo-600 text-white p-4 flex justify-between items-center">
                         <div className="font-bold">MyStore</div>
                         <div className="flex space-x-4">
@@ -396,43 +389,54 @@ export default function LoginPage() {
                 </div>
 
                 {/* Laptop Body */}
-                <div className="relative w-full" style={{ zIndex: 5 }}>
-                  <svg viewBox="0 0 800 550" className="w-full h-auto">
-                    <path
-                      d="M100,100 C100,50 700,50 700,100 L700,450 C700,500 100,500 100,450 Z"
-                      fill="#f3f4f6"
-                      stroke="#d1d5db"
-                      strokeWidth="2"
-                    />
-                    <rect
-                      x="150"
-                      y="110"
-                      width="500"
-                      height="280"
-                      rx="5"
-                      fill="#ffffff"
-                    />
-                    {/* Keyboard area */}
-                    <rect
-                      x="180"
-                      y="400"
-                      width="440"
-                      height="80"
-                      rx="5"
-                      fill="#e5e7eb"
-                      stroke="#d1d5db"
-                      strokeWidth="1"
-                    />
+                <div 
+                  className="absolute w-[90%] h-[15%] rounded-b-xl bg-gray-800"
+                  style={{
+                    top: "67%",
+                    left: "5%",
+                    zIndex: 10,
+                    boxShadow: "0 10px 25px rgba(0,0,0,0.2)"
+                  }}
+                >
+                  {/* Keyboard area */}
+                  <div className="absolute w-[80%] h-[60%] bg-gray-700 rounded-md"
+                    style={{
+                      top: "20%",
+                      left: "10%",
+                    }}
+                  >
+                    {/* Keyboard keys */}
+                    <div className="grid grid-cols-10 gap-1 p-2">
+                      {Array.from({ length: 60 }).map((_, i) => (
+                        <div 
+                          key={i}
+                          className="h-2 bg-gray-600 rounded-sm"
+                          style={{
+                            boxShadow: "inset 0 -2px 0 rgba(0,0,0,0.2)"
+                          }}
+                        ></div>
+                      ))}
+                    </div>
+                    
                     {/* Trackpad */}
-                    <rect
-                      x="320"
-                      y="420"
-                      width="160"
-                      height="50"
-                      rx="3"
-                      fill="#d1d5db"
-                    />
-                  </svg>
+                    <div className="absolute w-1/3 h-8 bg-gray-600 rounded-md"
+                      style={{
+                        bottom: "10%",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                      }}
+                    ></div>
+                  </div>
+                  
+                  {/* Hinge */}
+                  <div 
+                    className="absolute w-1/3 h-2 bg-gray-900 rounded-t-sm"
+                    style={{
+                      top: "-0.5rem",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                    }}
+                  ></div>
                 </div>
               </motion.div>
             </div>
