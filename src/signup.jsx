@@ -703,106 +703,35 @@ export default function LoginPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+      <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8  'bg-gray-800 text-white'}`}>
+        <div className="max-w-7xl mx-auto"> 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div>
-              <div className="flex items-center mb-6">
-                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center mr-3">
-                  <span className="text-white font-bold text-lg">B</span>
-                </div>
-                <h3 className="text-xl font-bold">BizzySite</h3>
-              </div>
-              <p className="text-gray-400 mb-6">
-                Empowering small businesses to succeed online with simple,
-                powerful tools.
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
+              <p className="text-gray-300 mb-4 text-sm sm:text-base">
+                Empowering small businesses to succeed online with simple, powerful tools.
               </p>
-              <div className="flex space-x-4">
-                {["twitter", "facebook", "instagram", "linkedin"].map(
-                  (social) => (
-                    <a
-                      key={social}
-                      href="#"
-                      className="text-gray-400 hover:text-white transition-colors"
-                    >
-                      <span className="sr-only">{social}</span>
-                      <div className="w-6 h-6 bg-gray-700 rounded-full flex items-center justify-center">
-                        {social[0].toUpperCase()}
-                      </div>
-                    </a>
-                  )
-                )}
-              </div>
             </div>
-
-            {[
-              {
-                title: "Product",
-                links: [
-                  "Features",
-                  "Templates",
-                  "Pricing",
-                  "Integrations",
-                  "Roadmap",
-                ],
-              },
-              {
-                title: "Resources",
-                links: [
-                  "Blog",
-                  "Documentation",
-                  "Guides",
-                  "Help Center",
-                  "API Status",
-                ],
-              },
-              {
-                title: "Company",
-                links: ["About", "Careers", "Contact", "Partners", "Legal"],
-              },
-            ].map((section, idx) => (
-              <div key={idx}>
-                <h4 className="text-lg font-semibold mb-6">{section.title}</h4>
-                <ul className="space-y-4">
-                  {section.links.map((link, linkIdx) => (
-                    <li key={linkIdx}>
-                      <Link
-                        to="#"
-                        className="text-gray-400 hover:text-white transition-colors"
-                      >
-                        {link}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            <div>
+              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
+              <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
+                <li>Email: rhythmsarma66@gmail.com</li>
+                <li>Phone: +91 7086758292</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Resources</h4>
+              <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
+                <li><Link to="#" className="hover:text-white">Blog</Link></li>
+                <li><Link to="#" className="hover:text-white">Help Center</Link></li>
+                <li><Link to="#" className="hover:text-white">Community</Link></li>
+              </ul>
+            </div>
           </div>
-
-          <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-500">
-              © 2024 BizzySite. All rights reserved.
-            </p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link
-                to="#"
-                className="text-gray-500 hover:text-white transition-colors"
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                to="#"
-                className="text-gray-500 hover:text-white transition-colors"
-              >
-                Terms of Service
-              </Link>
-              <Link
-                to="#"
-                className="text-gray-500 hover:text-white transition-colors"
-              >
-                Cookies
-              </Link>
-            </div>
+          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${
+            'border-gray-700 text-gray-400'
+          }`}>
+            <p>© 2024 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
       </footer>

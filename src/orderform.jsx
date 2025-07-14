@@ -19,7 +19,7 @@ const OrderForm = () => {
     city: "",
     state: "",
     country: "",
-    specialNote: ""
+    specialNote: "",
   });
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -28,21 +28,25 @@ const OrderForm = () => {
   // Order summary (safer version to prevent NaN issues)
   const shippingCharge = !isNaN(parseFloat(sc)) ? parseFloat(sc) : 0;
   const platformFee = !isNaN(total) ? total * 0.03 : 0;
-  const orderTotal = !isNaN(total + shippingCharge + platformFee) ? total + shippingCharge + platformFee : 0;
+  const orderTotal = !isNaN(total + shippingCharge + platformFee)
+    ? total + shippingCharge + platformFee
+    : 0;
 
   // Handle pincode lookup using postalpincode.in API
   const handlePincodeLookup = async (pincode) => {
     if (pincode.length === 6) {
       try {
-        const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+        const res = await fetch(
+          `https://api.postalpincode.in/pincode/${pincode}`
+        );
         const data = await res.json();
         if (data[0].Status === "Success") {
           const locationInfo = data[0].PostOffice[0];
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             city: locationInfo.District,
             state: locationInfo.State,
-            country: "India"
+            country: "India",
           }));
         }
       } catch (err) {
@@ -54,7 +58,7 @@ const OrderForm = () => {
   // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (name === "pincode") {
       handlePincodeLookup(value);
     }
@@ -71,25 +75,30 @@ const OrderForm = () => {
     console.log("🧾 platformFee:", platformFee);
     console.log("💰 orderTotal:", orderTotal);
     // Log amount and slug before the fetch call
-    console.log("Sending amount (paise):", Math.round((total + shippingCharge + platformFee) * 100));
+    console.log(
+      "Sending amount (paise):",
+      Math.round((total + shippingCharge + platformFee) * 100)
+    );
     console.log("Slug being sent:", slug);
     console.log("location.state:", location.state);
     console.log("✅ Using slug from URL params:", slug);
 
     try {
       // Step 1: Create Razorpay Order
-      const createOrderRes = await fetch("https://bizzysite.onrender.com/api/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("userId")}`
-        },
-        body: JSON.stringify({
-          amount: Math.round((total + shippingCharge + platformFee) * 100),
-          slug: slug,
-          customerName: formData.fullName
-        })
-      });
+      const createOrderRes = await fetch(
+        "https://bizzysite.onrender.com/api/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: Math.round((total + shippingCharge + platformFee) * 100),
+            slug: slug,
+            customerName: formData.fullName,
+          }),
+        }
+      );
 
       const razorOrder = await createOrderRes.json();
 
@@ -103,9 +112,9 @@ const OrderForm = () => {
         order_id: razorOrder.id,
         notes: {
           slug: slug,
-          storeOwnerName: localStorage.getItem('userName') || '',
-          storeOwnerEmail: localStorage.getItem('userEmail') || '',
-          storeOwnerPhone: localStorage.getItem('userPhone') || ''
+          storeOwnerName: localStorage.getItem("userName") || "",
+          storeOwnerEmail: localStorage.getItem("userEmail") || "",
+          storeOwnerPhone: localStorage.getItem("userPhone") || "",
         },
         handler: async function (response) {
           // Step 3: On successful payment, save order
@@ -121,30 +130,33 @@ const OrderForm = () => {
               state: formData.state,
               pincode: formData.pincode,
               country: formData.country,
-              specialNote: formData.specialNote
+              specialNote: formData.specialNote,
             },
-            items: cart.map(item => ({
+            items: cart.map((item) => ({
               name: item.name,
               price: item.price,
-              quantity: item.quantity
+              quantity: item.quantity,
             })),
             subtotal: total,
             shipping: shippingCharge,
             platformFee: platformFee,
             total: orderTotal,
-            currency: cart[0]?.currency || '$',
-            status: 'Pending',
+            currency: cart[0]?.currency || "$",
+            status: "Pending",
             razorpayPaymentId: response.razorpay_payment_id,
-            razorpayOrderId: razorOrder.id
+            razorpayOrderId: razorOrder.id,
           };
 
           console.log("📦 Order data being saved:", order);
-          
-          const saveRes = await fetch('https://bizzysite.onrender.com/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(order)
-          });
+
+          const saveRes = await fetch(
+            "https://bizzysite.onrender.com/api/orders",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(order),
+            }
+          );
 
           if (saveRes.ok) {
             setShowSuccessModal(true);
@@ -156,21 +168,21 @@ const OrderForm = () => {
         prefill: {
           name: formData.fullName,
           email: formData.email,
-          contact: formData.phone
+          contact: formData.phone,
         },
-        theme: { color: "#6366F1" }
+        theme: { color: "#6366F1" },
       };
 
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
-      console.error('Payment initiation failed:', err);
+      console.error("Payment initiation failed:", err);
       alert(`Payment initiation failed: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   // Dynamically add Razorpay script on mount
   useEffect(() => {
     const script = document.createElement("script");
@@ -183,8 +195,12 @@ const OrderForm = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center p-6 bg-white rounded-lg shadow-md max-w-md">
-          <h3 className="text-lg font-medium text-gray-800">Your cart is empty</h3>
-          <p className="mt-2 text-gray-600">Please add some products to your cart before checkout.</p>
+          <h3 className="text-lg font-medium text-gray-800">
+            Your cart is empty
+          </h3>
+          <p className="mt-2 text-gray-600">
+            Please add some products to your cart before checkout.
+          </p>
           <Link
             to={`/view/${slug}`}
             className="inline-block mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -206,20 +222,20 @@ const OrderForm = () => {
           ← Back
         </button>
         <h1 className="text-2xl font-bold text-gray-800 mb-8">Checkout</h1>
-        
+
         {/* Success Modal */}
         {showSuccessModal && (
-          <div 
+          <div
             className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 backdrop-blur-sm"
             onClick={() => setShowSuccessModal(false)}
           >
-            <div 
+            <div
               className="bg-white rounded-lg p-8 max-w-md w-full relative"
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-2xl font-bold mb-4">Thank You!</h2>
               <p className="mb-6">Thanks for confirming your order.</p>
-              <button 
+              <button
                 onClick={() => setShowSuccessModal(false)}
                 className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
               >
@@ -228,19 +244,27 @@ const OrderForm = () => {
             </div>
           </div>
         )}
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Order Form */}
           <div className="md:col-span-2">
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-6">Customer Information</h2>
-              
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white p-6 rounded-lg shadow-md"
+            >
+              <h2 className="text-xl font-semibold mb-6">
+                Customer Information
+              </h2>
+
               <div className="grid grid-cols-1 gap-6">
                 {/* Personal Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Personal Details</h3>
                   <div>
-                    <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="fullName"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Full Name *
                     </label>
                     <input
@@ -253,9 +277,12 @@ const OrderForm = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
-                  
+
                   <div>
-                    <label htmlFor="instagramId" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="instagramId"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Instagram ID
                     </label>
                     <input
@@ -267,9 +294,12 @@ const OrderForm = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
-                  
+
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="phone"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Phone Number *
                     </label>
                     <input
@@ -282,9 +312,12 @@ const OrderForm = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
-                  
+
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Email Address *
                     </label>
                     <input
@@ -298,12 +331,15 @@ const OrderForm = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Shipping Address */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Shipping Address</h3>
                   <div>
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="address"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Full Address *
                     </label>
                     <textarea
@@ -316,10 +352,13 @@ const OrderForm = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="pincode" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="pincode"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Pincode *
                       </label>
                       <input
@@ -332,9 +371,12 @@ const OrderForm = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
-                    
+
                     <div>
-                      <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="city"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         City *
                       </label>
                       <input
@@ -348,10 +390,13 @@ const OrderForm = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="state"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         State *
                       </label>
                       <input
@@ -364,9 +409,12 @@ const OrderForm = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
-                    
+
                     <div>
-                      <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="country"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Country *
                       </label>
                       <input
@@ -381,10 +429,13 @@ const OrderForm = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Special Note */}
                 <div>
-                  <label htmlFor="specialNote" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="specialNote"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Special Note (Optional)
                   </label>
                   <textarea
@@ -398,56 +449,76 @@ const OrderForm = () => {
                   />
                 </div>
               </div>
-              
+
               <button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full mt-6 py-3 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
-                {isSubmitting ? 'Processing...' : 'Proceed to Pay'}
+                {isSubmitting ? "Processing..." : "Proceed to Pay"}
               </button>
             </form>
           </div>
-          
+
           {/* Order Summary */}
           <div className="bg-white p-6 rounded-lg shadow-md h-fit sticky top-8">
             <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
-            
+
             <div className="space-y-4">
               <div className="border-b border-gray-200 pb-4">
                 <h3 className="text-lg font-medium mb-3">Your Items</h3>
                 <ul className="space-y-3">
-                  {cart.map(item => (
-                    <li key={item.id || item._id} className="flex justify-between">
+                  {cart.map((item) => (
+                    <li
+                      key={item.id || item._id}
+                      className="flex justify-between"
+                    >
                       <div>
                         <span className="font-medium">{item.name}</span>
-                        <span className="text-gray-600 text-sm block">Qty: {item.quantity}</span>
+                        <span className="text-gray-600 text-sm block">
+                          Qty: {item.quantity}
+                        </span>
                       </div>
-                      <span>{item.currency}{(item.price * item.quantity).toFixed(2)}</span>
+                      <span>
+                        {item.currency}
+                        {(item.price * item.quantity).toFixed(2)}
+                      </span>
                     </li>
                   ))}
                 </ul>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>{cart[0]?.currency || '$'}{total.toFixed(2)}</span>
+                  <span>
+                    {cart[0]?.currency || "$"}
+                    {total.toFixed(2)}
+                  </span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>{cart[0]?.currency || '$'}{shippingCharge.toFixed(2)}</span>
+                  <span>
+                    {cart[0]?.currency || "$"}
+                    {shippingCharge.toFixed(2)}
+                  </span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span>Platform Fee (3%)</span>
-                  <span>{cart[0]?.currency || '$'}{platformFee.toFixed(2)}</span>
+                  <span>
+                    {cart[0]?.currency || "$"}
+                    {platformFee.toFixed(2)}
+                  </span>
                 </div>
-                
+
                 <div className="border-t border-gray-200 pt-3 flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span>{cart[0]?.currency || '$'}{orderTotal.toFixed(2)}</span>
+                  <span>
+                    {cart[0]?.currency || "$"}
+                    {orderTotal.toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>
