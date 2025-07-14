@@ -347,21 +347,20 @@ const InProduct = () => {
           </div>
         
           <button
-            onClick={() => {
-              setIsCartOpen(false);
-              navigate(`/shop/${slug}/orderform`, {
-                // Changed from storeId to slug
-                state: {
-                  cart,
-                  total: cart.reduce(
-                    (total, item) =>
-                      total + parseFloat(item.price) * item.quantity,
-                    0
-                  ),
-                  shippingCharge: business.shippingCharge || 50,
-                },
-              });
-            }}
+           onClick={() => {
+            setIsCartOpen(false);
+            navigate(`/order/${slug}`, {
+              state: {
+                cart,
+                total: cart.reduce(
+                  (total, item) =>
+                    total + parseFloat(item.price) * item.quantity,
+                  0
+                ),
+                shippingCharge: business.shippingCharge || 50,
+              },
+            });
+          }}
             className="w-full py-2 text-white rounded-md font-medium text-center"
             style={{ backgroundColor: primaryColor }}
           >

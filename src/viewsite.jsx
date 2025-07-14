@@ -452,21 +452,20 @@ useEffect(() => {
           </div>
 
           <button
-            onClick={() => {
-              setIsCartOpen(false);
-              navigate(`/shop/${slug}/orderform`, {
-                // Changed from storeId to slug
-                state: {
-                  cart,
-                  total: cart.reduce(
-                    (total, item) =>
-                      total + parseFloat(item.price) * item.quantity,
-                    0
-                  ),
-                  shippingCharge: business.shippingCharge || 50,
-                },
-              });
-            }}
+           onClick={() => {
+            setIsCartOpen(false);
+            navigate(`/order/${slug}`, {
+              state: {
+                cart,
+                total: cart.reduce(
+                  (total, item) =>
+                    total + parseFloat(item.price) * item.quantity,
+                  0
+                ),
+                shippingCharge: business.shippingCharge || 50,
+              },
+            });
+          }}
             className="w-full py-2 text-white rounded-md font-medium text-center"
             style={{ backgroundColor: primaryColor }}
           >
@@ -752,15 +751,17 @@ useEffect(() => {
                             </div>
                           ) : (
                             <button
-                              className={`px-3 py-1 text-sm rounded-md font-medium hover:opacity-90 md:px-4 md:py-2 md:text-base ${
-                                textColor === "white"
-                                  ? "text-white"
-                                  : "text-black"
-                              }`}
-                              style={{ backgroundColor: primaryColor }}
-                            >
-                              Add to Cart
-                            </button>
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart(product);
+                            }}
+                            className={`px-3 py-1 text-sm rounded-md font-medium hover:opacity-90 md:px-4 md:py-2 md:text-base ${
+                              textColor === "white" ? "text-white" : "text-black"
+                            }`}
+                            style={{ backgroundColor: primaryColor }}
+                          >
+                            Add to Cart
+                          </button>
                           )
                         ) : (
                           <button
