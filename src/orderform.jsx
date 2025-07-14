@@ -3,17 +3,20 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const OrderForm = () => {
-  const { slug } = useParams(); // Use slug for store identification
+  const { slug } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { cart = [], shippingCharge: sc } = location.state || {};
+  
+  // Use passed state values instead of recalculating
+  const { 
+    cart = [], 
+    total: passedTotal = 0,
+    shippingCharge: sc = 0 
+  } = location.state || {};
 
-  const total = cart.reduce((sum, item) => {
-    const price = parseFloat(item.price) || 0;
-    const quantity = parseInt(item.quantity) || 0;
-    return sum + price * quantity;
-  }, 0);
-
+  // Use passed total directly
+  const total = passedTotal;
+  
   // Form state
   const [formData, setFormData] = useState({
     fullName: "",
@@ -31,14 +34,14 @@ const OrderForm = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Order summary (safer version to prevent NaN issues)
+  // Order summary calculations
   const shippingCharge = !isNaN(parseFloat(sc)) ? parseFloat(sc) : 0;
   const platformFee = !isNaN(total) ? total * 0.03 : 0;
   const orderTotal = !isNaN(total + shippingCharge + platformFee)
     ? total + shippingCharge + platformFee
     : 0;
 
-  // Handle pincode lookup using postalpincode.in API
+  // Handle pincode lookup
   const handlePincodeLookup = async (pincode) => {
     if (pincode.length === 6) {
       try {
@@ -70,33 +73,18 @@ const OrderForm = () => {
     }
   };
 
-  // Handle form submission (Razorpay integration)
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Debug logs
-    console.log("📦 total:", total);
-    console.log("🚚 shippingCharge:", shippingCharge);
-    console.log("🧾 platformFee:", platformFee);
-    console.log("💰 orderTotal:", orderTotal);
-    // Log amount and slug before the fetch call
-    console.log(
-      "Sending amount (paise):",
-      Math.round((total + shippingCharge + platformFee) * 100)
-    );
-    console.log("Slug being sent:", slug);
-    console.log("location.state:", location.state);
-    console.log("✅ Using slug from URL params:", slug);
-    console.log("📦 Total:", total);
-    console.log("🚚 Shipping:", shippingCharge);
-    console.log("🧾 Platform Fee:", platformFee);
-    console.log("💰 Final Order Total:", orderTotal);
-    console.log(
-      "📨 Amount in paise being sent to backend:",
-      Math.round((total + shippingCharge + platformFee) * 100)
-    );
-    console.log("🧾 Slug:", slug);
+    // Validate amount
+    const amountInPaise = Math.round(orderTotal * 100);
+    if (amountInPaise < 100) {
+      alert("Order amount must be at least ₹1");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       // Step 1: Create Razorpay Order
@@ -108,7 +96,7 @@ const OrderForm = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            amount: Math.round(orderTotal * 100),
+            amount: amountInPaise,
             slug: slug,
             customerName: formData.fullName,
           }),
@@ -116,15 +104,16 @@ const OrderForm = () => {
       );
 
       const razorOrder = await createOrderRes.json();
-      console.log("💳 Razorpay Order response from backend:", razorOrder);
-
+      if (!createOrderRes.ok) {
+        throw new Error(razorOrder.message || "Failed to create Razorpay order");
+      }
 
       // Step 2: Launch Razorpay Checkout
       const options = {
         key: "rzp_live_QIjpR4yQhX9L3h",
         amount: razorOrder.amount,
         currency: razorOrder.currency,
-        name: "my store",
+        name: business?.name || "My Store",
         description: "Order Payment",
         order_id: razorOrder.id,
         notes: {
@@ -158,13 +147,11 @@ const OrderForm = () => {
             shipping: shippingCharge,
             platformFee: platformFee,
             total: orderTotal,
-            currency: cart[0]?.currency || "$",
+            currency: cart[0]?.currency || "INR",
             status: "Pending",
             razorpayPaymentId: response.razorpay_payment_id,
             razorpayOrderId: razorOrder.id,
           };
-
-          console.log("📦 Order data being saved:", order);
 
           const saveRes = await fetch(
             "https://bizzysite.onrender.com/api/orders",
@@ -177,6 +164,8 @@ const OrderForm = () => {
 
           if (saveRes.ok) {
             setShowSuccessModal(true);
+            // Clear cart after successful order
+            localStorage.removeItem('cart');
           } else {
             console.error("Order save failed:", await saveRes.text());
             alert("Order failed to save. Please contact support.");
@@ -200,24 +189,24 @@ const OrderForm = () => {
     }
   };
 
-  // Dynamically add Razorpay script on mount
+  // Dynamically add Razorpay script
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
     document.body.appendChild(script);
-    console.log("🪵 location.state in OrderForm:", location.state);
   }, []);
 
-  if (!cart || cart.length === 0) {
+  // Handle missing cart or state data
+  if (!cart || cart.length === 0 || !location.state) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center p-6 bg-white rounded-lg shadow-md max-w-md">
           <h3 className="text-lg font-medium text-gray-800">
-            Your cart is empty
+            Order information incomplete
           </h3>
           <p className="mt-2 text-gray-600">
-            Please add some products to your cart before checkout.
+            Please return to the store and add products to your cart
           </p>
           <Link
             to={`/view/${slug}`}
@@ -252,12 +241,15 @@ const OrderForm = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-2xl font-bold mb-4">Thank You!</h2>
-              <p className="mb-6">Thanks for confirming your order.</p>
+              <p className="mb-6">Your order has been placed successfully.</p>
               <button
-                onClick={() => setShowSuccessModal(false)}
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  navigate(`/view/${slug}`);
+                }}
                 className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
               >
-                Close
+                Continue Shopping
               </button>
             </div>
           </div>
@@ -510,7 +502,7 @@ const OrderForm = () => {
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span>
-                    {cart[0]?.currency || "$"}
+                    {cart[0]?.currency || "₹"}
                     {total.toFixed(2)}
                   </span>
                 </div>
@@ -518,7 +510,7 @@ const OrderForm = () => {
                 <div className="flex justify-between">
                   <span>Shipping</span>
                   <span>
-                    {cart[0]?.currency || "$"}
+                    {cart[0]?.currency || "₹"}
                     {shippingCharge.toFixed(2)}
                   </span>
                 </div>
@@ -526,7 +518,7 @@ const OrderForm = () => {
                 <div className="flex justify-between">
                   <span>Platform Fee (3%)</span>
                   <span>
-                    {cart[0]?.currency || "$"}
+                    {cart[0]?.currency || "₹"}
                     {platformFee.toFixed(2)}
                   </span>
                 </div>
@@ -534,7 +526,7 @@ const OrderForm = () => {
                 <div className="border-t border-gray-200 pt-3 flex justify-between font-bold text-lg">
                   <span>Total</span>
                   <span>
-                    {cart[0]?.currency || "$"}
+                    {cart[0]?.currency || "₹"}
                     {orderTotal.toFixed(2)}
                   </span>
                 </div>
