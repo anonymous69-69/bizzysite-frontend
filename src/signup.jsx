@@ -224,7 +224,7 @@ export default function LoginPage() {
 
       {/* Hero Section with Floating Laptop */}
       <div className="min-h-screen flex flex-col justify-center items-center pt-32 pb-32 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto text-center mb-12">
+        <div className="max-w-4xl mx-auto text-center mb-12">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -268,7 +268,7 @@ export default function LoginPage() {
             </motion.button>
           </div>
 
-          {/* Floating Laptop - REVISED */}
+          {/* Floating Laptop with Image */}
           <motion.div
             className="relative w-full max-w-3xl mx-auto mt-16"
             initial={{ opacity: 0, y: 50 }}
@@ -295,83 +295,71 @@ export default function LoginPage() {
               },
             }}
           >
-            <div className="relative" style={{ perspective: "1000px" }}>
+            <div className="relative" style={{ perspective: "1500px" }}>
               <motion.div
                 className="relative mx-auto"
                 animate={{
-                  rotateX: window.innerWidth < 768 ? 0 : 5,
-                  rotateY: window.innerWidth < 768 ? 0 : -15,
-                  rotateZ: window.innerWidth < 768 ? 0 : -3,
+                  rotateX: window.innerWidth < 768 ? 0 : 15,
+                  rotateY: window.innerWidth < 768 ? 0 : -5,
+                  rotateZ: window.innerWidth < 768 ? 0 : -1,
                 }}
                 transition={{
                   duration: 1,
                   ease: "easeOut",
                 }}
               >
-                {/* Laptop Screen */}
-                <div
-                  className="absolute w-[76%] h-[62%] mx-auto rounded-t-xl overflow-hidden shadow-2xl border-4 border-gray-800"
-                  style={{
-                    top: "5%",
-                    left: "12%",
-                    backgroundColor: "#f0f0f0",
-                    zIndex: 20,
-                  }}
-                >
-                  <div className="absolute inset-0 bg-white flex flex-col">
-                    <div
-                      ref={contentRef}
-                      className="w-full h-[200%] transition-transform duration-300"
-                    >
-                      {/* E-commerce mockup content */}
-                      <div className="bg-indigo-600 text-white p-4 flex justify-between items-center">
-                        <div className="font-bold">MyStore</div>
-                        <div className="flex space-x-4">
-                          <div className="w-6 h-6 rounded-full bg-white/20"></div>
-                          <div className="w-6 h-6 rounded-full bg-white/20"></div>
-                        </div>
-                      </div>
+                {/* Laptop image container */}
+                <div className="relative w-[800px] h-auto mx-auto">
+                  {/* Laptop image */}
+                  <img
+                    src="/newlaptop.png"
+                    alt="Laptop mockup"
+                    className="w-full h-auto"
+                  />
 
-                      {/* Hero section */}
-                      <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-8 text-center">
-                        <h3 className="text-xl font-bold mb-2">My Store</h3>
-                        <p className="text-sm opacity-80">
-                          Discover our new products
-                        </p>
-                      </div>
-
-                      {/* Products grid */}
-                      <div className="grid grid-cols-2 gap-4 p-4">
-                        {[1, 2, 3, 4, 5, 6].map((item) => (
-                          <div
-                            key={item}
-                            className="border rounded-lg overflow-hidden"
-                          >
-                            <div className="bg-gray-100 h-24"></div>
-                            <div className="p-2">
-                              <div className="text-sm font-medium">
-                                Product {item}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                $29.99
-                              </div>
-                            </div>
+                  {/* Screen area for mockup content */}
+                  <div
+                    className="absolute w-[76%] h-[62%] overflow-hidden"
+                    style={{
+                      height: "38%", // Screen width percentage (try 74%-78%)
+                      width: "54%",
+                      top: "7%",
+                      left: "12%",
+                      transform: "perspective(1200px) rotateX(-5deg)", // Counter-tilt to match laptop angle
+                      transformOrigin: "top center",
+                      backfaceVisibility: "hidden",
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-white flex flex-col">
+                      <div
+                        ref={contentRef}
+                        className="w-full h-[200%] transition-transform duration-300"
+                      >
+                        {/* E-commerce mockup content */}
+                        <div className="bg-indigo-600 text-white p-4 flex justify-between items-center">
+                          <div className="font-bold">MyStore</div>
+                          <div className="flex space-x-4">
+                            <div className="w-6 h-6 rounded-full bg-white/20"></div>
+                            <div className="w-6 h-6 rounded-full bg-white/20"></div>
                           </div>
-                        ))}
-                      </div>
-
-                      {/* More products */}
-                      <div className="p-4">
-                        <div className="text-center py-4 text-gray-500">
-                          More products...
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          {[7, 8, 9, 10].map((item) => (
+
+                        {/* Hero section */}
+                        <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-8 text-center">
+                          <h3 className="text-xl font-bold mb-2">My Store</h3>
+                          <p className="text-sm opacity-80">
+                            Discover our new products
+                          </p>
+                        </div>
+
+                        {/* Products grid */}
+                        <div className="grid grid-cols-2 gap-4 p-4">
+                          {[1, 2, 3, 4, 5, 6].map((item) => (
                             <div
                               key={item}
                               className="border rounded-lg overflow-hidden"
                             >
-                              <div className="bg-gray-100 h-20"></div>
+                              <div className="bg-gray-100 h-24"></div>
                               <div className="p-2">
                                 <div className="text-sm font-medium">
                                   Product {item}
@@ -383,60 +371,34 @@ export default function LoginPage() {
                             </div>
                           ))}
                         </div>
+
+                        {/* More products */}
+                        <div className="p-4">
+                          <div className="text-center py-4 text-gray-500">
+                            More products...
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            {[7, 8, 9, 10].map((item) => (
+                              <div
+                                key={item}
+                                className="border rounded-lg overflow-hidden"
+                              >
+                                <div className="bg-gray-100 h-20"></div>
+                                <div className="p-2">
+                                  <div className="text-sm font-medium">
+                                    Product {item}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    $29.99
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Laptop Body */}
-                <div 
-                  className="absolute w-[90%] h-[15%] rounded-b-xl bg-gray-800"
-                  style={{
-                    top: "67%",
-                    left: "5%",
-                    zIndex: 10,
-                    boxShadow: "0 10px 25px rgba(0,0,0,0.2)"
-                  }}
-                >
-                  {/* Keyboard area */}
-                  <div className="absolute w-[80%] h-[60%] bg-gray-700 rounded-md"
-                    style={{
-                      top: "20%",
-                      left: "10%",
-                    }}
-                  >
-                    {/* Keyboard keys */}
-                    <div className="grid grid-cols-10 gap-1 p-2">
-                      {Array.from({ length: 60 }).map((_, i) => (
-                        <div 
-                          key={i}
-                          className="h-2 bg-gray-600 rounded-sm"
-                          style={{
-                            boxShadow: "inset 0 -2px 0 rgba(0,0,0,0.2)"
-                          }}
-                        ></div>
-                      ))}
-                    </div>
-                    
-                    {/* Trackpad */}
-                    <div className="absolute w-1/3 h-8 bg-gray-600 rounded-md"
-                      style={{
-                        bottom: "10%",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                      }}
-                    ></div>
-                  </div>
-                  
-                  {/* Hinge */}
-                  <div 
-                    className="absolute w-1/3 h-2 bg-gray-900 rounded-t-sm"
-                    style={{
-                      top: "-0.5rem",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                    }}
-                  ></div>
                 </div>
               </motion.div>
             </div>
@@ -470,77 +432,13 @@ export default function LoginPage() {
                       transition={{
                         duration: 3,
                         repeat: Infinity,
-                        repeatDelay: 1.5,
+                        repeatDelay: 0,
                         ease: "easeOut",
                       }}
                       style={{ position: "relative", zIndex: 10 }}
                     >
                       <div className="text-4xl">🚀</div>
                     </motion.div>
-
-                    {/* Enhanced smoke effect - now more visible */}
-                    <motion.div
-                      initial={{
-                        scale: 0.5,
-                        opacity: 0.9,
-                        y: 10,
-                      }}
-                      animate={{
-                        scale: 4,
-                        opacity: 0,
-                        y: -20,
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        repeatDelay: 1.5,
-                        ease: "easeOut",
-                      }}
-                      style={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: "50%",
-                        marginLeft: -15,
-                        width: 30,
-                        height: 30,
-                        borderRadius: "50%",
-                        backgroundColor: "rgba(120, 120, 120, 0.7)", // Darker gray color
-                        filter: "blur(8px)", // Increased blur
-                        zIndex: 1,
-                      }}
-                    />
-                    {/* Additional smoke particle for more effect */}
-                    <motion.div
-                      initial={{
-                        scale: 0.3,
-                        opacity: 0.7,
-                        y: 15,
-                        x: -5,
-                      }}
-                      animate={{
-                        scale: 3,
-                        opacity: 0,
-                        y: -10,
-                        x: 5,
-                      }}
-                      transition={{
-                        duration: 3.5,
-                        repeat: Infinity,
-                        repeatDelay: 1.5,
-                        ease: "easeOut",
-                      }}
-                      style={{
-                        position: "absolute",
-                        bottom: -5,
-                        left: "50%",
-                        width: 25,
-                        height: 25,
-                        borderRadius: "50%",
-                        backgroundColor: "rgba(150, 150, 150, 0.6)", // Medium gray
-                        filter: "blur(6px)",
-                        zIndex: 1,
-                      }}
-                    />
                   </div>
                 ),
               },

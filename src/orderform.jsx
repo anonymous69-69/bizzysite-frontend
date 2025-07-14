@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const OrderForm = () => {
-  const { slug } = useParams(); // Use slug instead of storeId
+  const { slug } = useParams(); // Use slug for store identification
   const location = useLocation();
   const navigate = useNavigate();
   const { cart = [], total = 0, shippingCharge: sc } = location.state || {};
@@ -70,9 +70,11 @@ const OrderForm = () => {
     console.log("🚚 shippingCharge:", shippingCharge);
     console.log("🧾 platformFee:", platformFee);
     console.log("💰 orderTotal:", orderTotal);
-    console.log("💸 amount being sent to backend:", Math.round((total + shippingCharge + platformFee) * 100));
+    // Log amount and slug before the fetch call
+    console.log("Sending amount (paise):", Math.round((total + shippingCharge + platformFee) * 100));
+    console.log("Slug being sent:", slug);
     console.log("location.state:", location.state);
-    console.log("✅ Using slug from URL params:", slug); // Use slug from params
+    console.log("✅ Using slug from URL params:", slug);
 
     try {
       // Step 1: Create Razorpay Order
@@ -84,7 +86,7 @@ const OrderForm = () => {
         },
         body: JSON.stringify({
           amount: Math.round((total + shippingCharge + platformFee) * 100),
-          slug: slug, // Send slug to backend
+          slug: slug,
           customerName: formData.fullName
         })
       });
@@ -108,7 +110,7 @@ const OrderForm = () => {
         handler: async function (response) {
           // Step 3: On successful payment, save order
           const order = {
-            slug: slug, // Include slug in order data
+            slug: slug,
             customer: {
               name: formData.fullName,
               instagramId: formData.instagramId,
@@ -133,7 +135,7 @@ const OrderForm = () => {
             currency: cart[0]?.currency || '$',
             status: 'Pending',
             razorpayPaymentId: response.razorpay_payment_id,
-            razorpayOrderId: razorOrder.id // Include Razorpay order ID
+            razorpayOrderId: razorOrder.id
           };
 
           console.log("📦 Order data being saved:", order);
@@ -184,7 +186,7 @@ const OrderForm = () => {
           <h3 className="text-lg font-medium text-gray-800">Your cart is empty</h3>
           <p className="mt-2 text-gray-600">Please add some products to your cart before checkout.</p>
           <Link
-            to={`/view/${slug}`} // Use slug in back link
+            to={`/view/${slug}`}
             className="inline-block mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
             Back to Store
