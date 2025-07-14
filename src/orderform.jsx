@@ -6,6 +6,7 @@ const OrderForm = () => {
   const { slug } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const [business, setBusiness] = useState(null);
   
   // Use passed state values instead of recalculating
   const { 
@@ -40,6 +41,26 @@ const OrderForm = () => {
   const orderTotal = !isNaN(total + shippingCharge + platformFee)
     ? total + shippingCharge + platformFee
     : 0;
+
+    useEffect(() => {
+      const fetchBusiness = async () => {
+        try {
+          const res = await fetch(
+            `https://bizzysite.onrender.com/api/store/slug/${slug}`
+          );
+          if (res.ok) {
+            const data = await res.json();
+            setBusiness(data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch business info:", err);
+        }
+      };
+      
+      if (slug) {  // Only fetch if slug exists
+        fetchBusiness();
+      }
+    }, [slug]);  // Add slug to dependency array
 
   // Handle pincode lookup
   const handlePincodeLookup = async (pincode) => {
@@ -113,7 +134,7 @@ const OrderForm = () => {
         key: "rzp_live_QIjpR4yQhX9L3h",
         amount: razorOrder.amount,
         currency: razorOrder.currency,
-        name: business?.name || "My Store",
+        name: business?.business?.name || "My Store",
         description: "Order Payment",
         order_id: razorOrder.id,
         notes: {
