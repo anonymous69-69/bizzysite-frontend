@@ -20,17 +20,17 @@ const OrderForm = () => {
   }, [slug]);
   const location = useLocation();
   const [business, setBusiness] = useState(null);
-  
+
   // Use passed state values instead of recalculating
-  const { 
-    cart = [], 
+  const {
+    cart = [],
     total: passedTotal = 0,
-    shippingCharge: sc = 0 
+    shippingCharge: sc = 0
   } = location.state || {};
 
   // Use passed total directly
   const total = passedTotal;
-  
+
   // Form state
   const [formData, setFormData] = useState({
     fullName: "",
@@ -55,25 +55,25 @@ const OrderForm = () => {
     ? total + shippingCharge + platformFee
     : 0;
 
-    useEffect(() => {
-      const fetchBusiness = async () => {
-        try {
-          const res = await fetch(
-            `https://bizzysite.onrender.com/api/store/slug/${slug}`
-          );
-          if (res.ok) {
-            const data = await res.json();
-            setBusiness(data);
-          }
-        } catch (err) {
-          console.error("Failed to fetch business info:", err);
+  useEffect(() => {
+    const fetchBusiness = async () => {
+      try {
+        const res = await fetch(
+          `https://bizzysite.onrender.com/api/store/slug/${slug}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setBusiness(data);
         }
-      };
-      
-      if (slug) {  // Only fetch if slug exists
-        fetchBusiness();
+      } catch (err) {
+        console.error("Failed to fetch business info:", err);
       }
-    }, [slug]);  // Add slug to dependency array
+    };
+
+    if (slug) {  // Only fetch if slug exists
+      fetchBusiness();
+    }
+  }, [slug]);  // Add slug to dependency array
 
   // Handle pincode lookup
   const handlePincodeLookup = async (pincode) => {
@@ -110,22 +110,37 @@ const OrderForm = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Basic validation
     if (!slug) {
       alert("Store information is missing. Please return to the store and try again.");
-      navigate(`/view/${slug}`); // Redirect back to store
+      navigate(`/view/${slug}`);
       return;
     }
+  
+    // Validate form data
+    if (!formData.fullName || !formData.phone || !formData.email || !formData.address) {
+      alert("Please fill in all required fields (Name, Phone, Email, Address)");
+      return;
+    }
+  
     setIsSubmitting(true);
-
-    // Validate amount
-    const amountInPaise = Math.round(orderTotal * 100);
-    if (amountInPaise < 100) {
-      alert("Order amount must be at least ₹1");
-      setIsSubmitting(false);
-      return;
-    }
-
+  
     try {
+      // Calculate and validate amount
+      const amountInPaise = Math.round(orderTotal * 100);
+      if (amountInPaise < 100) {
+        throw new Error("Order amount must be at least ₹1 (100 paise)");
+      }
+  
+      console.log('Attempting to create Razorpay order with:', {
+        amount: amountInPaise,
+        slug,
+        customer: formData.fullName,
+        cartItems: cart.length,
+        totalItems: cart.reduce((sum, item) => sum + item.quantity, 0)
+      });
+  
       // Step 1: Create Razorpay Order
       const createOrderRes = await fetch(
         "https://bizzysite.onrender.com/api/create-order",
@@ -137,92 +152,101 @@ const OrderForm = () => {
           body: JSON.stringify({
             amount: amountInPaise,
             slug: slug,
+            receiptId: `order_${Date.now()}`,
             customerName: formData.fullName,
           }),
         }
       );
-
-      const razorOrder = await createOrderRes.json();
-if (!createOrderRes.ok) {
-  console.error('Order creation failed:', {
-    status: createOrderRes.status,
-    response: razorOrder,
-    slugUsed: slug
-  });
-  throw new Error(
-    razorOrder.message || 
-    `Payment failed (Status ${createOrderRes.status}). ` +
-    `Please contact support and mention store: ${slug}`
-  );
-}
-console.log('Creating payment order with:', {
-  amount: amountInPaise,
-  slug,
-  customer: formData.fullName,
-  items: cart.length
-});
-
-      // Step 2: Launch Razorpay Checkout
-      const options = {
-        key: "rzp_live_QIjpR4yQhX9L3h",
-        amount: razorOrder.amount,
-        currency: razorOrder.currency,
-        name: business?.business?.name || "My Store",
-        description: "Order Payment",
-        order_id: razorOrder.id,
-        notes: {
-          slug: slug,
-          storeOwnerName: localStorage.getItem("userName") || "",
-          storeOwnerEmail: localStorage.getItem("userEmail") || "",
-          storeOwnerPhone: localStorage.getItem("userPhone") || "",
+  
+      const responseData = await createOrderRes.json();
+      
+      if (!createOrderRes.ok) {
+        console.error('Order creation failed:', {
+          status: createOrderRes.status,
+          response: responseData,
+          request: {
+            amount: amountInPaise,
+            slug,
+            customerName: formData.fullName
+          }
+        });
+        
+        throw new Error(
+          responseData.message || 
+          `Payment initialization failed (Status ${createOrderRes.status})`
+        );
+      }
+  
+      console.log('Razorpay order created:', responseData);
+  
+      // Step 2: Prepare order data for saving
+      const orderData = {
+        storeId: business?.storeId,
+        customer: {
+          name: formData.fullName,
+          instagramId: formData.instagramId,
+          phone: formData.phone,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+          country: formData.country,
+          specialNote: formData.specialNote,
         },
+        items: cart.map(item => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        subtotal: total,
+        shipping: shippingCharge,
+        platformFee: platformFee,
+        total: orderTotal,
+        currency: cart[0]?.currency || "INR",
+        status: "Pending",
+      };
+  
+      // Step 3: Launch Razorpay Checkout
+      const options = {
+        key: process.env.RAZORPAY_KEY_ID || "rzp_live_QIjpR4yQhX9L3h",
+        amount: responseData.amount,
+        currency: responseData.currency,
+        name: business?.business?.name || "My Store",
+        description: `Order for ${formData.fullName}`,
+        order_id: responseData.id,
         handler: async function (response) {
-          // Step 3: On successful payment, save order
-          const order = {
-            slug: slug,
-            customer: {
-              name: formData.fullName,
-              instagramId: formData.instagramId,
-              phone: formData.phone,
-              email: formData.email,
-              address: formData.address,
-              city: formData.city,
-              state: formData.state,
-              pincode: formData.pincode,
-              country: formData.country,
-              specialNote: formData.specialNote,
-            },
-            items: cart.map((item) => ({
-              name: item.name,
-              price: item.price,
-              quantity: item.quantity,
-            })),
-            subtotal: total,
-            shipping: shippingCharge,
-            platformFee: platformFee,
-            total: orderTotal,
-            currency: cart[0]?.currency || "INR",
-            status: "Pending",
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpayOrderId: razorOrder.id,
-          };
-
-          const saveRes = await fetch(
-            "https://bizzysite.onrender.com/api/orders",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(order),
+          try {
+            console.log('Payment successful:', response);
+            
+            // Save order with payment details
+            const orderToSave = {
+              ...orderData,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: responseData.id,
+              status: "Confirmed",
+              paid: true
+            };
+  
+            const saveRes = await fetch(
+              "https://bizzysite.onrender.com/api/orders",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderToSave),
+              }
+            );
+  
+            if (!saveRes.ok) {
+              throw new Error("Failed to save order details");
             }
-          );
-
-          if (saveRes.ok) {
-            setShowSuccessModal(true);
-            // Clear cart after successful order
+  
+            // Clear cart and show success
             localStorage.removeItem('cart');
-          } else {
-            console.error("Order save failed:", await saveRes.text());
-            alert("Order failed to save. Please contact support.");
+            setShowSuccessModal(true);
+          } catch (saveError) {
+            console.error("Order save failed:", saveError);
+            alert("Payment was successful but we couldn't save your order details. Please contact support with your payment ID.");
           }
         },
         prefill: {
@@ -230,14 +254,36 @@ console.log('Creating payment order with:', {
           email: formData.email,
           contact: formData.phone,
         },
-        theme: { color: "#6366F1" },
+        notes: {
+          slug: slug,
+          customerName: formData.fullName,
+          storeName: business?.business?.name || "Unknown Store"
+        },
+        theme: {
+          color: "#6366F1"
+        },
       };
-
+  
+      // Load Razorpay script if not already loaded
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onerror = () => {
+          throw new Error("Failed to load Razorpay checkout");
+        };
+        document.body.appendChild(script);
+      }
+  
       const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (response) => {
+        console.error('Payment failed:', response.error);
+        alert(`Payment failed: ${response.error.description}`);
+      });
       rzp.open();
+  
     } catch (err) {
-      console.error("Payment initiation failed:", err);
-      alert(`Payment initiation failed: ${err.message}`);
+      console.error("Payment processing error:", err);
+      alert(`Payment failed: ${err.message}\n\nPlease try again or contact support.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -247,12 +293,12 @@ console.log('Creating payment order with:', {
   useEffect(() => {
     // Verify slug exists before loading Razorpay
     if (!slug) return;
-    
+
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
     document.body.appendChild(script);
-  
+
     return () => {
       // Cleanup
       document.body.removeChild(script);
