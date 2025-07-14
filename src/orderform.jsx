@@ -82,6 +82,15 @@ const OrderForm = () => {
     console.log("Slug being sent:", slug);
     console.log("location.state:", location.state);
     console.log("✅ Using slug from URL params:", slug);
+    console.log("📦 Total:", total);
+    console.log("🚚 Shipping:", shippingCharge);
+    console.log("🧾 Platform Fee:", platformFee);
+    console.log("💰 Final Order Total:", orderTotal);
+    console.log(
+      "📨 Amount in paise being sent to backend:",
+      Math.round((total + shippingCharge + platformFee) * 100)
+    );
+    console.log("🧾 Slug:", slug);
 
     try {
       // Step 1: Create Razorpay Order
@@ -101,6 +110,8 @@ const OrderForm = () => {
       );
 
       const razorOrder = await createOrderRes.json();
+      console.log("💳 Razorpay Order response from backend:", razorOrder);
+
 
       // Step 2: Launch Razorpay Checkout
       const options = {
