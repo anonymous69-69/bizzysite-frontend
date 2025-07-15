@@ -147,10 +147,8 @@ const OrderForm = () => {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            "x-requested-with": "XMLHttpRequest", // Add this header
+            "Content-Type": "application/json"
           },
-          credentials: "include", // Add this for cookies if needed
           body: JSON.stringify({
             amount: amountInPaise,
             slug: slug,
@@ -278,8 +276,11 @@ const OrderForm = () => {
   
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', (response) => {
-        console.error('Payment failed:', response.error);
-        alert(`Payment failed: ${response.error.description}`);
+        console.error('Payment failed details:', {
+          error: response.error,
+          metadata: response.error.metadata
+        });
+        alert(`Payment failed: ${response.error.description}\nError code: ${response.error.code}`);
       });
       rzp.open();
   
@@ -292,20 +293,25 @@ const OrderForm = () => {
   };
 
   // Dynamically add Razorpay script
-  useEffect(() => {
-    // Verify slug exists before loading Razorpay
-    if (!slug) return;
+ // Load Razorpay script only once
+useEffect(() => {
+  if (!slug || window.Razorpay) return;
 
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
+  const script = document.createElement("script");
+  script.src = "https://checkout.razorpay.com/v1/checkout.js";
+  script.async = true;
+  script.onerror = () => {
+    console.error("Failed to load Razorpay script");
+    alert("Payment system failed to load. Please refresh the page.");
+  };
+  document.body.appendChild(script);
 
-    return () => {
-      // Cleanup
+  return () => {
+    if (script.parentNode) {
       document.body.removeChild(script);
-    };
-  }, [slug]); // Add slug to dependencies
+    }
+  };
+}, [slug]);// Add slug to dependencies
 
   // Handle missing cart or state data
   if (!cart || cart.length === 0 || !location.state) {
