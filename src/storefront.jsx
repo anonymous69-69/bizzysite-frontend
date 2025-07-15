@@ -1,4 +1,3 @@
-import './index.css'; // ensure custom fonts and animations are loaded
 import { useState, useEffect } from 'react';
 import { useTheme } from './ThemeContext';
 import toast, { Toaster } from 'react-hot-toast';
@@ -186,19 +185,19 @@ export default function BusinessDashboard() {
     return (
       <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
         <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow space-y-6 animate-pulse">
-          <div className="h-8 w-1/3 rounded skeleton"></div>
-          <div className="h-6 w-1/2 rounded skeleton"></div>
+          <div className="h-8 bg-gray-300 rounded w-1/3"></div>
+          <div className="h-6 bg-gray-300 rounded w-1/2"></div>
 
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow space-y-4">
-            <div className="h-6 w-1/4 rounded skeleton"></div>
-            <div className="h-4 w-3/4 rounded skeleton"></div>
-            <div className="h-4 w-full rounded skeleton"></div>
+            <div className="h-6 bg-gray-300 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-full"></div>
           </div>
 
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow space-y-4">
-            <div className="h-6 w-1/4 rounded skeleton"></div>
-            <div className="h-4 w-3/4 rounded skeleton"></div>
-            <div className="h-4 w-full rounded skeleton"></div>
+            <div className="h-6 bg-gray-300 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-full"></div>
           </div>
         </div>
       </div>
@@ -206,7 +205,7 @@ export default function BusinessDashboard() {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col overflow-x-hidden font-sans ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
+    <div className={`min-h-screen flex flex-col overflow-x-hidden ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
       <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 flex-grow w-full">
         {error && (
@@ -282,7 +281,7 @@ export default function BusinessDashboard() {
 
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className={`flex space-x-2 sm:space-x-6 px-4 py-3 rounded-full border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}>
+            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
               {[
                 { name: 'Setup', icon: '📊' },
                 { name: 'Products', icon: '📦' },
@@ -320,7 +319,7 @@ export default function BusinessDashboard() {
           </div>
         </div>
 
-        <div className={`rounded-xl border backdrop-blur-md bg-white/30 dark:bg-gray-800/50 shadow-lg p-6 mb-8 ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
           <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
             Business Information
           </h3>
@@ -427,7 +426,7 @@ export default function BusinessDashboard() {
                   setAnimate(true);
                   setTimeout(() => setAnimate(false), 500);
                 }}
-                className={`px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50 ${animate ? 'animate-wiggle' : ''}`}
+                className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 ${animate ? 'animate-wiggle' : ''}`}
               >
                 {loading ? 'Saving...' : 'Save Business Information'}
               </button>
@@ -466,7 +465,7 @@ export default function BusinessDashboard() {
 
       </div>
 
-      <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 shadow-inner ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'}`}>
+      <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div>
