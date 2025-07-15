@@ -270,18 +270,13 @@ export default function NavView() {
               </p>
             </div>
             <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
-              <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-                <li>Email: rhythmsarma66@gmail.com</li>
-                <li>Phone: +91 7086758292</li>
-              </ul>
+           
             </div>
             <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Resources</h4>
+              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
               <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-                <li><Link to="#" className="hover:text-white">Blog</Link></li>
-                <li><Link to="#" className="hover:text-white">Help Center</Link></li>
-                <li><Link to="#" className="hover:text-white">Community</Link></li>
+              <li>Email: your-store@bizzysite.shop</li>
+              <li>Phone: +91 7086758292</li>
               </ul>
             </div>
           </div>

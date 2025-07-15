@@ -800,7 +800,7 @@ useEffect(() => {
                 Contact
               </h4>
               <ul className="space-y-2 text-gray-300 text-sm sm:text-base">
-                <li>Email: rhythmsarma66@gmail.com</li>
+                <li>Email: your-store@bizzysite.shop</li>
                 <li>Phone: +91 7086758292</li>
               </ul>
             </div>

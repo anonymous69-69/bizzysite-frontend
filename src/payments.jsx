@@ -637,25 +637,20 @@ export default function PaymentMethodForm() {
               </p>
             </div>
             <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
-              <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-                <li>Email: rhythmsarma66@gmail.com</li>
-                <li>Phone: +91 7086758292</li>
-              </ul>
+            
             </div>
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Resources</h4>
               <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-                <li><Link to="#" className="hover:text-white">Blog</Link></li>
-                <li><Link to="#" className="hover:text-white">Help Center</Link></li>
-                <li><Link to="#" className="hover:text-white">Community</Link></li>
+              <li>Email: your-store@bizzysite.shop</li>
+              <li>Phone: +91 7086758292</li>
               </ul>
             </div>
           </div>
           <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${
             darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'
           }`}>
-            <p>© 2024 BizzySite. Made with ❤️ for small businesses.</p>
+            <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
       </footer>

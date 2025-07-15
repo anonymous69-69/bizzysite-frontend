@@ -286,49 +286,62 @@ export default function LoginPage() {
             }}
           >
             <div className="relative" style={{ perspective: "1500px" }}>
-              <motion.div
-                className="relative mx-auto z-10" 
-                animate={{
-                  rotateX: window.innerWidth < 768 ? 0 : 15,
-                  rotateY: window.innerWidth < 768 ? 0 : -5,
-                  rotateZ: window.innerWidth < 768 ? 0 : -1,
-                }}
-                style={{
-                  transform: window.innerWidth < 768 ? "scale(0.7)" : "none",
-                  transformOrigin: "top center",
-                }}
-              >
-                {/* Laptop image container */}
-                <div className="relative w-full max-w-[800px] h-auto mx-auto px-4">
-                  {/* Laptop image */}
-                  <img
-                    src="/newlaptop.png"
-                    alt="Laptop mockup"
-                    className="w-full h-auto"
-                  />
+  <motion.div
+    className="relative mx-auto z-10"
+    initial={{ y: 0 }}
+    animate={{
+      rotateX: window.innerWidth < 768 ? 0 : 15,
+      rotateY: window.innerWidth < 768 ? 0 : -5,
+      rotateZ: window.innerWidth < 768 ? 0 : -1,
+      y: [0, -15, 0], // Floating up and down
+    
+    }}
+    transition={{
+      y: {
+        duration: 3,
+        repeat: Infinity,
+        ease: "easeInOut",
+      },
+      rotateX: { duration: 1 },
+      rotateY: { duration: 1 },
+      rotateZ: { duration: 1 },
+    }}
+    style={{
+      transform: window.innerWidth < 768 ? "scale(0.7)" : "none",
+      transformOrigin: "top center",
+    }}
+  >
+    {/* Laptop image container */}
+    <div className="relative w-full max-w-[800px] h-auto mx-auto px-4">
+      {/* Laptop image */}
+      <img
+        src="/newlaptop.png"
+        alt="Laptop mockup"
+        className="w-full h-auto"
+      />
 
-                  {/* Screen area for mockup content */}
-                  <div
-                    className="absolute overflow-hidden"
-                    style={{
-                      height: "33.5%",
-                      width: "60.4%",
-                      top: "25.6%",
-                      left: "23.3%",
-                      transform:
-                        window.innerWidth < 768
-                          ? "perspective(1200px) rotateX(-1deg) rotateY(-50deg) rotateZ(-10.5deg) scaleX(1) scaleY(1) skewX(7deg) skewY(-8deg)"
-                          : "perspective(1160px) rotateX(5deg) rotateY(-35deg) rotateZ(-18deg) scaleX(1) scaleY(1) skewX(-0.8deg) skewY(-1deg)",
-                      clipPath:
-                        window.innerWidth < 768
-                          ? "polygon(0% 0%, 97.9% 1%, 100% 100%, 2% 90%)"
-                          : "polygon(8% 1%, 89% 0%, 86.6% 95%, 9% 92%)",
-                      transformOrigin: "top center",
-                      backfaceVisibility: "hidden",
-                      border: "3px solid #000",
-                     
-                    }}
-                  >
+      {/* Screen area for mockup content */}
+      <div
+        className="absolute overflow-hidden"
+        style={{
+          height: "33.5%",
+          width: "60.4%",
+          top: "25.6%",
+          left: "23.3%",
+          transform:
+            window.innerWidth < 768
+              ? "perspective(1200px) rotateX(-1deg) rotateY(-50deg) rotateZ(-10.5deg) scaleX(1) scaleY(1) skewX(7deg) skewY(-8deg)"
+              : "perspective(1160px) rotateX(5deg) rotateY(-35deg) rotateZ(-18deg) scaleX(1) scaleY(1) skewX(-0.8deg) skewY(-1deg)",
+          clipPath:
+            window.innerWidth < 768
+              ? "polygon(0% 0%, 97.9% 1%, 100% 100%, 2% 90%)"
+              : "polygon(8% 1%, 89% 0%, 86.6% 95%, 9% 92%)",
+          transformOrigin: "top center",
+          backfaceVisibility: "hidden",
+          border: "3px solid #000",
+        }}
+      >
+
                     <div className="absolute inset-0 bg-white flex flex-col">
                       <div
                         ref={contentRef}
@@ -660,19 +673,19 @@ export default function LoginPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 my-16">
             {[
               {
-                text: "BizzySite helped us launch our online store in just 2 days. The setup was incredibly simple!",
-                author: "Sarah Johnson",
-                role: "Owner, Boutique Store",
+                text: "BizzySite helped us launch our online store in just few minutes. The setup was incredibly simple!",
+                author: "candy crochet ",
+                role: "Crochet store",
               },
               {
                 text: "Our sales increased by 40% after switching to BizzySite. The beautiful storefront really makes a difference.",
-                author: "Michael Chen",
-                role: "Founder, Tech Gadgets",
+                author: "siya",
+                role: "SiyaCakes",
               },
               {
                 text: "As a small business owner with no tech skills, BizzySite has been a game-changer for us.",
-                author: "Emma Rodriguez",
-                role: "CEO, Handmade Crafts",
+                author: "Ron",
+                role: "Criss Soaps",
               },
             ].map((testimonial, idx) => (
               <motion.div
@@ -703,7 +716,7 @@ export default function LoginPage() {
       </div>
 
       {/* Footer */}
-      <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8  'bg-gray-800 text-white'}`}>
+      <footer className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-black text-white">
         <div className="max-w-7xl mx-auto"> 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div>
@@ -713,18 +726,14 @@ export default function LoginPage() {
               </p>
             </div>
             <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
-              <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-                <li>Email: rhythmsarma66@gmail.com</li>
-                <li>Phone: +91 7086758292</li>
-              </ul>
+             
+              
             </div>
             <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Resources</h4>
+              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contace</h4>
               <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-                <li><Link to="#" className="hover:text-white">Blog</Link></li>
-                <li><Link to="#" className="hover:text-white">Help Center</Link></li>
-                <li><Link to="#" className="hover:text-white">Community</Link></li>
+              <li>Email: your-store@bizzysite.shop</li>
+                <li>Phone: +91 7086758292</li>
               </ul>
             </div>
           </div>
