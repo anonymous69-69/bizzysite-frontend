@@ -462,7 +462,7 @@ useEffect(() => {
                     total + parseFloat(item.price) * item.quantity,
                   0
                 ),
-                shippingCharge: business.shippingCharge || 50,
+                shippingCharge: business.shippingCharge || 0,
               },
             });
           }}
