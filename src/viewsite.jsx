@@ -107,26 +107,32 @@ const ViewSite = () => {
 
   // Update quantity function
   const updateQuantity = (productId, newQuantity) => {
-    if (newQuantity < 1) return;
-
+    if (newQuantity < 1) {
+      removeFromCart(productId);  // remove product
+      return;
+    }
+  
     setCart((prevCart) =>
       prevCart.map((item) =>
         item._id === productId ? { ...item, quantity: newQuantity } : item
       )
     );
   };
+  
 
  
 
 useEffect(() => {
-  const storedCart = localStorage.getItem('cart');
+  const storedCart = localStorage.getItem(`cart_${slug}`);
+
   if (storedCart) {
     setCart(JSON.parse(storedCart));
   }
 }, []);
 
 useEffect(() => {
-  localStorage.setItem('cart', JSON.stringify(cart));
+  localStorage.setItem(`cart_${slug}`, JSON.stringify(cart));
+
 }, [cart]);
 
   // Remove from cart function
