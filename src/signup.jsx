@@ -83,7 +83,7 @@ export default function LoginPage() {
         }
         try {
           const businessRes = await fetch(
-            " https://bizzysite.onrender.com/api/business",
+            "https://bizzysite.onrender.com/api/business",
             {
               method: "POST",
               headers: {
@@ -113,7 +113,7 @@ export default function LoginPage() {
             throw new Error("Store ID not received from server");
           }
           await fetch(
-            " https://bizzysite.onrender.com/api/send-welcome-email",
+            "https://bizzysite.onrender.com/api/send-welcome-email",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -740,7 +740,7 @@ export default function LoginPage() {
           <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${
             'border-gray-700 text-gray-400'
           }`}>
-            <p>© 2024 BizzySite. Made with ❤️ for small businesses.</p>
+            <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
       </footer>
@@ -842,7 +842,7 @@ export default function LoginPage() {
                         if (emailPrompt) {
                           try {
                             const res = await fetch(
-                              " https://bizzysite.onrender.com/api/request-password-reset",
+                              "https://bizzysite.onrender.com/api/request-password-reset",
                               {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
@@ -908,7 +908,7 @@ export default function LoginPage() {
                           const user = result.user;
 
                           const res = await fetch(
-                            " https://bizzysite.onrender.com/api/google-login",
+                            "https://bizzysite.onrender.com/api/google-login",
                             {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
