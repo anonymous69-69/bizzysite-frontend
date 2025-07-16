@@ -32,18 +32,18 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Add validation checks
     if (!isLogin && (!name || !email || !password)) {
       toast.error("Please fill all required fields");
       return;
     }
-    
+
     if (!isLogin && password.length < 6) {
       toast.error("Password must be at least 6 characters");
       return;
     }
-  
+
     setIsLoading(true);
     const payload = {
       email,
@@ -54,25 +54,33 @@ export default function LoginPage() {
       let url = `https://bizzysite.onrender.com/api/${
         isLogin ? "login" : "signup"
       }`;
-      
+      console.log("%c[Signup] Sending payload:", "color:blue", payload);
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-    
+
       // First check if response is okay
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed. Please try again.");
-      }
-    
+      // ✅ Only one call to response.json()
       const data = await response.json();
-      const userId = String(data.userId || "").trim();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Registration failed. Please try again."
+        );
+      }
+
+      const userId = String(data.userId || data._id || "").trim();
       if (!userId) {
-        console.error("Invalid or missing userId in response", data);
+        console.error(
+          "%c[Signup] Missing userId. Full response:",
+          "color:red",
+          data
+        );
         throw new Error("Invalid user ID received from server.");
       }
+
       localStorage.setItem("userId", userId);
       localStorage.setItem("token", userId);
       localStorage.setItem("userEmail", data.email || "");
@@ -137,8 +145,8 @@ export default function LoginPage() {
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(
-        error.message || 
-        "Registration failed. Please check your details and try again."
+        error.message ||
+          "Registration failed. Please check your details and try again."
       );
       setIsLoading(false);
     }
