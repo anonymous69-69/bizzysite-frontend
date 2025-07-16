@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from './ThemeContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OrderManagement() {
   const { darkMode } = useTheme();
@@ -11,6 +12,7 @@ export default function OrderManagement() {
   const [orderToDelete, setOrderToDelete] = useState(null);
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
+  
 
   useEffect(() => {
     // Fetch user name
