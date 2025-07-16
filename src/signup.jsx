@@ -39,8 +39,9 @@ export default function LoginPage() {
       ...(isLogin ? {} : { name }),
     };
     try {
-      let url = ` https://bizzysite.onrender.com/api/${isLogin ? "login" : "signup"
-        }`;
+      let url = ` https://bizzysite.onrender.com/api/${
+        isLogin ? "login" : "signup"
+      }`;
       let response;
       try {
         response = await fetch(url, {
@@ -111,14 +112,11 @@ export default function LoginPage() {
           } else {
             throw new Error("Store ID not received from server");
           }
-          await fetch(
-            "https://bizzysite.onrender.com/api/send-welcome-email",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, name }),
-            }
-          );
+          await fetch("https://bizzysite.onrender.com/api/send-welcome-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, name }),
+          });
         } catch (error) {
           console.error("Store creation error:", error);
           toast.error("Failed to initialize your store. Please try again.");
@@ -277,11 +275,10 @@ export default function LoginPage() {
               opacity: 1,
               y: 0,
               x: 0,
-
             }}
             transition={{
               delay: 0.3,
-              duration: 0.8
+              duration: 0.8,
             }}
           >
             <div className="relative" style={{ perspective: "1500px" }}>
@@ -293,7 +290,6 @@ export default function LoginPage() {
                   rotateY: window.innerWidth < 768 ? 0 : -5,
                   rotateZ: window.innerWidth < 768 ? 0 : -1,
                   y: [0, -15, 0], // Floating up and down
-
                 }}
                 transition={{
                   y: {
@@ -340,7 +336,6 @@ export default function LoginPage() {
                       border: "3px solid #000",
                     }}
                   >
-
                     <div className="absolute inset-0 bg-white flex flex-col">
                       <div
                         ref={contentRef}
@@ -719,25 +714,28 @@ export default function LoginPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div>
-              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+                BizzySite
+              </h3>
               <p className="text-gray-300 mb-4 text-sm sm:text-base">
-                Empowering small businesses to succeed online with simple, powerful tools.
+                Empowering small businesses to succeed online with simple,
+                powerful tools.
               </p>
             </div>
+            <div></div>
             <div>
-
-
-            </div>
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contace</h4>
+              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                Contace
+              </h4>
               <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
                 <li>Email: your-store@bizzysite.shop</li>
                 <li>Phone: +91 7086758292</li>
               </ul>
             </div>
           </div>
-          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${'border-gray-700 text-gray-400'
-            }`}>
+          <div
+            className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${"border-gray-700 text-gray-400"}`}
+          >
             <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
@@ -760,7 +758,7 @@ export default function LoginPage() {
                 setShowModal(false);
               }
             }}
-            className="bg-white/40 backdrop-blur-md rounded-t-2xl shadow-xl max-w-lg w-full mx-auto border border-white/20 sm:rounded-lg sm:max-w-md"
+            className="bg-white/30 backdrop-blur-md rounded-xl shadow-2xl max-w-lg w-full mx-auto border border-white/30 p-6 sm:p-8"
             style={{
               boxShadow: "0 0 12px rgba(122, 111, 240, 0.4)",
               border: "1px solid rgba(255, 255, 255, 0.2)",
@@ -788,7 +786,7 @@ export default function LoginPage() {
                       name="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] bg-white/70"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] shadow-sm placeholder-gray-400 text-sm"
                       required
                     />
                   </div>
@@ -807,7 +805,7 @@ export default function LoginPage() {
                     name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] bg-white/70"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] shadow-sm placeholder-gray-400 text-sm"
                     required
                   />
                 </div>
@@ -825,7 +823,7 @@ export default function LoginPage() {
                     name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] bg-white/70"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] shadow-sm placeholder-gray-400 text-sm"
                     required
                   />
                 </div>
@@ -860,7 +858,7 @@ export default function LoginPage() {
                           }
                         }
                       }}
-                      className="text-sm text-[#7a6ff0] hover:text-[#5a50d0] transition-colors"
+                      className="text-sm text-[#000000] hover:text-[#362fa5] transition-colors"
                     >
                       Forgot Password?
                     </button>
@@ -869,7 +867,7 @@ export default function LoginPage() {
                 <div>
                   <button
                     type="submit"
-                    className="w-full px-4 py-2 bg-[#7a6ff0] text-white font-medium rounded-md hover:bg-[#5a50d0] focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0] transition-colors shadow-md"
+                    className="w-full py-2.5 bg-[#7a6ff0] text-white font-semibold rounded-md hover:bg-[#5a50d0] focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0] transition-colors shadow-lg"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -885,27 +883,24 @@ export default function LoginPage() {
                   </button>
                 </div>
 
-                <div className="mt-6">
+                <div className="mt-6"></div>
+                <div className="relative my-6">
+                  <hr className="border-gray-300" />
+                  <span className="absolute left-1/2 transform -translate-x-1/2 -top-2 px-2 text-sm text-black bg-white">
+                    or continue with
+                  </span>
                 </div>
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white/70 text-gray-500">
-                        Or continue with
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mt-6 grid grid-cols-1 gap-3">
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          const result = await signInWithPopup(auth, provider);
-                          const user = result.user;
+                <div className="mt-6 grid grid-cols-1 gap-3">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const result = await signInWithPopup(auth, provider);
+                        const user = result.user;
 
-                          const res = await fetch("https://bizzysite.onrender.com/api/google-login", {
+                        const res = await fetch(
+                          "https://bizzysite.onrender.com/api/google-login",
+                          {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
@@ -913,52 +908,73 @@ export default function LoginPage() {
                               name: user.displayName,
                               email: user.email,
                             }),
-                          });
+                          }
+                        );
 
-                          const data = await res.json();
-                          if (!res.ok) throw new Error(data.message || "Google login failed");
+                        const data = await res.json();
+                        if (!res.ok)
+                          throw new Error(
+                            data.message || "Google login failed"
+                          );
 
-                          localStorage.setItem("userId", data.userId);
-                          localStorage.setItem("token", data.userId || "");
-                          localStorage.setItem("userEmail", data.email || "");
-                          localStorage.setItem("userName", data.name || "");
-                          localStorage.setItem("userPhone", data.phone || "");
-                          localStorage.setItem("userRole", "vendor");
+                        localStorage.setItem("userId", data.userId);
+                        localStorage.setItem("token", data.userId || "");
+                        localStorage.setItem("userEmail", data.email || "");
+                        localStorage.setItem("userName", data.name || "");
+                        localStorage.setItem("userPhone", data.phone || "");
+                        localStorage.setItem("userRole", "vendor");
 
-                          toast.success(data.message || "Signed in with Google");
-                          setShowModal(false);
-                          navigate("/storefront");
-                        } catch (error) {
-                          console.error(error);
-                          toast.error(error.message || "Google sign-in failed");
-                        }
-                      }}
-                      className="w-full inline-flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-md bg-white/70 hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0] transition"
-                    >
-                      <div className="w-5 h-5">
-                        <svg
-                          className="w-full h-full object-contain"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M12.545 10.239v3.821h5.445c-0.261 1.353-1.126 2.471-2.381 3.229l3.845 2.979c2.246-2.071 3.538-5.116 3.538-8.579 0-0.741-0.071-1.457-0.202-2.155h-8.245z" />
-                        </svg>
-                      </div>
-                      <span className="text-sm font-medium text-gray-700">Continue with Google</span>
-                    </button>
-                  </div>
+                        toast.success(data.message || "Signed in with Google");
+                        setShowModal(false);
+                        navigate("/storefront");
+                      } catch (error) {
+                        console.error(error);
+                        toast.error(error.message || "Google sign-in failed");
+                      }
+                    }}
+                    className="w-full inline-flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-md bg-white/70 hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0] transition"
+                  >
+                    <div className="w-5 h-5">
+                      <svg
+                        className="w-full h-full"
+                        viewBox="0 0 533.5 544.3"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M533.5 278.4c0-17.4-1.6-34.1-4.6-50.2H272v95h147.1c-6.3 34.1-25.1 62.9-53.5 82.1v68.2h86.4c50.7-46.7 81.5-115.5 81.5-195.1z"
+                          fill="#4285F4"
+                        />
+                        <path
+                          d="M272 544.3c72.9 0 134-24.2 178.6-65.8l-86.4-68.2c-24 16-54.5 25.4-92.2 25.4-70.9 0-131-47.9-152.5-112.1H30.8v70.4C74.7 474.7 166.4 544.3 272 544.3z"
+                          fill="#34A853"
+                        />
+                        <path
+                          d="M119.5 323.6c-10.2-30.1-10.2-62.6 0-92.7v-70.4H30.8c-42.5 84.6-42.5 183.3 0 267.9l88.7-70.4z"
+                          fill="#FBBC05"
+                        />
+                        <path
+                          d="M272 107.1c39.7-.6 77.5 14.6 106.6 41.6l79.4-79.4C406 24.8 345.8 0 272 0 166.4 0 74.7 69.6 30.8 173.3l88.7 70.4C141 155 201.1 107.1 272 107.1z"
+                          fill="#EA4335"
+                        />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">
+                      Continue with Google
+                    </span>
+                  </button>
+                </div>
 
-                  <div className="mt-6 text-center">
-                    <button
-                      type="button"
-                      onClick={() => setIsLogin(!isLogin)}
-                      className="text-[#7a6ff0] hover:text-[#5a50d0] text-sm font-medium transition-colors"
-                    >
-                      {isLogin
-                        ? "Don't have an account? Sign up"
-                        : "Already have an account? Sign in"}
-                    </button>
-                  </div>
+                <div className="mt-6 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setIsLogin(!isLogin)}
+                    className="text-[#000000] hover:text-[#5a50d0] text-sm font-medium transition-colors"
+                  >
+                    {isLogin
+                      ? "Don't have an account? Sign up"
+                      : "Already have an account? Sign in"}
+                  </button>
+                </div>
               </form>
             </div>
           </motion.div>
