@@ -39,9 +39,8 @@ export default function LoginPage() {
       ...(isLogin ? {} : { name }),
     };
     try {
-      let url = ` https://bizzysite.onrender.com/api/${
-        isLogin ? "login" : "signup"
-      }`;
+      let url = ` https://bizzysite.onrender.com/api/${isLogin ? "login" : "signup"
+        }`;
       let response;
       try {
         response = await fetch(url, {
@@ -243,20 +242,20 @@ export default function LoginPage() {
             transition={{ delay: 0.2, duration: 0.5 }}
           >
             <div className="min-h-[72px] sm:min-h-[60px] flex justify-center items-center">
-    <TypeAnimation
-      sequence={[
-        "Create beautiful ecommerce sites in minutes",
-        2000,
-        "Powerful tools for small businesses",
-        2000,
-        "Easy customization, no technical skills needed",
-        2000,
-      ]}
-      wrapper="p"
-      repeat={Infinity}
-      className="text-xl sm:text-2xl text-gray-600 max-w-2xl mx-auto text-center"
-    />
-  </div>
+              <TypeAnimation
+                sequence={[
+                  "Create beautiful ecommerce sites in minutes",
+                  2000,
+                  "Powerful tools for small businesses",
+                  2000,
+                  "Easy customization, no technical skills needed",
+                  2000,
+                ]}
+                wrapper="p"
+                repeat={Infinity}
+                className="text-xl sm:text-2xl text-gray-600 max-w-2xl mx-auto text-center"
+              />
+            </div>
           </motion.div>
 
           <div className="flex justify-center items-center -mb-4 mt-8">
@@ -277,8 +276,8 @@ export default function LoginPage() {
             animate={{
               opacity: 1,
               y: 0,
-              x:0,
-         
+              x: 0,
+
             }}
             transition={{
               delay: 0.3,
@@ -286,61 +285,61 @@ export default function LoginPage() {
             }}
           >
             <div className="relative" style={{ perspective: "1500px" }}>
-  <motion.div
-    className="relative mx-auto z-10"
-    initial={{ y: 0 }}
-    animate={{
-      rotateX: window.innerWidth < 768 ? 0 : 15,
-      rotateY: window.innerWidth < 768 ? 0 : -5,
-      rotateZ: window.innerWidth < 768 ? 0 : -1,
-      y: [0, -15, 0], // Floating up and down
-    
-    }}
-    transition={{
-      y: {
-        duration: 3,
-        repeat: Infinity,
-        ease: "easeInOut",
-      },
-      rotateX: { duration: 1 },
-      rotateY: { duration: 1 },
-      rotateZ: { duration: 1 },
-    }}
-    style={{
-      transform: window.innerWidth < 768 ? "scale(0.7)" : "none",
-      transformOrigin: "top center",
-    }}
-  >
-    {/* Laptop image container */}
-    <div className="relative w-full max-w-[800px] h-auto mx-auto px-4">
-      {/* Laptop image */}
-      <img
-        src="/newlaptop.png"
-        alt="Laptop mockup"
-        className="w-full h-auto"
-      />
+              <motion.div
+                className="relative mx-auto z-10"
+                initial={{ y: 0 }}
+                animate={{
+                  rotateX: window.innerWidth < 768 ? 0 : 15,
+                  rotateY: window.innerWidth < 768 ? 0 : -5,
+                  rotateZ: window.innerWidth < 768 ? 0 : -1,
+                  y: [0, -15, 0], // Floating up and down
 
-      {/* Screen area for mockup content */}
-      <div
-        className="absolute overflow-hidden"
-        style={{
-          height: "33.5%",
-          width: "60.4%",
-          top: "25.6%",
-          left: "23.3%",
-          transform:
-            window.innerWidth < 768
-              ? "perspective(1200px) rotateX(-1deg) rotateY(-50deg) rotateZ(-10.5deg) scaleX(1) scaleY(1) skewX(7deg) skewY(-8deg)"
-              : "perspective(1160px) rotateX(5deg) rotateY(-35deg) rotateZ(-18deg) scaleX(1) scaleY(1) skewX(-0.8deg) skewY(-1deg)",
-          clipPath:
-            window.innerWidth < 768
-              ? "polygon(0% 0%, 97.9% 1%, 100% 100%, 2% 90%)"
-              : "polygon(8% 1%, 89% 0%, 86.6% 95%, 9% 92%)",
-          transformOrigin: "top center",
-          backfaceVisibility: "hidden",
-          border: "3px solid #000",
-        }}
-      >
+                }}
+                transition={{
+                  y: {
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  },
+                  rotateX: { duration: 1 },
+                  rotateY: { duration: 1 },
+                  rotateZ: { duration: 1 },
+                }}
+                style={{
+                  transform: window.innerWidth < 768 ? "scale(0.7)" : "none",
+                  transformOrigin: "top center",
+                }}
+              >
+                {/* Laptop image container */}
+                <div className="relative w-full max-w-[800px] h-auto mx-auto px-4">
+                  {/* Laptop image */}
+                  <img
+                    src="/newlaptop.png"
+                    alt="Laptop mockup"
+                    className="w-full h-auto"
+                  />
+
+                  {/* Screen area for mockup content */}
+                  <div
+                    className="absolute overflow-hidden"
+                    style={{
+                      height: "33.5%",
+                      width: "60.4%",
+                      top: "25.6%",
+                      left: "23.3%",
+                      transform:
+                        window.innerWidth < 768
+                          ? "perspective(1200px) rotateX(-1deg) rotateY(-50deg) rotateZ(-10.5deg) scaleX(1) scaleY(1) skewX(7deg) skewY(-8deg)"
+                          : "perspective(1160px) rotateX(5deg) rotateY(-35deg) rotateZ(-18deg) scaleX(1) scaleY(1) skewX(-0.8deg) skewY(-1deg)",
+                      clipPath:
+                        window.innerWidth < 768
+                          ? "polygon(0% 0%, 97.9% 1%, 100% 100%, 2% 90%)"
+                          : "polygon(8% 1%, 89% 0%, 86.6% 95%, 9% 92%)",
+                      transformOrigin: "top center",
+                      backfaceVisibility: "hidden",
+                      border: "3px solid #000",
+                    }}
+                  >
 
                     <div className="absolute inset-0 bg-white flex flex-col">
                       <div
@@ -717,7 +716,7 @@ export default function LoginPage() {
 
       {/* Footer */}
       <footer className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-black text-white">
-        <div className="max-w-7xl mx-auto"> 
+        <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div>
               <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
@@ -726,20 +725,19 @@ export default function LoginPage() {
               </p>
             </div>
             <div>
-             
-              
+
+
             </div>
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contace</h4>
               <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-              <li>Email: your-store@bizzysite.shop</li>
+                <li>Email: your-store@bizzysite.shop</li>
                 <li>Phone: +91 7086758292</li>
               </ul>
             </div>
           </div>
-          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${
-            'border-gray-700 text-gray-400'
-          }`}>
+          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${'border-gray-700 text-gray-400'
+            }`}>
             <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
@@ -888,6 +886,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="mt-6">
+                </div>
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-gray-300"></div>
@@ -898,7 +897,6 @@ export default function LoginPage() {
                       </span>
                     </div>
                   </div>
-
                   <div className="mt-6 grid grid-cols-1 gap-3">
                     <button
                       type="button"
@@ -907,24 +905,18 @@ export default function LoginPage() {
                           const result = await signInWithPopup(auth, provider);
                           const user = result.user;
 
-                          const res = await fetch(
-                            "https://bizzysite.onrender.com/api/google-login",
-                            {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                uid: user.uid,
-                                name: user.displayName,
-                                email: user.email,
-                              }),
-                            }
-                          );
+                          const res = await fetch("https://bizzysite.onrender.com/api/google-login", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              uid: user.uid,
+                              name: user.displayName,
+                              email: user.email,
+                            }),
+                          });
 
                           const data = await res.json();
-                          if (!res.ok)
-                            throw new Error(
-                              data.message || "Google login failed"
-                            );
+                          if (!res.ok) throw new Error(data.message || "Google login failed");
 
                           localStorage.setItem("userId", data.userId);
                           localStorage.setItem("token", data.userId || "");
@@ -933,9 +925,7 @@ export default function LoginPage() {
                           localStorage.setItem("userPhone", data.phone || "");
                           localStorage.setItem("userRole", "vendor");
 
-                          toast.success(
-                            data.message || "Signed in with Google"
-                          );
+                          toast.success(data.message || "Signed in with Google");
                           setShowModal(false);
                           navigate("/storefront");
                         } catch (error) {
@@ -943,31 +933,32 @@ export default function LoginPage() {
                           toast.error(error.message || "Google sign-in failed");
                         }
                       }}
-                      className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md bg-white/70 hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0]"
+                      className="w-full inline-flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-md bg-white/70 hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0] transition"
                     >
-                      <svg
-                        className="w-5 h-5"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12.545 10.239v3.821h5.445c-0.261 1.353-1.126 2.471-2.381 3.229l3.845 2.979c2.246-2.071 3.538-5.116 3.538-8.579 0-0.741-0.071-1.457-0.202-2.155h-8.245z" />
-                      </svg>
-                      <span className="ml-2">Google</span>
+                      <div className="w-5 h-5">
+                        <svg
+                          className="w-full h-full object-contain"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12.545 10.239v3.821h5.445c-0.261 1.353-1.126 2.471-2.381 3.229l3.845 2.979c2.246-2.071 3.538-5.116 3.538-8.579 0-0.741-0.071-1.457-0.202-2.155h-8.245z" />
+                        </svg>
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">Continue with Google</span>
                     </button>
                   </div>
-                </div>
 
-                <div className="mt-6 text-center">
-                  <button
-                    type="button"
-                    onClick={() => setIsLogin(!isLogin)}
-                    className="text-[#7a6ff0] hover:text-[#5a50d0] text-sm font-medium transition-colors"
-                  >
-                    {isLogin
-                      ? "Don't have an account? Sign up"
-                      : "Already have an account? Sign in"}
-                  </button>
-                </div>
+                  <div className="mt-6 text-center">
+                    <button
+                      type="button"
+                      onClick={() => setIsLogin(!isLogin)}
+                      className="text-[#7a6ff0] hover:text-[#5a50d0] text-sm font-medium transition-colors"
+                    >
+                      {isLogin
+                        ? "Don't have an account? Sign up"
+                        : "Already have an account? Sign in"}
+                    </button>
+                  </div>
               </form>
             </div>
           </motion.div>

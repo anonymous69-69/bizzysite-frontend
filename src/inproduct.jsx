@@ -514,7 +514,13 @@ const InProduct = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
-            onClick={() => updateQuantity(product._id, cartItem.quantity - 1)}
+            onClick={() => {
+              if (cartItem.quantity === 1) {
+                removeFromCart(product._id);
+              } else {
+                updateQuantity(product._id, cartItem.quantity - 1);
+              }
+            }}
             className="w-10 h-10 flex items-center justify-center border rounded-md text-xl"
             style={{ borderColor: primaryColor }}
           >
@@ -529,12 +535,6 @@ const InProduct = () => {
             +
           </button>
         </div>
-        <button
-          onClick={() => removeFromCart(product._id)}
-          className="px-4 py-2 bg-red-100 text-red-600 rounded-md hover:bg-red-200"
-        >
-          Remove
-        </button>
       </div>
     ) : (
       <button
