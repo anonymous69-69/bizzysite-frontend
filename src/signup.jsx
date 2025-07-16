@@ -51,16 +51,13 @@ export default function LoginPage() {
       ...(isLogin ? {} : { name }),
     };
     try {
-      let url = `https://bizzysite.onrender.com/api/${
-        isLogin ? "login" : "signup"
-      }`;
+      let url = `https://bizzysite.onrender.com/api/${isLogin ? "login" : "signup"}`;
       console.log("%c[Signup] Sending payload:", "color:blue", payload);
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       // First check if response is okay
       // ✅ Only one call to response.json()
       const data = await response.json();
