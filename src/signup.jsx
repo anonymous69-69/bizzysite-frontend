@@ -32,6 +32,18 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Add validation checks
+    if (!isLogin && (!name || !email || !password)) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+    
+    if (!isLogin && password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+  
     setIsLoading(true);
     const payload = {
       email,
@@ -39,33 +51,23 @@ export default function LoginPage() {
       ...(isLogin ? {} : { name }),
     };
     try {
-      let url = ` https://bizzysite.onrender.com/api/${
+      let url = `https://bizzysite.onrender.com/api/${
         isLogin ? "login" : "signup"
       }`;
-      let response;
-      try {
-        response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } catch (fetchErr) {
-        console.error("Fetch error (login/signup):", fetchErr, url);
-        throw new Error("Failed to connect to server.");
-      }
-      const contentType = response.headers.get("content-type");
-      let data;
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        const raw = await response.text();
-        console.error("Non-JSON response from server:", raw);
-        throw new Error("Unexpected server response. Please try again.");
-      }
-
+      
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    
+      // First check if response is okay
       if (!response.ok) {
-        throw new Error(data?.message || "Something went wrong");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed. Please try again.");
       }
+    
+      const data = await response.json();
       const userId = String(data.userId || "").trim();
       if (!userId) {
         console.error("Invalid or missing userId in response", data);
@@ -133,8 +135,11 @@ export default function LoginPage() {
         navigate("/storefront");
       }, 500);
     } catch (error) {
-      console.error(error);
-      toast.error(error.message || "Operation failed");
+      console.error("Registration error:", error);
+      toast.error(
+        error.message || 
+        "Registration failed. Please check your details and try again."
+      );
       setIsLoading(false);
     }
   };
@@ -776,7 +781,7 @@ export default function LoginPage() {
                   <div>
                     <label
                       htmlFor="name"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-white mb-1"
                     >
                       Your Name
                     </label>
