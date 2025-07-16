@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { auth, provider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
 import { motion } from "framer-motion";
+import DarkVeil from "./DarkVeil"; // Add this import
 
 export default function LoginPage() {
   const [showModal, setShowModal] = useState(false);
@@ -51,7 +52,9 @@ export default function LoginPage() {
       ...(isLogin ? {} : { name }),
     };
     try {
-      let url = `https://bizzysite.onrender.com/api/${isLogin ? "login" : "signup"}`;
+      let url = `https://bizzysite.onrender.com/api/${
+        isLogin ? "login" : "signup"
+      }`;
       console.log("%c[Signup] Sending payload:", "color:blue", payload);
       const response = await fetch(url, {
         method: "POST",
@@ -156,9 +159,19 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-gray-50 to-indigo-50">
+      <div className="fixed inset-0 -z-50">
+        <DarkVeil
+          hueShift={10}
+          noiseIntensity={0.02}
+          scanlineIntensity={0.1}
+          speed={0.3}
+          scanlineFrequency={0.5}
+          warpAmount={0.1}
+        />
+      </div>
+
       {/* Floating background elements */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {Array.from({ length: 15 }).map((_, i) => {
+      <div className="fixed inset-0 -z-40 overflow-hidden pointer-events-none">        {Array.from({ length: 15 }).map((_, i) => {
           const size = Math.floor(Math.random() * 40) + 20;
           const left = Math.random() * 100;
           const top = Math.random() * 100;
