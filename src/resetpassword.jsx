@@ -32,27 +32,33 @@ export default function ResetPassword() {
     try {
       const res = await fetch('https://bizzysite.onrender.com/api/reset-password', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password })
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json' // Explicitly accept JSON
+        },
+        body: JSON.stringify({ 
+          token: token.trim(), // Trim whitespace
+          password: password.trim() 
+        })
       });
       
       const data = await res.json();
       
       if (!res.ok) {
-        // More specific error messages
-        if (res.status === 400) {
-          throw new Error(data.message || 'Invalid or expired token. Please request a new reset link.');
-        }
-        throw new Error(data.message || 'Password reset failed. Please try again.');
+        // Enhanced error handling
+        const errorMsg = data.message || 
+                        (res.status === 400 ? 'Invalid or expired token' : 'Password reset failed');
+        throw new Error(errorMsg);
       }
       
-      toast.success('Password reset successful! Redirecting to login...');
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      toast.success('Password reset successful! Redirecting...');
+      setTimeout(() => navigate('/login'), 2000); // Explicit /login redirect
+      
     } catch (err) {
-      console.error('Password reset error:', err);
-      setError(err.message);
+      console.error('Reset error:', err);
+      setError(err.message.includes('token') ? 
+               'The reset link is invalid or expired. Please request a new one.' : 
+               err.message);
       toast.error(err.message);
     } finally {
       setIsLoading(false);
