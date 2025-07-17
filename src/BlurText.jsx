@@ -93,7 +93,7 @@ const BlurText = ({
 
         // Gradient detection
         const isGradient =
-          segment.startsWith('<gradient>') && segment.endsWith('</gradient>');
+          segment.includes('<gradient>') && segment.includes('</gradient>');
         const cleanText = segment.replace(/<\/?gradient>/g, '');
         return (
             cleanText === '\n' ? (

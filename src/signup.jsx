@@ -200,16 +200,16 @@ export default function LoginPage() {
       animateBy="words"
       direction="top"
       className="leading-tight"
-      delay={50}
-      stepDuration={0.3}
+      delay={600}
+      stepDuration={1}
     />
     <BlurText 
-      text="<gradient>Without Coding</gradient>"
+      text="Without Coding"
       animateBy="words"
       direction="top"
       className="leading-tight"
-      delay={100}
-      stepDuration={0.3}
+      delay={600}
+      stepDuration={1}
     />
   </motion.div>
 
