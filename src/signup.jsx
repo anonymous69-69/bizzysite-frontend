@@ -5,7 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { auth, provider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
 import { motion } from "framer-motion";
-import DarkVeil from "./DarkVeil"; // Add this import
+import Orb from "./Orb"; 
+import BlurText from "./BlurText";
 
 export default function LoginPage() {
   const [showModal, setShowModal] = useState(false);
@@ -15,21 +16,6 @@ export default function LoginPage() {
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const contentRef = useRef(null);
-
-  useEffect(() => {
-    // Auto-scroll the laptop screen content for mockup
-    let scrollPos = 0;
-    const scrollInterval = setInterval(() => {
-      if (contentRef.current) {
-        scrollPos += 0.5;
-        if (scrollPos > 300) scrollPos = 0;
-        contentRef.current.style.transform = `translateY(-${scrollPos}px)`;
-      }
-    }, 30);
-
-    return () => clearInterval(scrollInterval);
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,9 +38,7 @@ export default function LoginPage() {
       ...(isLogin ? {} : { name }),
     };
     try {
-      let url = `https://bizzysite.onrender.com/api/${
-        isLogin ? "login" : "signup"
-      }`;
+      let url = `https://bizzysite.onrender.com/api/${isLogin ? "login" : "signup"}`;
       console.log("%c[Signup] Sending payload:", "color:blue", payload);
       const response = await fetch(url, {
         method: "POST",
@@ -158,77 +142,37 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-gray-50 to-indigo-50">
-      <div className="fixed inset-0 -z-50">
-        <DarkVeil
-          hueShift={10}
-          noiseIntensity={0.02}
-          scanlineIntensity={0.1}
-          speed={0.3}
-          scanlineFrequency={0.5}
-          warpAmount={0.1}
-        />
-      </div>
-
-      {/* Floating background elements */}
-      <div className="fixed inset-0 -z-40 overflow-hidden pointer-events-none">        {Array.from({ length: 15 }).map((_, i) => {
-          const size = Math.floor(Math.random() * 40) + 20;
-          const left = Math.random() * 100;
-          const top = Math.random() * 100;
-          const delay = Math.random() * 5;
-          const duration = Math.random() * 5 + 5;
-          const colors = [
-            "#818cf8",
-            "#a78bfa",
-            "#c084fc",
-            "#e879f9",
-            "#f472b6",
-          ];
-
-          return (
-            <motion.div
-              key={i}
-              initial={{ y: 0, opacity: 0 }}
-              animate={{ y: [-20, 20, -20] }}
-              transition={{
-                duration,
-                delay,
-                repeat: Infinity,
-                repeatType: "loop",
-                ease: "easeInOut",
-              }}
-              style={{
-                position: "absolute",
-                top: `${top}%`,
-                left: `${left}%`,
-                width: `${size}px`,
-                height: `${size}px`,
-                backgroundColor:
-                  colors[Math.floor(Math.random() * colors.length)],
-                borderRadius: "9999px",
-                filter: "blur(10px)",
-                opacity: Math.random() * 0.1 + 0.05,
-              }}
+    <div className="min-h-screen relative overflow-hidden bg-black">
+      {/* Background Orb */}
+      <div className="absolute top-0 left-0 w-full min-h-screen z-0 overflow-hidden pointer-events-none flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative w-[70vmin] aspect-square">
+            <Orb 
+              hue={200} 
+              hoverIntensity={0.6}
+              rotateOnHover={true}
+              forceHoverState={false}
             />
-          );
-        })}
+          </div>
+          {/* <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80"></div> */}
+        </div>
       </div>
 
       <Toaster position="top-right" />
 
-      {/* Header */}
-      <header className="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-30">
+      {/* Header - Dark Theme */}
+      <header className="fixed w-full bg-gray-900/80 backdrop-blur-md shadow-sm z-30 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <div className="bg-gradient-to-r from-indigo-500 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center mr-3">
               <span className="text-white font-bold text-lg">B</span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">BizzySite</h1>
+            <h1 className="text-2xl font-bold text-white">BizzySite</h1>
           </div>
           <div className="flex gap-4 items-center">
             <button
               onClick={() => openModal(true)}
-              className="px-4 py-2 text-gray-700 font-medium hover:text-indigo-600 transition-colors"
+              className="px-4 py-2 text-gray-300 font-medium hover:text-indigo-400 transition-colors"
             >
               Login
             </button>
@@ -242,207 +186,76 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* Hero Section with Floating Laptop */}
-      <div className="min-h-screen flex flex-col justify-center items-center pt-24 md:pt-32 pb-0 px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-4xl mx-auto text-center mb-12">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-4xl sm:text-6xl font-extrabold text-gray-900 mb-6"
-          >
-            Build Your Online Store <br />
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Without Coding
-            </span>
-          </motion.h1>
+      {/* Hero Section - Dark Theme */}
+<div className="min-h-screen flex flex-col justify-center items-center pt-24 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
+  <div className="max-w-4xl mx-auto text-center mb-12">
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    className="text-4xl sm:text-6xl font-extrabold text-white mb-6 leading-tight text-center"
+  >
+    <BlurText 
+      text="Build Your Online Store"
+      animateBy="words"
+      direction="top"
+      className="leading-tight"
+      delay={50}
+      stepDuration={0.3}
+    />
+    <BlurText 
+      text="<gradient>Without Coding</gradient>"
+      animateBy="words"
+      direction="top"
+      className="leading-tight"
+      delay={100}
+      stepDuration={0.3}
+    />
+  </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            <div className="min-h-[72px] sm:min-h-[60px] flex justify-center items-center">
-              <TypeAnimation
-                sequence={[
-                  "Create beautiful ecommerce sites in minutes",
-                  2000,
-                  "Powerful tools for small businesses",
-                  2000,
-                  "Easy customization, no technical skills needed",
-                  2000,
-                ]}
-                wrapper="p"
-                repeat={Infinity}
-                className="text-xl sm:text-2xl text-gray-600 max-w-2xl mx-auto text-center"
-              />
-            </div>
-          </motion.div>
-
-          <div className="flex justify-center items-center -mb-4 mt-8">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => openModal(false)}
-              className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:opacity-90 transition-all shadow-xl"
-            >
-              Get Started Free
-            </motion.button>
-          </div>
-
-          {/* Floating Laptop with Image */}
-          <motion.div
-            className="relative w-full max-w-3xl mx-auto mt-8 md:mt-16"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              x: 0,
-            }}
-            transition={{
-              delay: 0.3,
-              duration: 0.8,
-            }}
-          >
-            <div className="relative" style={{ perspective: "1500px" }}>
-              <motion.div
-                className="relative mx-auto z-10"
-                initial={{ y: 0 }}
-                animate={{
-                  rotateX: window.innerWidth < 768 ? 0 : 15,
-                  rotateY: window.innerWidth < 768 ? 0 : -5,
-                  rotateZ: window.innerWidth < 768 ? 0 : -1,
-                  y: [0, -15, 0], // Floating up and down
-                }}
-                transition={{
-                  y: {
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                  rotateX: { duration: 1 },
-                  rotateY: { duration: 1 },
-                  rotateZ: { duration: 1 },
-                }}
-                style={{
-                  transform: window.innerWidth < 768 ? "scale(0.7)" : "none",
-                  transformOrigin: "top center",
-                }}
-              >
-                {/* Laptop image container */}
-                <div className="relative w-full max-w-[800px] h-auto mx-auto px-4">
-                  {/* Laptop image */}
-                  <img
-                    src="/newlaptop.png"
-                    alt="Laptop mockup"
-                    className="w-full h-auto"
-                  />
-
-                  {/* Screen area for mockup content */}
-                  <div
-                    className="absolute overflow-hidden"
-                    style={{
-                      height: "33.5%",
-                      width: "60.4%",
-                      top: "25.6%",
-                      left: "23.3%",
-                      transform:
-                        window.innerWidth < 768
-                          ? "perspective(1200px) rotateX(-1deg) rotateY(-50deg) rotateZ(-10.5deg) scaleX(1) scaleY(1) skewX(7deg) skewY(-8deg)"
-                          : "perspective(1160px) rotateX(5deg) rotateY(-35deg) rotateZ(-18deg) scaleX(1) scaleY(1) skewX(-0.8deg) skewY(-1deg)",
-                      clipPath:
-                        window.innerWidth < 768
-                          ? "polygon(0% 0%, 97.9% 1%, 100% 100%, 2% 90%)"
-                          : "polygon(8% 1%, 89% 0%, 86.6% 95%, 9% 92%)",
-                      transformOrigin: "top center",
-                      backfaceVisibility: "hidden",
-                      border: "3px solid #000",
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-white flex flex-col">
-                      <div
-                        ref={contentRef}
-                        className="w-full h-full transition-transform duration-300"
-                      >
-                        {/* E-commerce mockup content */}
-                        <div className="bg-indigo-600 text-white p-4 flex justify-between items-center">
-                          <div className="font-bold">MyStore</div>
-                          <div className="flex space-x-4">
-                            <div className="w-6 h-6 rounded-full bg-white/20"></div>
-                            <div className="w-6 h-6 rounded-full bg-white/20"></div>
-                          </div>
-                        </div>
-
-                        {/* Hero section */}
-                        <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-8 text-center">
-                          <h3 className="text-xl font-bold mb-2">My Store</h3>
-                          <p className="text-sm opacity-80">
-                            Discover our new products
-                          </p>
-                        </div>
-
-                        {/* Products grid */}
-                        <div className="grid grid-cols-2 gap-4 p-4">
-                          {[1, 2, 3, 4, 5, 6].map((item) => (
-                            <div
-                              key={item}
-                              className="border rounded-lg overflow-hidden"
-                            >
-                              <div className="bg-gray-100 h-24"></div>
-                              <div className="p-2">
-                                <div className="text-sm font-medium">
-                                  Product {item}
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  $29.99
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* More products */}
-                        <div className="p-4">
-                          <div className="text-center py-4 text-gray-500">
-                            More products...
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            {[7, 8, 9, 10].map((item) => (
-                              <div
-                                key={item}
-                                className="border rounded-lg overflow-hidden"
-                              >
-                                <div className="bg-gray-100 h-20"></div>
-                                <div className="p-2">
-                                  <div className="text-sm font-medium">
-                                    Product {item}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    $29.99
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.2, duration: 0.5 }}
+    >
+      <div className="min-h-[72px] sm:min-h-[60px] flex justify-center items-center">
+        <TypeAnimation
+          sequence={[
+            "Create beautiful ecommerce sites in minutes",
+            2000,
+            "Powerful tools for small businesses",
+            2000,
+            "Easy customization, no technical skills needed",
+            2000,
+          ]}
+          wrapper="p"
+          repeat={Infinity}
+          className="text-xl sm:text-2xl text-gray-400 max-w-2xl mx-auto text-center"
+        />
       </div>
+    </motion.div>
 
-      {/* Features Section */}
-      <div className="pt-6 pb-8 -mt-20 px-4 sm:px-6 lg:px-8 bg-white">
+    <div className="flex justify-center items-center mt-8">
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => openModal(false)}
+        className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-xl shadow-indigo-500/20"
+      >
+        Get Started Free
+      </motion.button>
+    </div>
+  </div>
+</div>
+
+      {/* Features Section - Dark Theme */}
+      <div className="pt-20 pb-8 px-4 sm:px-6 lg:px-8 bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
               Everything You Need to Succeed Online
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               Powerful features designed to help your business grow
             </p>
           </div>
@@ -481,7 +294,7 @@ export default function LoginPage() {
                         position: "relative",
                         width: 80,
                         height: 40,
-                        filter: "drop-shadow(0 4px 6px rgba(79, 70, 229, 0.2))",
+                        filter: "drop-shadow(0 4px 6px rgba(99, 102, 241, 0.3))",
                       }}
                     >
                       {/* Payment Terminal Base */}
@@ -493,7 +306,7 @@ export default function LoginPage() {
                           transform: "translateX(-50%)",
                           width: 60,
                           height: 30,
-                          backgroundColor: "#d1d5db",
+                          backgroundColor: "#4b5563",
                           borderRadius: 4,
                           boxShadow:
                             "0 2px 8px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.1)",
@@ -516,12 +329,12 @@ export default function LoginPage() {
                           left: "50%",
                           width: 40,
                           height: 25,
-                          backgroundColor: "white",
+                          backgroundColor: "#1f2937",
                           borderRadius: 3,
                           boxShadow: `
                             0 2px 8px rgba(0,0,0,0.2),
-                            0 4px 12px rgba(79, 70, 229, 0.15),
-                            inset 0 0 0 1px rgba(0,0,0,0.05)
+                            0 4px 12px rgba(79, 70, 229, 0.3),
+                            inset 0 0 0 1px rgba(255,255,255,0.05)
                           `,
                           zIndex: 10,
                         }}
@@ -534,7 +347,7 @@ export default function LoginPage() {
                             left: 4,
                             right: 4,
                             height: 4,
-                            backgroundColor: "#e5e7eb",
+                            backgroundColor: "#374151",
                             borderRadius: 2,
                           }}
                         ></div>
@@ -545,7 +358,7 @@ export default function LoginPage() {
                             left: 4,
                             width: 12,
                             height: 8,
-                            backgroundColor: "#818cf8",
+                            backgroundColor: "#6366f1",
                             borderRadius: 2,
                           }}
                         ></div>
@@ -554,7 +367,7 @@ export default function LoginPage() {
                       {/* Subtle glow effect */}
                       <motion.div
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.3 }}
+                        animate={{ opacity: 0.5 }}
                         transition={{
                           duration: 2,
                           repeat: Infinity,
@@ -567,7 +380,7 @@ export default function LoginPage() {
                           left: "50%",
                           width: 50,
                           height: 30,
-                          backgroundColor: "#818cf8",
+                          backgroundColor: "#6366f1",
                           borderRadius: "50%",
                           filter: "blur(8px)",
                           transform: "translateX(-50%)",
@@ -592,6 +405,7 @@ export default function LoginPage() {
                         borderRadius: 8,
                         overflow: "hidden",
                         border: "2px solid #333",
+                        boxShadow: "0 0 10px rgba(99, 102, 241, 0.3)"
                       }}
                     >
                       <motion.div
@@ -611,7 +425,7 @@ export default function LoginPage() {
                             flexDirection: "column",
                             alignItems: "center",
                             justifyContent: "center",
-                            backgroundColor: "#f0f0f0",
+                            backgroundColor: "#1f2937",
                           }}
                         >
                           <div
@@ -628,7 +442,7 @@ export default function LoginPage() {
                                   width: 12,
                                   height: 12,
                                   backgroundColor:
-                                    i % 2 === 0 ? "#818cf8" : "#a78bfa",
+                                    i % 2 === 0 ? "#6366f1" : "#8b5cf6",
                                   margin: 3,
                                   borderRadius: 3,
                                 }}
@@ -639,7 +453,7 @@ export default function LoginPage() {
                         <div
                           style={{
                             height: 60,
-                            backgroundColor: "#818cf8",
+                            backgroundColor: "#6366f1",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -667,13 +481,13 @@ export default function LoginPage() {
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -10 }}
-                className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100"
+                className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl shadow-lg hover:shadow-xl transition-all border border-gray-700"
               >
                 {feature.animation}
-                <h3 className="text-xl font-semibold mb-3 text-gray-900">
+                <h3 className="text-xl font-semibold mb-3 text-white">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600">{feature.desc}</p>
+                <p className="text-gray-400">{feature.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -681,7 +495,7 @@ export default function LoginPage() {
       </div>
 
       {/* Testimonial Section */}
-      <div className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+      <div className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-700 to-purple-800 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">
             Trusted by Thousands of Businesses
@@ -725,22 +539,22 @@ export default function LoginPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => openModal(false)}
-            className="px-8 py-4 bg-white text-indigo-600 font-bold rounded-lg shadow-xl hover:bg-gray-100 transition-all"
+            className="px-8 py-4 bg-white text-indigo-700 font-bold rounded-lg shadow-xl hover:bg-gray-100 transition-all"
           >
-            Start Your Free Trial
+            Get started for free
           </motion.button>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-black text-white">
+      <footer className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-gray-900 text-white border-t border-gray-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div>
               <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
                 BizzySite
               </h3>
-              <p className="text-gray-300 mb-4 text-sm sm:text-base">
+              <p className="text-gray-400 mb-4 text-sm sm:text-base">
                 Empowering small businesses to succeed online with simple,
                 powerful tools.
               </p>
@@ -748,26 +562,26 @@ export default function LoginPage() {
             <div></div>
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-                Contace
+                Contact
               </h4>
-              <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
+              <ul className="space-y-1 sm:space-y-2 text-gray-400 text-sm sm:text-base">
                 <li>Email: your-store@bizzysite.shop</li>
                 <li>Phone: +91 7086758292</li>
               </ul>
             </div>
           </div>
           <div
-            className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${"border-gray-700 text-gray-400"}`}
+            className={`border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base text-gray-500`}
           >
             <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
       </footer>
 
-      {/* Modal */}
+      {/* Modal - Dark Theme */}
       {showModal && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end p-0 sm:p-4 z-50"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-end p-0 sm:p-4 z-50"
           onClick={() => setShowModal(false)}
         >
           <motion.div
@@ -781,17 +595,16 @@ export default function LoginPage() {
                 setShowModal(false);
               }
             }}
-            className="bg-white/30 backdrop-blur-md rounded-xl shadow-2xl max-w-lg w-full mx-auto border border-white/30 p-6 sm:p-8"
+            className="bg-gray-900/80 backdrop-blur-xl rounded-xl shadow-2xl max-w-lg w-full mx-auto border border-gray-700 p-6 sm:p-8"
             style={{
-              boxShadow: "0 0 12px rgba(122, 111, 240, 0.4)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
+              boxShadow: "0 0 30px rgba(99, 102, 241, 0.3)",
               willChange: "transform",
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="pt-4 px-4 sm:px-6 pb-6 sm:py-6 flex flex-col">
-              <div className="w-12 h-1.5 bg-gray-400 rounded-full mx-auto mb-4" />
-              <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800 text-center">
+              <div className="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-4" />
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 text-white text-center">
                 {isLogin ? "Login" : "Create Account"}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -799,7 +612,7 @@ export default function LoginPage() {
                   <div>
                     <label
                       htmlFor="name"
-                      className="block text-sm font-medium text-white mb-1"
+                      className="block text-sm font-medium text-gray-300 mb-1"
                     >
                       Your Name
                     </label>
@@ -809,7 +622,7 @@ export default function LoginPage() {
                       name="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] shadow-sm placeholder-gray-400 text-sm"
+                      className="w-full px-4 py-2 border border-gray-700 rounded-md bg-gray-800/70 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm placeholder-gray-500 text-sm"
                       required
                     />
                   </div>
@@ -818,7 +631,7 @@ export default function LoginPage() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-white mb-1"
+                    className="block text-sm font-medium text-gray-300 mb-1"
                   >
                     Email address
                   </label>
@@ -828,7 +641,7 @@ export default function LoginPage() {
                     name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] shadow-sm placeholder-gray-400 text-sm"
+                    className="w-full px-4 py-2 border border-gray-700 rounded-md bg-gray-800/70 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm placeholder-gray-500 text-sm"
                     required
                   />
                 </div>
@@ -836,7 +649,7 @@ export default function LoginPage() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium text-white mb-1"
+                    className="block text-sm font-medium text-gray-300 mb-1"
                   >
                     Password
                   </label>
@@ -846,7 +659,7 @@ export default function LoginPage() {
                     name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-[#7a6ff0] shadow-sm placeholder-gray-400 text-sm"
+                    className="w-full px-4 py-2 border border-gray-700 rounded-md bg-gray-800/70 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm placeholder-gray-500 text-sm"
                     required
                   />
                 </div>
@@ -881,7 +694,7 @@ export default function LoginPage() {
                           }
                         }
                       }}
-                      className="text-sm text-[#000000] hover:text-[#362fa5] transition-colors"
+                      className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
                     >
                       Forgot Password?
                     </button>
@@ -890,7 +703,7 @@ export default function LoginPage() {
                 <div>
                   <button
                     type="submit"
-                    className="w-full py-2.5 bg-[#7a6ff0] text-white font-semibold rounded-md hover:bg-[#5a50d0] focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0] transition-colors shadow-lg"
+                    className="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors shadow-lg shadow-indigo-500/20"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -908,8 +721,8 @@ export default function LoginPage() {
 
                 <div className="mt-6"></div>
                 <div className="relative my-6">
-                  <hr className="border-gray-300" />
-                  <span className="absolute left-1/2 transform -translate-x-1/2 -top-2 px-2 text-sm text-black bg-white">
+                  <hr className="border-gray-700" />
+                  <span className="absolute left-1/2 transform -translate-x-1/2 -top-2 px-2 text-sm text-gray-400 bg-gray-900">
                     or continue with
                   </span>
                 </div>
@@ -936,9 +749,9 @@ export default function LoginPage() {
 
                         const data = await res.json();
                         if (!res.ok)
-                          throw new Error(
-                            data.message || "Google login failed"
-                          );
+                              throw new Error(
+                                data.message || "Google login failed"
+                              );
 
                         localStorage.setItem("userId", data.userId);
                         localStorage.setItem("token", data.userId || "");
@@ -955,7 +768,7 @@ export default function LoginPage() {
                         toast.error(error.message || "Google sign-in failed");
                       }
                     }}
-                    className="w-full inline-flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-md bg-white/70 hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7a6ff0] transition"
+                    className="w-full inline-flex items-center justify-center gap-3 px-4 py-2 border border-gray-700 rounded-md bg-gray-800/70 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
                   >
                     <div className="w-5 h-5">
                       <svg
@@ -981,7 +794,7 @@ export default function LoginPage() {
                         />
                       </svg>
                     </div>
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-white">
                       Continue with Google
                     </span>
                   </button>
@@ -991,7 +804,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setIsLogin(!isLogin)}
-                    className="text-[#000000] hover:text-[#5a50d0] text-sm font-medium transition-colors"
+                    className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors"
                   >
                     {isLogin
                       ? "Don't have an account? Sign up"
