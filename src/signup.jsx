@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { auth, provider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
 import { motion } from "framer-motion";
-import Orb from "./Orb"; 
+import Orb from "./Orb";
 import BlurText from "./BlurText";
 
 export default function LoginPage() {
@@ -16,6 +16,9 @@ export default function LoginPage() {
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+const [resetEmail, setResetEmail] = useState("");
+const [isSendingReset, setIsSendingReset] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +41,9 @@ export default function LoginPage() {
       ...(isLogin ? {} : { name }),
     };
     try {
-      let url = `https://bizzysite.onrender.com/api/${isLogin ? "login" : "signup"}`;
+      let url = `https://bizzysite.onrender.com/api/${
+        isLogin ? "login" : "signup"
+      }`;
       console.log("%c[Signup] Sending payload:", "color:blue", payload);
       const response = await fetch(url, {
         method: "POST",
@@ -147,8 +152,8 @@ export default function LoginPage() {
       <div className="absolute top-0 left-0 w-full min-h-screen z-0 overflow-hidden pointer-events-none flex items-center justify-center">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative w-[70vmin] aspect-square">
-            <Orb 
-              hue={200} 
+            <Orb
+              hue={200}
               hoverIntensity={0.6}
               rotateOnHover={true}
               forceHoverState={false}
@@ -187,66 +192,66 @@ export default function LoginPage() {
       </header>
 
       {/* Hero Section - Dark Theme */}
-<div className="min-h-screen flex flex-col justify-center items-center pt-24 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
-  <div className="max-w-4xl mx-auto text-center mb-12">
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-    className="text-4xl sm:text-6xl font-extrabold text-white mb-6 leading-tight text-center"
-  >
-    <BlurText 
-      text="Build Your Online Store"
-      animateBy="words"
-      direction="top"
-      className="leading-tight"
-      delay={600}
-      stepDuration={1}
-    />
-    <BlurText 
-      text="Without Coding"
-      animateBy="words"
-      direction="top"
-      className="leading-tight"
-      delay={600}
-      stepDuration={1}
-    />
-  </motion.div>
+      <div className="min-h-screen flex flex-col justify-center items-center pt-24 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-4xl mx-auto text-center mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-4xl sm:text-6xl font-extrabold text-white mb-6 leading-tight text-center"
+          >
+            <BlurText
+              text="Build Your Online Store"
+              animateBy="words"
+              direction="top"
+              className="leading-tight"
+              delay={600}
+              stepDuration={1}
+            />
+            <BlurText
+              text="Without Coding"
+              animateBy="words"
+              direction="top"
+              className="leading-tight"
+              delay={600}
+              stepDuration={1}
+            />
+          </motion.div>
 
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.2, duration: 0.5 }}
-    >
-      <div className="min-h-[72px] sm:min-h-[60px] flex justify-center items-center">
-        <TypeAnimation
-          sequence={[
-            "Create beautiful ecommerce sites in minutes",
-            2000,
-            "Powerful tools for small businesses",
-            2000,
-            "Easy customization, no technical skills needed",
-            2000,
-          ]}
-          wrapper="p"
-          repeat={Infinity}
-          className="text-xl sm:text-2xl text-gray-400 max-w-2xl mx-auto text-center"
-        />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <div className="min-h-[72px] sm:min-h-[60px] flex justify-center items-center">
+              <TypeAnimation
+                sequence={[
+                  "Create beautiful ecommerce sites in minutes",
+                  2000,
+                  "Powerful tools for small businesses",
+                  2000,
+                  "Easy customization, no technical skills needed",
+                  2000,
+                ]}
+                wrapper="p"
+                repeat={Infinity}
+                className="text-xl sm:text-2xl text-gray-400 max-w-2xl mx-auto text-center"
+              />
+            </div>
+          </motion.div>
+
+          <div className="flex justify-center items-center mt-8">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => openModal(false)}
+              className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-xl shadow-indigo-500/20"
+            >
+              Get Started Free
+            </motion.button>
+          </div>
+        </div>
       </div>
-    </motion.div>
-
-    <div className="flex justify-center items-center mt-8">
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => openModal(false)}
-        className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-xl shadow-indigo-500/20"
-      >
-        Get Started Free
-      </motion.button>
-    </div>
-  </div>
-</div>
 
       {/* Features Section - Dark Theme */}
       <div className="pt-20 pb-8 px-4 sm:px-6 lg:px-8 bg-gray-900">
@@ -294,7 +299,8 @@ export default function LoginPage() {
                         position: "relative",
                         width: 80,
                         height: 40,
-                        filter: "drop-shadow(0 4px 6px rgba(99, 102, 241, 0.3))",
+                        filter:
+                          "drop-shadow(0 4px 6px rgba(99, 102, 241, 0.3))",
                       }}
                     >
                       {/* Payment Terminal Base */}
@@ -405,7 +411,7 @@ export default function LoginPage() {
                         borderRadius: 8,
                         overflow: "hidden",
                         border: "2px solid #333",
-                        boxShadow: "0 0 10px rgba(99, 102, 241, 0.3)"
+                        boxShadow: "0 0 10px rgba(99, 102, 241, 0.3)",
                       }}
                     >
                       <motion.div
@@ -667,33 +673,7 @@ export default function LoginPage() {
                   <div className="text-right">
                     <button
                       type="button"
-                      onClick={async () => {
-                        const emailPrompt = prompt(
-                          "Enter your email to reset your password:"
-                        );
-                        if (emailPrompt) {
-                          try {
-                            const res = await fetch(
-                              "https://bizzysite.onrender.com/api/request-password-reset",
-                              {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ email: emailPrompt }),
-                              }
-                            );
-                            const data = await res.json();
-                            if (!res.ok)
-                              throw new Error(
-                                data.message || "Something went wrong"
-                              );
-                            toast.success(
-                              data.message || "Password reset email sent"
-                            );
-                          } catch (err) {
-                            toast.error(err.message);
-                          }
-                        }
-                      }}
+                      onClick={() => setShowForgotPasswordModal(true)}
                       className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
                     >
                       Forgot Password?
@@ -749,9 +729,9 @@ export default function LoginPage() {
 
                         const data = await res.json();
                         if (!res.ok)
-                              throw new Error(
-                                data.message || "Google login failed"
-                              );
+                          throw new Error(
+                            data.message || "Google login failed"
+                          );
 
                         localStorage.setItem("userId", data.userId);
                         localStorage.setItem("token", data.userId || "");
@@ -816,6 +796,90 @@ export default function LoginPage() {
           </motion.div>
         </div>
       )}
+      {/* Forgot Password Modal */}
+{showForgotPasswordModal && (
+  <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
+    <motion.div
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="bg-gray-900/80 backdrop-blur-xl rounded-xl shadow-2xl max-w-md w-full mx-auto border border-gray-700 p-8"
+    >
+      <h2 className="text-2xl font-bold mb-6 text-white text-center">
+        Reset Your Password
+      </h2>
+      
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            Email address
+          </label>
+          <input
+            type="email"
+            value={resetEmail}
+            onChange={(e) => setResetEmail(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-700 rounded-md bg-gray-800/70 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm placeholder-gray-500"
+            placeholder="your@email.com"
+          />
+        </div>
+        
+        <div className="flex gap-3 pt-4">
+          <button
+            type="button"
+            onClick={() => {
+              setShowForgotPasswordModal(false);
+              setResetEmail("");
+            }}
+            className="flex-1 py-2.5 bg-gray-700 text-white font-medium rounded-md hover:bg-gray-600 transition-colors"
+            disabled={isSendingReset}
+          >
+            Cancel
+          </button>
+          
+          <button
+            type="button"
+            onClick={async () => {
+              if (!resetEmail) {
+                toast.error("Please enter your email address");
+                return;
+              }
+              
+              setIsSendingReset(true);
+              try {
+                const res = await fetch(
+                  "https://bizzysite.onrender.com/api/request-password-reset",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: resetEmail }),
+                  }
+                );
+                
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Something went wrong");
+                
+                toast.success("Password reset email sent. Please check your inbox.");
+                setShowForgotPasswordModal(false);
+                setResetEmail("");
+              } catch (err) {
+                toast.error(err.message);
+              } finally {
+                setIsSendingReset(false);
+              }
+            }}
+            className="flex-1 py-2.5 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20"
+            disabled={isSendingReset}
+          >
+            {isSendingReset ? (
+              <span>Sending<span className="animate-pulse">...</span></span>
+            ) : (
+              "Send Reset Link"
+            )}
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  </div>
+)}
     </div>
   );
 }
