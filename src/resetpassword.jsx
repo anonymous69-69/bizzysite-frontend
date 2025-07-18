@@ -30,15 +30,14 @@ export default function ResetPassword() {
     setIsLoading(true);
     
     try {
-      const res = await fetch('https://bizzysite.onrender.com/api/reset-password', {
+      const res = await fetch(`https://bizzysite.onrender.com/api/reset-password/${token.trim()}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Accept': 'application/json' // Explicitly accept JSON
+          'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          token: token.trim(), // Trim whitespace
-          password: password.trim() 
+          password: password.trim()
         })
       });
       
