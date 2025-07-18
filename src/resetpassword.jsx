@@ -37,7 +37,7 @@ export default function ResetPassword() {
           'Accept': 'application/json' // Explicitly accept JSON
         },
         body: JSON.stringify({ 
-          token: token.trim(), // Trim whitespace
+          token: token, // Do not trim JWTs or cryptographic tokens
           password: password.trim() 
         })
       });
