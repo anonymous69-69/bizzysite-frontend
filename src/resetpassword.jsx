@@ -18,57 +18,62 @@ export default function ResetPassword() {
   }, [token]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+  e.preventDefault();
+  setError('');
+
+  if (password !== confirmPassword) {
+    setError('Passwords do not match');
+    return;
+  }
+
+  if (password.length < 6) {
+    setError('Password must be at least 6 characters');
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    console.log("🔄 Sending password reset request...");
+    console.log("🔗 Token:", token);
+    console.log("🔒 Password:", password.trim());
   
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
+    const response = await fetch(`https://bizzysite.onrender.com/api/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        token: token.trim(),
+        newPassword: password.trim(),
+        confirmPassword: password.trim(),
+      }),
+    });
+  
+    console.log("📩 Raw response:", response);
+  
+    const data = await response.json();
+    console.log("✅ Response data:", data);
+  
+    if (!response.ok) {
+      throw new Error(data.message || "Reset failed");
     }
   
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
+    toast.success("Password reset successful!");
+    setTimeout(() => navigate("/login"), 2000);
+  } catch (err) {
+    console.error("❌ Reset error (frontend):", err);
+    setError(err.message.includes("token")
+      ? "The reset link is invalid or expired. Please request a new one."
+      : err.message);
+    toast.error(err.message);
+  } finally {
+    setIsLoading(false);
+  }
   
-    setIsLoading(true);
-  
-    try {
-      console.log("🔄 Sending password reset request...");
-      console.log("🔗 Token:", token);
-      console.log("🔒 Password:", password.trim());
-  
-      const response = await fetch(`https://bizzysite.onrender.com/api/reset-password/${token.trim()}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({ password: password.trim() }),
-      });
-  
-      console.log("📩 Raw response:", response);
-  
-      const data = await response.json();
-      console.log("✅ Response data:", data);
-  
-      if (!response.ok) {
-        throw new Error(data.message || "Reset failed");
-      }
-  
-      toast.success("Password reset successful!");
-      setTimeout(() => navigate("/login"), 2000);
-    } catch (err) {
-      console.error("❌ Reset error (frontend):", err);
-      setError(err.message.includes("token")
-        ? "The reset link is invalid or expired. Please request a new one."
-        : err.message);
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
