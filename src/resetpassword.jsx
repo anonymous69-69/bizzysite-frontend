@@ -20,55 +20,56 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-  
+
+    // Validate passwords match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-  
+
+    // Validate password length
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
     }
-  
+
     setIsLoading(true);
-  
+    
     try {
-      console.log("🔄 Sending password reset request...");
-      console.log("🔗 Token:", token);
-      console.log("🔒 Password:", password.trim());
-  
-      const response = await fetch(`https://bizzysite.onrender.com/api/reset-password/${token.trim()}`, {
+      const res = await fetch(`https://bizzysite.onrender.com/api/reset-password/${token.trim()}`, {
         method: 'POST',
-        headers: {
+        headers: { 
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({ password: password.trim() }),
+        body: JSON.stringify({ 
+          password: password.trim()
+        })
       });
-  
-      console.log("📩 Raw response:", response);
-  
-      const data = await response.json();
-      console.log("✅ Response data:", data);
-  
-      if (!response.ok) {
-        throw new Error(data.message || "Reset failed");
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        // Enhanced error handling
+        const errorMsg = data.message || 
+                        (res.status === 400 ? 'Invalid or expired token' : 'Password reset failed');
+        throw new Error(errorMsg);
       }
-  
-      toast.success("Password reset successful!");
-      setTimeout(() => navigate("/login"), 2000);
+      
+      toast.success('Password reset successful! Redirecting...');
+      setTimeout(() => navigate('/login'), 2000); // Explicit /login redirect
+      
     } catch (err) {
-      console.error("❌ Reset error (frontend):", err);
-      setError(err.message.includes("token")
-        ? "The reset link is invalid or expired. Please request a new one."
-        : err.message);
+      console.error('Reset error:', err);
+      setError(err.message.includes('token') ? 
+               'The reset link is invalid or expired. Please request a new one.' : 
+               err.message);
       toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
       <motion.div
