@@ -20,126 +20,110 @@ export default function LoginPage() {
 const [resetEmail, setResetEmail] = useState("");
 const [isSendingReset, setIsSendingReset] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // Add validation checks
-    if (!isLogin && (!name || !email || !password)) {
-      toast.error("Please fill all required fields");
-      return;
-    }
+  if (!isLogin && (!name || !email || !password)) {
+    toast.error("Please fill all required fields");
+    return;
+  }
 
-    if (!isLogin && password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return;
-    }
+  if (!isLogin && password.length < 6) {
+    toast.error("Password must be at least 6 characters");
+    return;
+  }
 
-    setIsLoading(true);
-    const payload = {
-      email,
-      password,
-      ...(isLogin ? {} : { name }),
-    };
-    try {
-      let url = `https://bizzysite.onrender.com/api/${
-        isLogin ? "login" : "signup"
-      }`;
-      console.log("%c[Signup] Sending payload:", "color:blue", payload);
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      // First check if response is okay
-      // ✅ Only one call to response.json()
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Registration failed. Please try again."
-        );
-      }
-
-      const userId = String(data.userId || data._id || "").trim();
-      if (!userId) {
-        console.error(
-          "%c[Signup] Missing userId. Full response:",
-          "color:red",
-          data
-        );
-        throw new Error("Invalid user ID received from server.");
-      }
-
-      localStorage.setItem("userId", userId);
-      localStorage.setItem("token", userId);
-      localStorage.setItem("userEmail", data.email || "");
-      localStorage.setItem("userName", data.name || "");
-      localStorage.setItem("userPhone", data.phone || "");
-      localStorage.setItem("userRole", "vendor");
-      if (!isLogin) {
-        if (!userId) {
-          throw new Error("Missing user ID for store creation.");
-        }
-        try {
-          const businessRes = await fetch(
-            "https://bizzysite.onrender.com/api/business",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${userId}`,
-              },
-              body: JSON.stringify({
-                type: "business",
-                data: {
-                  name: name || "My Store",
-                  email: email,
-                  phone: "",
-                  address: "",
-                  shippingCharge: 0,
-                },
-              }),
-            }
-          );
-          const businessData = await businessRes.json();
-          if (!businessRes.ok) {
-            throw new Error(businessData.message || "Failed to create store");
-          }
-          const storeId = businessData.storeId;
-          if (storeId) {
-            localStorage.setItem("storeId", storeId);
-          } else {
-            throw new Error("Store ID not received from server");
-          }
-          await fetch("https://bizzysite.onrender.com/api/send-welcome-email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, name }),
-          });
-        } catch (error) {
-          console.error("Store creation error:", error);
-          toast.error("Failed to initialize your store. Please try again.");
-          setIsLoading(false);
-          return;
-        }
-      }
-      toast.success(
-        data.message || (isLogin ? "Login successful" : "Signup successful")
-      );
-      setIsLoading(false);
-      setShowModal(false);
-      setTimeout(() => {
-        navigate("/storefront");
-      }, 500);
-    } catch (error) {
-      console.error("Registration error:", error);
-      toast.error(
-        error.message ||
-          "Registration failed. Please check your details and try again."
-      );
-      setIsLoading(false);
-    }
+  setIsLoading(true);
+  const payload = {
+    email,
+    password,
+    ...(isLogin ? {} : { name }),
   };
+
+  try {
+    const url = `https://bizzysite.onrender.com/api/${isLogin ? "login" : "signup"}`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Registration failed. Please try again.");
+    }
+
+    const userId = String(data.userId || data._id || "").trim();
+    if (!userId) {
+      throw new Error("Invalid user ID received from server.");
+    }
+
+    localStorage.setItem("userId", userId);
+    localStorage.setItem("token", userId);
+    localStorage.setItem("userEmail", data.email || "");
+    localStorage.setItem("userName", data.name || "");
+    localStorage.setItem("userPhone", data.phone || "");
+    localStorage.setItem("userRole", "vendor");
+
+    if (!isLogin) {
+      try {
+        const businessRes = await fetch("https://bizzysite.onrender.com/api/business", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userId}`,
+          },
+          body: JSON.stringify({
+            type: "business",
+            data: {
+              name: name || "My Store",
+              email: email,
+              phone: "",
+              address: "",
+              shippingCharge: 0,
+            },
+          }),
+        });
+
+        const businessData = await businessRes.json();
+        if (!businessRes.ok) {
+          throw new Error(businessData.message || "Failed to create store");
+        }
+
+        const storeId = businessData.storeId;
+        if (storeId) {
+          localStorage.setItem("storeId", storeId);
+        } else {
+          throw new Error("Store ID not received from server");
+        }
+
+        await fetch("https://bizzysite.onrender.com/api/send-welcome-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, name }),
+        });
+      } catch (error) {
+        toast.error("Failed to initialize your store. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    toast.success(data.message || (isLogin ? "Login successful" : "Signup successful"));
+    setIsLoading(false);
+    setShowModal(false);
+    setTimeout(() => {
+      navigate("/storefront");
+    }, 500);
+  } catch (error) {
+    toast.error(
+      error.message || "Registration failed. Please check your details and try again."
+    );
+    setIsLoading(false);
+  }
+};
+
 
   const openModal = (login) => {
     setIsLogin(login);
