@@ -61,7 +61,7 @@ export default function ResetPassword() {
     }
   
     toast.success("Password reset successful!");
-    setTimeout(() => navigate("/login"), 2000);
+    setTimeout(() => navigate("/signup"), 2000);
   } catch (err) {
     console.error("❌ Reset error (frontend):", err);
     setError(err.message.includes("token")
