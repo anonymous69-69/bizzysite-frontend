@@ -560,7 +560,7 @@ export default function ProductCatalog() {
 
                 <div className="mb-4 sm:mb-6">
                   <label className={`block mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'} text-sm sm:text-base`}>
-                    Description
+                    Description(also add delivering time)
                   </label>
                   <textarea
                     name="description"
@@ -712,7 +712,7 @@ export default function ProductCatalog() {
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Resources</h4>
               <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
               <li>Email: your-store@bizzysite.com</li>
-              <li>Phone: +91 7086758292</li>
+              <li></li>
               </ul>
             </div>
           </div>

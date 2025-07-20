@@ -293,7 +293,7 @@ export default function NavView() {
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
               <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
               <li>Email: your-store@bizzysite.shop</li>
-              <li>Phone: +91 7086758292</li>
+              <li></li>
               </ul>
             </div>
           </div>
