@@ -3,7 +3,7 @@ import { Renderer, Program, Mesh, Triangle, Vec3 } from "ogl";
 
 export default function Orb({
   hue = 0,
-  hoverIntensity = 0.4,  // Increased default intensity
+  hoverIntensity = 0.2,
   rotateOnHover = true,
   forceHoverState = false,
 }) {
@@ -98,10 +98,9 @@ export default function Orb({
       return vec4(colorIn.rgb / (a + 1e-5), a);
     }
 
-    // Lavender and nearby hues
-    const vec3 baseColor1 = vec3(0.811765, 0.462745, 1.0);
-    const vec3 baseColor2 = vec3(0.498039, 0.860784, 1.0);
-    const vec3 baseColor3 = vec3(0.262745, 0.278431, 1.0);
+    const vec3 baseColor1 = vec3(0.611765, 0.262745, 0.996078);
+    const vec3 baseColor2 = vec3(0.298039, 0.760784, 0.913725);
+    const vec3 baseColor3 = vec3(0.062745, 0.078431, 0.600000);
     const float innerRadius = 0.6;
     const float noiseScale = 0.65;
 
@@ -123,16 +122,15 @@ export default function Orb({
       
       float n0 = snoise3(vec3(uv * noiseScale, iTime * 0.5)) * 0.5 + 0.5;
       float r0 = mix(mix(innerRadius, 1.0, 0.4), mix(innerRadius, 1.0, 0.6), n0);
-      vec2 uvShifted = uv + vec2(sin(iTime * 0.3), cos(iTime * 0.3)) * 0.1;
-      float d0 = distance(uvShifted, (r0 * invLen) * uvShifted);
-      float v0 = light1(1.5, 8.0, d0);
+      float d0 = distance(uv, (r0 * invLen) * uv);
+      float v0 = light1(1.0, 10.0, d0);
       v0 *= smoothstep(r0 * 1.05, r0, len);
       float cl = cos(ang + iTime * 2.0) * 0.5 + 0.5;
       
       float a = iTime * -1.0;
       vec2 pos = vec2(cos(a), sin(a)) * r0;
       float d = distance(uv, pos);
-      float v1 = light2(2.0, 4.0, d);
+      float v1 = light2(1.5, 5.0, d);
       v1 *= light1(1.0, 50.0, d0);
       
       float v2 = smoothstep(1.0, mix(innerRadius, 1.0, n0 * 0.5), len);
@@ -146,51 +144,51 @@ export default function Orb({
       return extractAlpha(col);
     }
 
+    vec4 mainImage(vec2 fragCoord) {
+      vec2 center = iResolution.xy * 0.5;
+      float size = min(iResolution.x, iResolution.y);
+      vec2 uv = (fragCoord - center) / size * 2.0;
+      
+      float angle = rot;
+      float s = sin(angle);
+      float c = cos(angle);
+      uv = vec2(c * uv.x - s * uv.y, s * uv.x + c * uv.y);
+      
+      uv.x += hover * hoverIntensity * 0.1 * sin(uv.y * 10.0 + iTime);
+      uv.y += hover * hoverIntensity * 0.1 * sin(uv.x * 10.0 + iTime);
+      
+      return draw(uv);
+    }
+
     void main() {
-      vec2 fragCoord = (vUv - 0.5) * 2.0;
-      vec4 col = draw(fragCoord);
-      float len = length(fragCoord);
-      float fade = smoothstep(1.2, 0.2, len) * (1.0 - pow(len, 2.0));
-      gl_FragColor = vec4(col.rgb * 0.8 * fade, col.a * fade);
+      vec2 fragCoord = vUv * iResolution.xy;
+      vec4 col = mainImage(fragCoord);
+      gl_FragColor = vec4(col.rgb * col.a, col.a);
     }
   `;
 
   useEffect(() => {
     const container = ctnDom.current;
-    console.log("Orb canvas mounted:", container);
     if (!container) return;
 
-    const renderer = new Renderer({ 
-      alpha: true, 
-      premultipliedAlpha: false,
-      antialias: true
-    });
+    const renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
     const gl = renderer.gl;
-    const dpr = window.devicePixelRatio || 1;
     gl.clearColor(0, 0, 0, 0);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.enable(gl.BLEND);
     container.appendChild(gl.canvas);
-    gl.canvas.width = container.offsetWidth * dpr;
-    gl.canvas.height = container.offsetHeight * dpr;
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    gl.canvas.style.position = 'absolute';
-    gl.canvas.style.top = '0';
-    gl.canvas.style.left = '0';
-    gl.canvas.style.width = '100%';
-    gl.canvas.style.height = '100%';
-
-    const vertex = vert;
-    const fragment = frag;
 
     const geometry = new Triangle(gl);
-
     const program = new Program(gl, {
-      vertex,
-      fragment,
+      vertex: vert,
+      fragment: frag,
       uniforms: {
         iTime: { value: 0 },
-        iResolution: { value: new Vec3(gl.canvas.width, gl.canvas.height, 1) },
+        iResolution: {
+          value: new Vec3(
+            gl.canvas.width,
+            gl.canvas.height,
+            gl.canvas.width / gl.canvas.height
+          ),
+        },
         hue: { value: hue },
         hover: { value: 0 },
         rot: { value: 0 },
@@ -201,59 +199,84 @@ export default function Orb({
     const mesh = new Mesh(gl, { geometry, program });
 
     function resize() {
-      const bounds = container.getBoundingClientRect();
-      const width = bounds.width;
-      const height = bounds.height;
-      gl.canvas.style.width = width + 'px';
-      gl.canvas.style.height = height + 'px';
-      gl.canvas.width = width * dpr;
-      gl.canvas.height = height * dpr;
-      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-      renderer.setSize(width, height, dpr);
+      if (!container) return;
+      const dpr = window.devicePixelRatio || 1;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      renderer.setSize(width * dpr, height * dpr);
+      gl.canvas.style.width = width + "px";
+      gl.canvas.style.height = height + "px";
       program.uniforms.iResolution.value.set(
         gl.canvas.width,
         gl.canvas.height,
-        1
+        gl.canvas.width / gl.canvas.height
       );
     }
-
-    window.addEventListener("resize", resize, false);
+    window.addEventListener("resize", resize);
     resize();
 
-    let startTime = performance.now();
-    let rot = 0;
-    let hover = 0;
+    let targetHover = 0;
+    let lastTime = 0;
+    let currentRot = 0;
+    const rotationSpeed = 0.3;
 
-    function update(t) {
-      const elapsed = (t - startTime) / 1000;
+    const handleMouseMove = (e) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const width = rect.width;
+      const height = rect.height;
+      const size = Math.min(width, height);
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const uvX = ((x - centerX) / size) * 2.0;
+      const uvY = ((y - centerY) / size) * 2.0;
 
-      program.uniforms.iTime.value = elapsed;
-      program.uniforms.hue.value = hue;
-      program.uniforms.hoverIntensity.value = hoverIntensity;
-      program.uniforms.rot.value = rot;
-      program.uniforms.hover.value = forceHoverState ? 1 : hover;
-
-      renderer.render({ scene: mesh });
-      requestAnimationFrame(update);
-    }
-
-    requestAnimationFrame(update);
-
-    return () => {
-      window.removeEventListener("resize", resize);
-      if (gl.canvas && gl.canvas.parentNode) {
-        gl.canvas.parentNode.removeChild(gl.canvas);
+      if (Math.sqrt(uvX * uvX + uvY * uvY) < 0.8) {
+        targetHover = 1;
+      } else {
+        targetHover = 0;
       }
     };
+
+    const handleMouseLeave = () => {
+      targetHover = 0;
+    };
+
+    container.addEventListener("mousemove", handleMouseMove);
+    container.addEventListener("mouseleave", handleMouseLeave);
+
+    let rafId;
+    const update = (t) => {
+      rafId = requestAnimationFrame(update);
+      const dt = (t - lastTime) * 0.001;
+      lastTime = t;
+      program.uniforms.iTime.value = t * 0.001;
+      program.uniforms.hue.value = hue;
+      program.uniforms.hoverIntensity.value = hoverIntensity;
+
+      const effectiveHover = forceHoverState ? 1 : targetHover;
+      program.uniforms.hover.value += (effectiveHover - program.uniforms.hover.value) * 0.1;
+
+      if (rotateOnHover && effectiveHover > 0.5) {
+        currentRot += dt * rotationSpeed;
+      }
+      program.uniforms.rot.value = currentRot;
+
+      renderer.render({ scene: mesh });
+    };
+    rafId = requestAnimationFrame(update);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", resize);
+      container.removeEventListener("mousemove", handleMouseMove);
+      container.removeEventListener("mouseleave", handleMouseLeave);
+      container.removeChild(gl.canvas);
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hue, hoverIntensity, rotateOnHover, forceHoverState]);
 
-  return (
-    <div
-      ref={ctnDom}
-      className="absolute inset-0 w-full h-full pointer-events-none z-0"
-      style={{
-        backgroundColor: "#000"
-      }}
-    />
-  );
+  return <div ref={ctnDom} className="w-full h-full" />;
 }

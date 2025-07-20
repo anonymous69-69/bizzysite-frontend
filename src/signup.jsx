@@ -137,7 +137,7 @@ const handleSubmit = async (e) => {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative w-[70vmin] aspect-square">
             <Orb
-              hue={200}
+              hue={2}
               hoverIntensity={0.6}
               rotateOnHover={true}
               forceHoverState={false}
