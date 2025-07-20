@@ -274,8 +274,8 @@ const handleSubmit = async (e) => {
                 ),
               },
               {
-                title: "Integrated Payments",
-                desc: "Accept credit cards, PayPal, and other payment methods securely",
+                title: "Everything for free",
+                desc: "Absolutely free for all the users with no hidden charges",
                 animation: (
                   <div className="h-16 flex items-center justify-center mb-6">
                     <div
