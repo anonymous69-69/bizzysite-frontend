@@ -217,11 +217,14 @@ export default function NavView() {
           </p>
 
           {loading ? (
-            <div className="text-center py-8">
-              <div className={`animate-spin rounded-full h-8 w-8 border-b-2 mx-auto ${darkMode ? 'border-indigo-400' : 'border-indigo-600'}`}></div>
-              <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                Loading your store information...
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[1, 2].map((i) => (
+                <div key={i} className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                  <div className={`h-4 w-1/2 mb-3 rounded ${darkMode ? 'bg-gray-600' : 'bg-gray-300'} animate-pulse`}></div>
+                  <div className={`h-3 w-3/4 mb-4 rounded ${darkMode ? 'bg-gray-600' : 'bg-gray-300'} animate-pulse`}></div>
+                  <div className={`h-9 w-24 rounded ${darkMode ? 'bg-gray-600' : 'bg-gray-300'} animate-pulse`}></div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

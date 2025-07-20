@@ -34,13 +34,6 @@ export default function ProductCatalog() {
 
   const menuRef = useRef(null);
 
-  const currencies = [
-    { symbol: '$', name: 'USD' },
-    { symbol: '€', name: 'EUR' },
-    { symbol: '£', name: 'GBP' },
-    { symbol: '₹', name: 'INR' },
-    { symbol: '¥', name: 'JPY' },
-  ];
 
   // FIXED: Updated API endpoint and headers
   const fetchProducts = useCallback(async (storeId, userId) => {
@@ -117,7 +110,7 @@ export default function ProductCatalog() {
       description: '',
       images: [],
       inStock: true,
-      currency: '$'
+      currency: '₹'
     });
     setImagePreviews([]);
     setImageUploadError('');
@@ -143,7 +136,7 @@ export default function ProductCatalog() {
       description: '',
       images: [],
       inStock: true,
-      currency: '$'
+      currency: '₹'
     });
     setImagePreviews([]);
     setImageUploadError('');
@@ -583,25 +576,16 @@ export default function ProductCatalog() {
                     Price
                   </label>
                   <div className="flex">
-                    <select
-                      name="currency"
-                      value={currentProduct.currency}
-                      onChange={handleInputChange}
-                      className={`px-3 py-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
-                        }`}
-                    >
-                      {currencies.map(curr => (
-                        <option key={curr.symbol} value={curr.symbol}>{curr.name}</option>
-                      ))}
-                    </select>
+                    <span className={`px-3 py-2 border rounded-l text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-700'}`}>
+                      ₹
+                    </span>
                     <input
                       type="number"
                       name="price"
                       value={currentProduct.price}
                       onChange={handleInputChange}
                       required
-                      className={`w-full px-3 py-2 border border-l-0 rounded-r focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                        }`}
+                      className={`w-full px-3 py-2 border border-l-0 rounded-r focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
                     />
                   </div>
                 </div>
