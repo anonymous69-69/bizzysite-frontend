@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
@@ -32,6 +32,8 @@ export default function ProductCatalog() {
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
 
+  const menuRef = useRef(null);
+
   const currencies = [
     { symbol: '$', name: 'USD' },
     { symbol: '€', name: 'EUR' },
@@ -63,6 +65,19 @@ export default function ProductCatalog() {
       setIsLoading(false);
     }
   }, [navigate, API_BASE_URL]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
@@ -310,7 +325,7 @@ export default function ProductCatalog() {
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
-              <div className="relative">
+            <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
                   className="focus:outline-none"

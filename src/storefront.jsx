@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTheme } from './ThemeContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 export default function BusinessDashboard() {
   const { darkMode } = useTheme();
   const navigate = useNavigate();
+  const menuRef = useRef(null);
   const [businessInfo, setBusinessInfo] = useState({
     name: '',
     phone: '',
@@ -58,6 +59,19 @@ export default function BusinessDashboard() {
 
     }
   }, [navigate]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const fetchBusinessInfo = async (storeId) => {
     try {
@@ -231,7 +245,7 @@ export default function BusinessDashboard() {
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
                   className="focus:outline-none"

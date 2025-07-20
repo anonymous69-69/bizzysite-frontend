@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useTheme } from './ThemeContext';
@@ -23,6 +23,21 @@ export default function PaymentMethodForm() {
   const [isLoading, setIsLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [userName, setUserName] = useState('User');
+
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchPaymentSettings = async () => {
@@ -220,7 +235,7 @@ export default function PaymentMethodForm() {
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
                   className="focus:outline-none"

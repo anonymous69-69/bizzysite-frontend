@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useTheme } from './ThemeContext';
@@ -13,6 +13,7 @@ export default function NavView() {
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
   const [storeSlug, setStoreSlug] = useState('');
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const fetchStoreData = async () => {
@@ -76,6 +77,19 @@ export default function NavView() {
     };
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleCopyLink = () => {
     const slugToUse = storeSlug || localStorage.getItem('storeSlug');
     if (!slugToUse) {
@@ -110,7 +124,7 @@ export default function NavView() {
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button onClick={() => setShowMenu(!showMenu)} className="focus:outline-none">
                   <img
                     src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=4f46e5&color=fff&bold=true`}

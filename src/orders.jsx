@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from './ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +12,20 @@ export default function OrderManagement() {
   const [orderToDelete, setOrderToDelete] = useState(null);
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   
 
   useEffect(() => {
@@ -134,7 +148,7 @@ export default function OrderManagement() {
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
                   className="focus:outline-none"
