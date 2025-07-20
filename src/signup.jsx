@@ -556,7 +556,7 @@ const handleSubmit = async (e) => {
               </h4>
               <ul className="space-y-1 sm:space-y-2 text-gray-400 text-sm sm:text-base">
                 <li>Email: your-store@bizzysite.shop</li>
-                <li>Phone: +91 7086758292</li>
+               
               </ul>
             </div>
           </div>
