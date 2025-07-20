@@ -193,7 +193,7 @@ const handleSubmit = async (e) => {
               stepDuration={1}
             />
             <BlurText
-              text="Without Coding"
+              text="For Free"
               animateBy="words"
               direction="top"
               className="leading-tight"
