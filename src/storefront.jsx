@@ -25,6 +25,11 @@ export default function BusinessDashboard() {
   const [storeSlug, setStoreSlug] = useState('');
 
   useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
     const userId = localStorage.getItem('userId');
   
@@ -49,14 +54,10 @@ export default function BusinessDashboard() {
       setStoreId(savedStoreId);
       fetchBusinessInfo(savedStoreId);
     } else {
-      // 🔥 Remove this line:
-      // toast.error("Store ID not found. Please log in again.");
-  
-      // ✅ Just wait for user to submit form — no need to panic
-      console.log("No storeId yet — will be created after form submission.");
+      console.warn("No storeId found in localStorage");
+
     }
   }, [navigate]);
-  
 
   const fetchBusinessInfo = async (storeId) => {
     try {
