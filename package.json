@@ -465,7 +465,7 @@
     "make-dir": "^3.1.0",
     "makeerror": "^1.0.12",
     "math-intrinsics": "^1.1.0",
-    "mdn-data": "^2.0.4",
+    "mdn-data": "^2.23.0",
     "media-typer": "^0.3.0",
     "memfs": "^3.5.3",
     "merge-descriptors": "^1.0.3",
