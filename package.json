@@ -896,7 +896,7 @@
   "bugs": {
     "url": "https://github.com/anonymous69-69/bizzysite-frontend/issues"
   },
-  "homepage": "https://github.com/anonymous69-69/bizzysite-frontend#readme",
+  
   "browserslist": {
     "production": [
       ">0.2%",
