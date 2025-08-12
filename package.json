@@ -911,5 +911,14 @@
   },
   "devDependencies": {
     "eslint-plugin-react-hooks": "^5.2.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "rules": {
+      "react-hooks/exhaustive-deps": "off"
+    }
   }
 }
