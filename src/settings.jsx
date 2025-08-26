@@ -186,15 +186,20 @@ export default function SettingsPage() {
                 </div>
                 <button
                   onClick={() => setDarkMode(!darkMode)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    darkMode ? 'bg-indigo-600' : 'bg-gray-300'
+                  className={`flex items-center gap-2 px-3 py-1 rounded-full transition-colors ${
+                    darkMode ? 'bg-indigo-600 text-white' : 'bg-gray-300 text-gray-800'
                   }`}
+                  aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                 >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      darkMode ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
+                  {darkMode ? (
+                    <>
+                      <span className="text-sm">🌙 Dark</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-sm">☀️ Light</span>
+                    </>
+                  )}
                 </button>
               </div>
 

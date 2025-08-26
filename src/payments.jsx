@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { useTheme } from './ThemeContext';
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useTheme } from "./ThemeContext";
+import { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import axios from "axios";
 
 export default function PaymentMethodForm() {
@@ -207,29 +208,60 @@ export default function PaymentMethodForm() {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
+    <div
+      className={`min-h-screen flex flex-col overflow-x-hidden ${
+        darkMode
+          ? "bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white"
+          : "bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black"
+      }`}
+    >
+      <Toaster />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
         {errorMessage && (
-          <div className={`mb-6 p-4 ${darkMode ? 'bg-red-900 border-red-700 text-red-100' : 'bg-red-50 border-l-4 border-red-500'}`}>
+          <div
+            className={`mb-6 p-4 ${
+              darkMode
+                ? "bg-red-900 border-red-700 text-red-100"
+                : "bg-red-50 border-l-4 border-red-500"
+            }`}
+          >
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
               <div className="ml-3">
-                <p className={`text-sm ${darkMode ? 'text-red-100' : 'text-red-700'}`}>{errorMessage}</p>
+                <p
+                  className={`text-sm ${
+                    darkMode ? "text-red-100" : "text-red-700"
+                  }`}
+                >
+                  {errorMessage}
+                </p>
               </div>
             </div>
           </div>
         )}
 
-        <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
+        {/* Header Section */}
+        <div className="mb-6 rounded-md p-3">
           <div className="flex justify-between items-center mb-2">
-            <Link 
-              to="/signup" 
-              className={`text-2xl sm:text-3xl font-bold transition-colors ${
-                darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'
+            <Link
+              to="/signup"
+              className={`text-3xl sm:text-4xl font-extrabold ${
+                darkMode
+                  ? "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+                  : "text-gray-900"
               }`}
             >
               BizzySite
@@ -241,74 +273,79 @@ export default function PaymentMethodForm() {
                   className="focus:outline-none"
                 >
                   <img
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=4f46e5&color=fff&bold=true`}
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      userName
+                    )}&background=4f46e5&color=fff&bold=true`}
                     alt="Profile"
                     className="w-10 h-10 rounded-full"
                   />
                 </button>
-                {showMenu && (
-                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 dark:text-white ${
-                    darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'
-                  }`}>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Settings
-                    </Link>
-                  </div>
-                )}
+                <div
+                  className={`absolute right-0 mt-2 w-44 rounded-md shadow-lg z-50 bg-gray-800/90 text-white border border-gray-700 backdrop-blur-md transform transition-all duration-300 ease-out origin-top-right ${
+                    showMenu
+                      ? "opacity-100 translate-y-0 scale-100 visible"
+                      : "opacity-0 -translate-y-2 scale-95 invisible"
+                  }`}
+                >
+                  <span
+                    className="block px-4 py-2 text-sm font-medium hover:bg-gray-700 hover:text-indigo-300 pointer-events-none opacity-50"
+                  >
+                    Profile
+                  </span>
+                  <div className="border-t border-gray-700"></div>
+                  <Link
+                    to="/settings"
+                    className="block px-4 py-2 text-sm font-medium hover:bg-gray-700 hover:text-indigo-300"
+                  >
+                    Settings
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-          
-          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${
-            darkMode ? 'text-gray-300' : 'text-gray-600'
-          }`}>
-            Welcome to your business dashboard
+          <h2
+            className={`text-xl sm:text-2xl font-semibold mb-2 ${
+              darkMode ? "text-gray-300" : "text-gray-900"
+            }`}
+          >
+            {(() => {
+              const hour = new Date().getHours();
+              if (hour >= 5 && hour < 12)
+                return <>🌞 Good Morning, {userName}!</>;
+              if (hour >= 12 && hour < 18)
+                return <>🌤️ Good Afternoon, {userName}!</>;
+              if (hour >= 18 && hour < 22)
+                return <>🌙 Good Evening, {userName}!</>;
+              return <>🌌 Good Night, {userName}!</>;
+            })()}{" "}
+            💳
           </h2>
-          
-          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${
-            darkMode ? 'text-gray-400' : 'text-gray-700'
-          }`}>
-            Set up your online store in minutes and start selling today
+          <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full mb-6"></div>
+          <p className="mb-6 sm:mb-8 text-base sm:text-lg text-gray-900 dark:text-gray-400 max-w-2xl">
+            Manage your payments securely and effortlessly.
           </p>
         </div>
 
+        {/* Navigation Bar */}
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${
-              darkMode ? 'bg-gray-800' : 'bg-gray-50'
-            }`}>
+            <div className="flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-md">
               {[
-                { name: 'Setup', icon: '📊', path: '/storefront' },
-                { name: 'Products', icon: '📦', path: '/products' },
-                { name: 'Orders', icon: '🛒', path: '/orders' },
-                { name: 'Customize', icon: '🎨', path: '/customize' },
-                { name: 'Preview', icon: '🌐', path: '/navview' },
-                { name: 'Payments', icon: '💳', path: '/payment' }
+                { name: "Setup", icon: "📊", path: "/storefront" },
+                { name: "Products", icon: "📦", path: "/products" },
+                { name: "Orders", icon: "🛒", path: "/orders" },
+                { name: "Customize", icon: "🎨", path: "/customize" },
+                { name: "Preview", icon: "🌐", path: "/navview" },
+                { name: "Payments", icon: "💳", path: "/payment" },
               ].map((tab) => (
                 <Link
                   to={tab.path}
                   key={tab.name}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
-                    activeTab === tab.name
-                      ? darkMode
-                        ? 'bg-indigo-800 text-white' 
-                        : 'bg-purple-100 text-indigo-700'
-                      : darkMode
-                        ? 'text-gray-300 hover:text-indigo-300'
-                        : 'text-gray-500 hover:text-indigo-600'
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md text-sm sm:text-base ${
+                    window.location.pathname === tab.path
+                      ? "bg-white/20 text-white"
+                      : "text-white/80 hover:text-white"
                   }`}
-                  onClick={() => setActiveTab(tab.name)}
                 >
                   <span className="text-lg">{tab.icon}</span>
                   <span>{tab.name}</span>
@@ -318,9 +355,7 @@ export default function PaymentMethodForm() {
           </div>
         </div>
 
-        <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${
-          darkMode ? 'bg-gray-800' : 'bg-white'
-        }`}>
+        <div className="rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border border-white/20">
           <h3 className={`text-lg font-semibold mb-3 sm:mb-4 ${
             darkMode ? 'text-white' : 'text-gray-800'
           }`}>
@@ -333,9 +368,7 @@ export default function PaymentMethodForm() {
           </p>
 
           <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-            <div className={`flex items-center justify-between p-3 sm:p-4 border rounded-lg ${
-              darkMode ? 'border-gray-700' : 'border-gray-200'
-            }`}>
+            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
               <div className="mr-2">
                 <h3 className={`text-base sm:text-lg font-semibold ${
                   darkMode ? 'text-white' : 'text-gray-800'
@@ -362,9 +395,7 @@ export default function PaymentMethodForm() {
             </div>
 
             {isUPIEnabled && (
-              <div className={`p-4 border rounded-lg animate-slideDown ${
-                darkMode ? 'border-gray-700 bg-gray-700' : 'border-gray-200'
-              }`}>
+              <div className="p-4 border rounded-lg animate-slideDown bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
                 <h4 className={`text-sm font-semibold mb-3 ${
                   darkMode ? 'text-gray-300' : 'text-gray-700'
                 }`}>
@@ -398,9 +429,7 @@ export default function PaymentMethodForm() {
               </div>
             )}
 
-            <div className={`flex items-center justify-between p-3 sm:p-4 border rounded-lg ${
-              darkMode ? 'border-gray-700' : 'border-gray-200'
-            }`}>
+            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
               <div className="mr-2">
                 <h3 className={`text-base sm:text-lg font-semibold ${
                   darkMode ? 'text-white' : 'text-gray-800'
@@ -427,9 +456,7 @@ export default function PaymentMethodForm() {
             </div>
 
             {isBankEnabled && (
-              <div className={`p-4 border rounded-lg animate-slideDown ${
-                darkMode ? 'border-gray-700 bg-gray-700' : 'border-gray-200'
-              }`}>
+              <div className="p-4 border rounded-lg animate-slideDown bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
                 <h4 className={`text-sm font-semibold mb-3 ${
                   darkMode ? 'text-gray-300' : 'text-gray-700'
                 }`}>
@@ -499,30 +526,42 @@ export default function PaymentMethodForm() {
             <button
               onClick={handleSavePayments}
               disabled={isSaving}
-              className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm sm:text-base ${
-                isSaving 
-                  ? darkMode 
-                    ? 'bg-gray-700 text-gray-300 cursor-not-allowed' 
-                    : 'bg-gray-400 text-gray-800 cursor-not-allowed'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              className={`w-full mt-6 mb-6 px-4 py-2 rounded-md text-sm sm:text-base font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white transition-all duration-200 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 ${
+                isSaving ? "opacity-60 cursor-not-allowed" : ""
               }`}
             >
               {isSaving ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Saving...
                 </>
-              ) : 'Save Payment Settings'}
+              ) : (
+                "Save Payment Settings"
+              )}
             </button>
           </div>
         </div>
 
-        <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${
-          darkMode ? 'bg-gray-800' : 'bg-white'
-        }`}>
+        <div className="rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border border-white/20">
           <h3 className={`text-lg font-semibold mb-3 sm:mb-4 ${
             darkMode ? 'text-white' : 'text-gray-800'
           }`}>
@@ -570,9 +609,7 @@ export default function PaymentMethodForm() {
           </ul>
         </div>
 
-        <div className={`rounded-lg shadow p-4 sm:p-6 ${
-          darkMode ? 'bg-gray-800' : 'bg-white'
-        }`}>
+        <div className="rounded-lg shadow-lg p-4 sm:p-6 bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border border-white/20">
           <h3 className={`text-lg font-semibold mb-3 sm:mb-4 ${
             darkMode ? 'text-white' : 'text-gray-800'
           }`}>
@@ -586,9 +623,7 @@ export default function PaymentMethodForm() {
 
           <div className="space-y-3 sm:space-y-4">
             {isUPIEnabled && (
-              <div className={`p-3 sm:p-4 border rounded-lg ${
-                darkMode ? 'border-gray-700' : 'border-gray-200'
-              }`}>
+              <div className="p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
                 <h4 className={`font-medium text-sm sm:text-base ${
                   darkMode ? 'text-white' : 'text-gray-800'
                 }`}>
@@ -609,9 +644,7 @@ export default function PaymentMethodForm() {
               </div>
             )}
             {isBankEnabled && (
-              <div className={`p-3 sm:p-4 border rounded-lg ${
-                darkMode ? 'border-gray-700' : 'border-gray-200'
-              }`}>
+              <div className="p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
                 <h4 className={`font-medium text-sm sm:text-base ${
                   darkMode ? 'text-white' : 'text-gray-800'
                 }`}>

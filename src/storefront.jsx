@@ -4,7 +4,8 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function BusinessDashboard() {
-  const { darkMode } = useTheme();
+  const theme = useTheme() || {};
+  const { darkMode } = theme;
   const navigate = useNavigate();
   const menuRef = useRef(null);
   const [businessInfo, setBusinessInfo] = useState({
@@ -219,7 +220,11 @@ export default function BusinessDashboard() {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col overflow-x-hidden ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
+    <div className={`min-h-screen flex flex-col overflow-x-hidden ${
+      darkMode
+        ? 'bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white'
+        : 'bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black'
+    }`}>
       <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 flex-grow w-full">
         {error && (
@@ -234,12 +239,14 @@ export default function BusinessDashboard() {
           </div>
         )}
 
-        <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
+        <div className="mb-6 rounded-md p-3">
           <div className="flex justify-between items-center mb-2">
             <Link 
               to="/signup" 
-              className={`text-2xl sm:text-3xl font-bold transition-colors ${
-                darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'
+              className={`text-3xl sm:text-4xl font-extrabold ${
+                darkMode
+                  ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent'
+                  : 'text-gray-900'
               }`}
             >
               BizzySite
@@ -256,46 +263,48 @@ export default function BusinessDashboard() {
                     className="w-10 h-10 rounded-full"
                   />
                 </button>
-                {showMenu && (
-                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 dark:text-white ${
-                    darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'
-                  }`}>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Settings
-                    </Link>
-                  </div>
-                )}
+                <div
+                  className={`absolute right-0 mt-2 w-44 rounded-md shadow-lg z-50 bg-gray-800 text-white border border-gray-700 transform transition-all duration-300 ease-out origin-top-right ${
+                    showMenu ? 'opacity-100 translate-y-0 scale-100 visible' : 'opacity-0 -translate-y-2 scale-95 invisible'
+                  }`}
+                >
+                  <span
+                    className="block px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 hover:text-indigo-300 transition-colors pointer-events-none opacity-50"
+                  >
+                    Profile
+                  </span>
+                  <div className="border-t border-gray-700"></div>
+                  <Link
+                    to="/settings"
+                    className="block px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 hover:text-indigo-300 transition-colors"
+                    onClick={() => setShowMenu(false)}
+                  >
+                    Settings
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-          
-          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${
-            darkMode ? 'text-gray-300' : 'text-gray-600'
+          <h2 className={`text-xl sm:text-2xl font-semibold mb-2 ${
+            darkMode ? 'text-gray-300' : 'text-gray-900'
           }`}>
-            Welcome to your business dashboard
+            {(() => {
+              const hour = new Date().getHours();
+              if (hour >= 5 && hour < 12) return <span className={darkMode ? '' : 'text-gray-900'}>🌞 Good Morning, {userName}!</span>;
+              if (hour >= 12 && hour < 18) return <span className={darkMode ? '' : 'text-gray-900'}>🌤️ Good Afternoon, {userName}!</span>;
+              if (hour >= 18 && hour < 22) return <span className={darkMode ? '' : 'text-gray-900'}>🌙 Good Evening, {userName}!</span>;
+              return <span className={darkMode ? '' : 'text-gray-900'}>🌌 Good Night, {userName}!</span>;
+            })()} <span className={darkMode ? '' : 'text-gray-900'}>🚀</span>
           </h2>
-          
-          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${
-            darkMode ? 'text-gray-400' : 'text-gray-700'
-          }`}>
-            Set up your online store in minutes and start selling today
+          <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full mb-6"></div>
+          <p className="mb-6 sm:mb-8 text-base sm:text-lg text-gray-900 dark:text-gray-400 max-w-2xl">
+            Launch your brand, your way — fast, simple, and free ✨
           </p>
         </div>
 
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+            <div className="flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
               {[
                 { name: 'Setup', icon: '📊' },
                 { name: 'Products', icon: '📦' },
@@ -322,7 +331,7 @@ export default function BusinessDashboard() {
                         : 'bg-purple-100 text-indigo-700'
                       : darkMode
                         ? 'text-gray-300 hover:text-indigo-300'
-                        : 'text-gray-500 hover:text-indigo-600'
+                        : 'text-gray-700 hover:text-indigo-700'
                   }`}
                 >
                   <span className="text-lg">{tab.icon}</span>
@@ -333,56 +342,87 @@ export default function BusinessDashboard() {
           </div>
         </div>
 
-        <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-          <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+        <div
+          className={`rounded-xl shadow-lg p-6 sm:p-8 transition-all transform hover:scale-[1.02] hover:shadow-2xl backdrop-blur-md border ${
+            darkMode
+              ? "bg-gray-800/40 border-gray-700 hover:border-indigo-400/60"
+              : "bg-white/50 border-gray-200 hover:border-indigo-400/60"
+          }`}
+        >
+          <h3
+            className={`text-xl font-semibold mb-2 ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Business Information
           </h3>
-          <p className={`mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+          <p
+            className={`mb-6 text-sm ${
+              darkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             Tell us about your business to get started
           </p>
 
-          <form onSubmit={handleSave}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
-              <div>
-                <label htmlFor="name" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Business Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={businessInfo.name}
-                  onChange={handleChange}
-                  placeholder="Enter your business name"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
-                  }`}
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="phone" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={businessInfo.phone}
-                  onChange={handleChange}
-                  placeholder="Enter your phone number"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
-                  }`}
-                />
-              </div>
+          <form onSubmit={handleSave} className="space-y-6">
+            <div>
+              <label
+                htmlFor="name"
+                className={`block text-sm font-medium mb-1 ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Business Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={businessInfo.name}
+                onChange={handleChange}
+                placeholder="Enter your business name"
+                className={`w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                  darkMode
+                    ? "bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border border-gray-300 text-gray-900 placeholder-gray-500"
+                }`}
+                required
+              />
             </div>
 
-            <div className={`border-t my-6 ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}></div>
+            <div>
+              <label
+                htmlFor="phone"
+                className={`block text-sm font-medium mb-1 ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={businessInfo.phone}
+                onChange={handleChange}
+                placeholder="Enter your phone number"
+                className={`w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                  darkMode
+                    ? "bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border border-gray-300 text-gray-900 placeholder-gray-500"
+                }`}
+              />
+            </div>
 
-            <div className="mb-6">
-              <label htmlFor="email" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            <div className={`border-t ${darkMode ? "border-gray-700" : "border-gray-200"}`}></div>
+
+            <div>
+              <label
+                htmlFor="email"
+                className={`block text-sm font-medium mb-1 ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Email Address
               </label>
               <input
@@ -391,16 +431,22 @@ export default function BusinessDashboard() {
                 name="email"
                 value={businessInfo.email}
                 onChange={handleChange}
-                placeholder="Enter your email address"
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
+                placeholder="Enter your email"
+                className={`w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                  darkMode
+                    ? "bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border border-gray-300 text-gray-900 placeholder-gray-500"
                 }`}
               />
             </div>
 
-
-            <div className="mb-6">
-              <label htmlFor="address" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            <div>
+              <label
+                htmlFor="address"
+                className={`block text-sm font-medium mb-1 ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Business Address
               </label>
               <textarea
@@ -410,24 +456,34 @@ export default function BusinessDashboard() {
                 onChange={handleChange}
                 placeholder="Enter your business address"
                 rows={3}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
+                className={`w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                  darkMode
+                    ? "bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border border-gray-300 text-gray-900 placeholder-gray-500"
                 }`}
               />
             </div>
-            <div className="mb-6">
-              <label htmlFor="shippingCharge" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Shipping Charge (in ₹)
+
+            <div>
+              <label
+                htmlFor="shippingCharge"
+                className={`block text-sm font-medium mb-1 ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Shipping Charge (₹)
               </label>
               <input
                 type="number"
                 id="shippingCharge"
                 name="shippingCharge"
-                value={businessInfo.shippingCharge !== '' ? businessInfo.shippingCharge : ''}
+                value={businessInfo.shippingCharge || ""}
                 onChange={handleChange}
                 placeholder="Enter flat shipping charge"
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-black'
+                className={`w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                  darkMode
+                    ? "bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border border-gray-300 text-gray-900 placeholder-gray-500"
                 }`}
               />
             </div>
@@ -436,20 +492,28 @@ export default function BusinessDashboard() {
               <button
                 type="submit"
                 disabled={loading}
-                onClick={() => {
-                  setAnimate(true);
-                  setTimeout(() => setAnimate(false), 500);
-                }}
-                className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 ${animate ? 'animate-wiggle' : ''}`}
+                className={`px-6 py-2.5 rounded-lg font-medium transition-all shadow-lg ${
+                  loading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:scale-105 hover:shadow-xl"
+                } ${
+                  darkMode
+                    ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                    : "bg-indigo-600 text-white hover:bg-indigo-700"
+                }`}
               >
-                {loading ? 'Saving...' : 'Save Business Information'}
+                {loading ? "Saving..." : "Save Business Information"}
               </button>
             </div>
           </form>
         </div>
 
         {storeId && (
-          <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+          <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 mt-8 transform transition-all hover:scale-[1.02] hover:shadow-2xl backdrop-blur-md border ${
+            darkMode
+              ? 'bg-gray-800/40 border-gray-700 hover:border-indigo-400/60'
+              : 'bg-white/50 border-gray-200 hover:border-indigo-400/60'
+          }`}>
             <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
               Your Store ID
             </h3>

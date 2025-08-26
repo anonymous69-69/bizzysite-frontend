@@ -113,9 +113,7 @@ const handleSubmit = async (e) => {
     toast.success(data.message || (isLogin ? "Login successful" : "Signup successful"));
     setIsLoading(false);
     setShowModal(false);
-    setTimeout(() => {
-      navigate("/storefront");
-    }, 500);
+    navigate("/storefront");
   } catch (error) {
     toast.error(
       error.message || "Registration failed. Please check your details and try again."
@@ -693,7 +691,7 @@ const handleSubmit = async (e) => {
                 <div className="mt-6 grid grid-cols-1 gap-3">
                   <button
                     type="button"
-                    onClick={async () => {
+                  onClick={async () => {
                       try {
                         const result = await signInWithPopup(auth, provider);
                         const user = result.user;

@@ -4,9 +4,14 @@ import { createContext, useContext, useEffect, useState } from 'react';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem('darkMode') === 'true'
-  );
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const [darkMode, setDarkMode] = useState(() => {
+    const stored = localStorage.getItem('darkMode');
+    if (stored !== null) {
+      return stored === 'true';
+    }
+    return true; // default to dark mode if nothing stored
+  });
 
   useEffect(() => {
     if (darkMode) {
@@ -25,4 +30,11 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
-export const useTheme = () => useContext(ThemeContext);
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    console.warn('useTheme must be used within a ThemeProvider');
+    return { darkMode: false, setDarkMode: () => {} };
+  }
+  return context;
+};

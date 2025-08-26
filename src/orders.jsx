@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { useTheme } from './ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -135,15 +136,23 @@ export default function OrderManagement() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
+    <div className={`min-h-screen flex flex-col overflow-x-hidden ${
+      darkMode
+        ? 'bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white'
+        : 'bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black'
+    }`}>
+      <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        {/* Header with dark mode */}
-        <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
+        {/* Header section styled like storefront.jsx */}
+        <div className="mb-6 rounded-md p-3">
           <div className="flex justify-between items-center mb-2">
-            <Link
-              to="/signup"
-              className={`text-2xl sm:text-3xl font-bold transition-colors ${darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'
-                }`}
+            <Link 
+              to="/signup" 
+              className={`text-3xl sm:text-4xl font-extrabold ${
+                darkMode
+                  ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent'
+                  : 'text-gray-900'
+              }`}
             >
               BizzySite
             </Link>
@@ -159,45 +168,49 @@ export default function OrderManagement() {
                     className="w-10 h-10 rounded-full"
                   />
                 </button>
-                {showMenu && (
-                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 dark:text-white ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'
-                    }`}>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Settings
-                    </Link>
-                  </div>
-                )}
+                <div
+                  className={`absolute right-0 mt-2 w-44 rounded-md shadow-lg z-50 bg-gray-800 text-white border border-gray-700 transform transition-all duration-300 ease-out origin-top-right ${
+                    showMenu ? 'opacity-100 translate-y-0 scale-100 visible' : 'opacity-0 -translate-y-2 scale-95 invisible'
+                  }`}
+                >
+                  <span
+                    className="block px-4 py-2 text-sm font-medium text-white pointer-events-none opacity-50 transition-colors"
+                  >
+                    Profile
+                  </span>
+                  <div className="border-t border-gray-700"></div>
+                  <Link
+                    to="/settings"
+                    className="block px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 hover:text-indigo-300 transition-colors"
+                    onClick={() => setShowMenu(false)}
+                  >
+                    Settings
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-
-          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'
-            }`}>
-            Welcome to your business dashboard
+          <h2 className={`text-xl sm:text-2xl font-semibold mb-2 ${
+            darkMode ? 'text-gray-300' : 'text-gray-900'
+          }`}>
+            {(() => {
+              const hour = new Date().getHours();
+              if (hour >= 5 && hour < 12) return <span className={darkMode ? '' : 'text-gray-900'}>🌞 Good Morning, {userName}!</span>;
+              if (hour >= 12 && hour < 18) return <span className={darkMode ? '' : 'text-gray-900'}>🌤️ Good Afternoon, {userName}!</span>;
+              if (hour >= 18 && hour < 22) return <span className={darkMode ? '' : 'text-gray-900'}>🌙 Good Evening, {userName}!</span>;
+              return <span className={darkMode ? '' : 'text-gray-900'}>🌌 Good Night, {userName}!</span>;
+            })()} <span className={darkMode ? '' : 'text-gray-900'}>🚀</span>
           </h2>
-
-          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${darkMode ? 'text-gray-400' : 'text-gray-700'
-            }`}>
-            Set up your online store in minutes and start selling today
+          <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full mb-6"></div>
+          <p className="mb-6 sm:mb-8 text-base sm:text-lg text-gray-900 dark:text-gray-400 max-w-2xl">
+            📦 Manage your orders — track, update, and fulfill with ease 🚚
           </p>
         </div>
 
         {/* Navigation tabs with dark mode */}
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'
-              }`}>
+            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-md`}>
               {[
                 { name: 'Setup', icon: '📊', path: '/storefront' },
                 { name: 'Products', icon: '📦', path: '/products' },
@@ -209,14 +222,11 @@ export default function OrderManagement() {
                 <Link
                   to={tab.path}
                   key={tab.name}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${window.location.pathname === tab.path
-                      ? darkMode
-                        ? 'bg-indigo-800 text-white'
-                        : 'bg-purple-100 text-indigo-700'
-                      : darkMode
-                        ? 'text-gray-300 hover:text-indigo-300'
-                        : 'text-gray-500 hover:text-indigo-600'
-                    }`}
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
+                    window.location.pathname === tab.path
+                      ? 'bg-white/20 text-white'
+                      : 'text-white/80 hover:text-white'
+                  }`}
                 >
                   <span className="text-lg">{tab.icon}</span>
                   <span>{tab.name}</span>
@@ -275,10 +285,13 @@ export default function OrderManagement() {
         </div>
 
         {/* Orders List */}
-        <div className={`rounded-lg shadow overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'
-          }`}>
+        <div className={`rounded-xl shadow-lg overflow-hidden backdrop-blur-md border ${
+          darkMode
+            ? 'bg-gray-800/40 border-gray-700 hover:border-indigo-400/60'
+            : 'bg-white/50 border-gray-200 hover:border-indigo-400/60'
+        }`}>
           {filteredOrders.length === 0 ? (
-            <div className={`p-6 sm:p-8 text-center ${darkMode ? 'bg-gray-800' : 'bg-white'
+            <div className={`p-6 sm:p-8 text-center ${darkMode ? 'bg-gray-800/40' : 'bg-white/50'
               }`}>
               <svg
                 className={`mx-auto h-12 w-12 ${darkMode ? 'text-gray-500' : 'text-gray-400'
@@ -312,7 +325,7 @@ export default function OrderManagement() {
               {filteredOrders.map(order => (
                 <li
                   key={order.id}
-                  className={`p-3 sm:p-4 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
+                  className={`p-3 sm:p-4 ${darkMode ? 'hover:bg-gray-700/60' : 'hover:bg-white/80'
                     }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
@@ -437,8 +450,11 @@ export default function OrderManagement() {
         >
           <div
             onClick={(e) => e.stopPropagation()} // prevents closing when clicking inside modal
-            className={`relative rounded-lg shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'
-              }`}
+            className={`relative rounded-xl shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto backdrop-blur-md border ${
+              darkMode
+                ? 'bg-gray-800/80 border-gray-700'
+                : 'bg-white/90 border-gray-200'
+            }`}
           >
             <div className="flex justify-between items-center mb-4">
               <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'
@@ -526,8 +542,11 @@ export default function OrderManagement() {
       {/* Delete Confirmation Modal */}
       {orderToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`rounded-lg shadow-lg p-6 w-full max-w-sm ${darkMode ? 'bg-gray-800' : 'bg-white'
-            }`}>
+          <div className={`rounded-xl shadow-lg p-6 w-full max-w-sm backdrop-blur-md border ${
+            darkMode
+              ? 'bg-gray-800/80 border-gray-700'
+              : 'bg-white/90 border-gray-200'
+          }`}>
             <div className="flex justify-between items-center mb-4">
               <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'
                 }`}>

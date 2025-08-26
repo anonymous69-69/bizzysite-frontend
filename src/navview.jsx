@@ -113,59 +113,66 @@ export default function NavView() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
+    <div className={`min-h-screen flex flex-col overflow-x-hidden ${
+      darkMode
+        ? 'bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white'
+        : 'bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black'
+    }`}>
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
+        <div className="mb-6 rounded-md p-3">
           <div className="flex justify-between items-center mb-2">
-            <Link
-              to="/signup"
-              className={`text-2xl sm:text-3xl font-bold transition-colors ${darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'}`}
+            <Link 
+              to="/signup" 
+              className={`text-3xl sm:text-4xl font-extrabold ${
+                darkMode
+                  ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent'
+                  : 'text-gray-900'
+              }`}
             >
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
               <div className="relative" ref={menuRef}>
-                <button onClick={() => setShowMenu(!showMenu)} className="focus:outline-none">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="focus:outline-none"
+                >
                   <img
                     src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=4f46e5&color=fff&bold=true`}
                     alt="Profile"
                     className="w-10 h-10 rounded-full"
                   />
                 </button>
-                {showMenu && (
-                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'}`}>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Settings
-                    </Link>
-                  </div>
-                )}
+                <div
+                  className={`absolute right-0 mt-2 w-44 rounded-md shadow-lg z-50 bg-gray-800 text-white border border-gray-700 transform transition-all duration-300 ease-out origin-top-right ${
+                    showMenu ? 'opacity-100 translate-y-0 scale-100 visible' : 'opacity-0 -translate-y-2 scale-95 invisible'
+                  }`}
+                >
+                  <span className="block px-4 py-2 text-sm font-medium pointer-events-none opacity-50">Profile</span>
+                  <div className="border-t border-gray-700"></div>
+                  <Link to="/settings" className="block px-4 py-2 text-sm font-medium hover:bg-gray-700 hover:text-indigo-300">Settings</Link>
+                </div>
               </div>
             </div>
           </div>
-
-          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-            Website Preview
+          <h2 className={`text-xl sm:text-2xl font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
+            {(() => {
+              const hour = new Date().getHours();
+              if (hour >= 5 && hour < 12) return <>🌞 Good Morning, {userName}!</>;
+              if (hour >= 12 && hour < 18) return <>🌤️ Good Afternoon, {userName}!</>;
+              if (hour >= 18 && hour < 22) return <>🌙 Good Evening, {userName}!</>;
+              return <>🌌 Good Night, {userName}!</>;
+            })()} 🚀
           </h2>
-
-          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+          <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full mb-6"></div>
+          <p className="mb-6 sm:mb-8 text-base sm:text-lg text-gray-900 dark:text-gray-400 max-w-2xl">
             Preview and share your online store
           </p>
         </div>
 
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+            <div className="flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-md backdrop-blur-md bg-opacity-70">
               {[
                 { name: 'Setup', icon: '📊', path: '/storefront' },
                 { name: 'Products', icon: '📦', path: '/products' },
@@ -179,12 +186,8 @@ export default function NavView() {
                   key={tab.name}
                   className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
                     activeTab === tab.name
-                      ? darkMode
-                        ? 'bg-indigo-800 text-white'
-                        : 'bg-purple-100 text-indigo-700'
-                      : darkMode
-                        ? 'text-gray-300 hover:text-indigo-300'
-                        : 'text-gray-500 hover:text-indigo-600'
+                      ? 'bg-indigo-800 text-white'
+                      : 'text-white hover:text-indigo-300'
                   }`}
                   onClick={() => setActiveTab(tab.name)}
                 >

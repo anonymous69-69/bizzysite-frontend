@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Toaster } from 'react-hot-toast';
 import { useTheme } from './ThemeContext';
 
 export default function ProductCatalog() {
@@ -305,20 +306,28 @@ export default function ProductCatalog() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
+    <div className={`min-h-screen flex flex-col overflow-x-hidden ${
+      darkMode
+        ? 'bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white'
+        : 'bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black'
+    }`}>
+      <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        {/* Header with dark mode */}
-        <div className={`mb-6 rounded-md p-3 ${darkMode ? 'bg-gray-800' : ''}`}>
+        {/* Header section styled like storefront.jsx */}
+        <div className="mb-6 rounded-md p-3">
           <div className="flex justify-between items-center mb-2">
-            <Link
-              to="/signup"
-              className={`text-2xl sm:text-3xl font-bold transition-colors ${darkMode ? 'text-white hover:text-indigo-300' : 'text-gray-800 hover:text-purple-600'
-                }`}
+            <Link 
+              to="/signup" 
+              className={`text-3xl sm:text-4xl font-extrabold ${
+                darkMode
+                  ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent'
+                  : 'text-gray-900'
+              }`}
             >
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
-            <div className="relative" ref={menuRef}>
+              <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
                   className="focus:outline-none"
@@ -329,45 +338,49 @@ export default function ProductCatalog() {
                     className="w-10 h-10 rounded-full"
                   />
                 </button>
-                {showMenu && (
-                  <div className={`absolute right-0 mt-2 w-40 border rounded-md shadow-lg z-50 dark:text-white ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'
-                    }`}>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Settings
-                    </Link>
-                  </div>
-                )}
+                <div
+                  className={`absolute right-0 mt-2 w-44 rounded-md shadow-lg z-50 bg-gray-800 text-white border border-gray-700 transform transition-all duration-300 ease-out origin-top-right ${
+                    showMenu ? 'opacity-100 translate-y-0 scale-100 visible' : 'opacity-0 -translate-y-2 scale-95 invisible'
+                  }`}
+                >
+                  <span
+                    className="block px-4 py-2 text-sm font-medium text-white bg-opacity-100 pointer-events-none opacity-50"
+                  >
+                    Profile
+                  </span>
+                  <div className="border-t border-gray-700"></div>
+                  <Link
+                    to="/settings"
+                    className="block px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 hover:text-indigo-300 transition-colors"
+                    onClick={() => setShowMenu(false)}
+                  >
+                    Settings
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-
-          <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'
-            }`}>
-            Welcome to your business dashboard
+          <h2 className={`text-xl sm:text-2xl font-semibold mb-2 ${
+            darkMode ? 'text-gray-300' : 'text-gray-900'
+          }`}>
+            {(() => {
+              const hour = new Date().getHours();
+              if (hour >= 5 && hour < 12) return <span className={darkMode ? '' : 'text-gray-900'}>🌞 Good Morning, {userName}!</span>;
+              if (hour >= 12 && hour < 18) return <span className={darkMode ? '' : 'text-gray-900'}>🌤️ Good Afternoon, {userName}!</span>;
+              if (hour >= 18 && hour < 22) return <span className={darkMode ? '' : 'text-gray-900'}>🌙 Good Evening, {userName}!</span>;
+              return <span className={darkMode ? '' : 'text-gray-900'}>🌌 Good Night, {userName}!</span>;
+            })()} <span className={darkMode ? '' : 'text-gray-900'}>🚀</span>
           </h2>
-
-          <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${darkMode ? 'text-gray-400' : 'text-gray-700'
-            }`}>
-            Set up your online store in minutes and start selling today
+          <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full mb-6"></div>
+          <p className="mb-6 sm:mb-8 text-base sm:text-lg text-gray-900 dark:text-gray-400 max-w-2xl">
+            🛠️ Manage your products easily — add, edit, and organize with ease 📦
           </p>
         </div>
 
         {/* Navigation tabs with dark mode */}
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'
-              }`}>
+            <div className="flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
               {[
                 { name: 'Setup', icon: '📊', path: '/storefront' },
                 { name: 'Products', icon: '📦', path: '/products' },
@@ -379,14 +392,15 @@ export default function ProductCatalog() {
                 <Link
                   to={tab.path}
                   key={tab.name}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${activeTab === tab.name
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
+                    activeTab === tab.name
                       ? darkMode
                         ? 'bg-indigo-800 text-white'
                         : 'bg-purple-100 text-indigo-700'
                       : darkMode
                         ? 'text-gray-300 hover:text-indigo-300'
-                        : 'text-gray-500 hover:text-indigo-600'
-                    }`}
+                        : 'text-gray-700 hover:text-indigo-700'
+                  }`}
                   onClick={() => setActiveTab(tab.name)}
                 >
                   <span className="text-lg">{tab.icon}</span>
@@ -442,8 +456,11 @@ export default function ProductCatalog() {
             </button>
           </div>
         ) : products.length === 0 ? (
-          <div className={`rounded-lg shadow p-6 sm:p-8 text-center ${darkMode ? 'bg-gray-800' : 'bg-white'
-            }`}>
+          <div className={`rounded-xl shadow-lg p-6 sm:p-8 text-center backdrop-blur-md border ${
+            darkMode
+              ? 'bg-gray-800/40 border-gray-700 hover:border-indigo-400/60'
+              : 'bg-white/50 border-gray-200 hover:border-indigo-400/60'
+          }`}>
             <div className="max-w-md mx-auto">
               <svg
                 className={`mx-auto h-12 w-12 ${darkMode ? 'text-gray-500' : 'text-gray-400'
@@ -471,7 +488,11 @@ export default function ProductCatalog() {
             {products.map((product) => (
               <div
                 key={product._id}
-                className="bg-white rounded-lg shadow overflow-hidden transition-transform hover:scale-[1.02]"
+                className={`rounded-xl shadow-lg overflow-hidden transition-transform hover:scale-[1.02] backdrop-blur-md border ${
+                  darkMode
+                    ? 'bg-gray-800/40 border-gray-700 hover:border-indigo-400/60'
+                    : 'bg-white/50 border-gray-200 hover:border-indigo-400/60'
+                }`}
               >
                 {/* Image container with reduced padding */}
                 <div className="w-full h-48 sm:h-56 md:h-64 overflow-hidden">
@@ -494,14 +515,15 @@ export default function ProductCatalog() {
 
                 {/* Product info */}
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-                  <p className="text-gray-600 mt-1 text-sm line-clamp-2">{product.description}</p>
+                  <h3 className={`text-lg font-semibold ${darkMode ? 'text-indigo-200' : 'text-gray-800'}`}>{product.name}</h3>
+                  <p className={`mt-1 text-sm line-clamp-2 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{product.description}</p>
                   <div className="mt-3 flex justify-between items-center">
-                    <p className="text-gray-800 font-bold">{product.currency}{product.price}</p>
-                    <span className={`px-2 py-1 text-xs rounded-full ${product.inStock
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                      }`}>
+                    <p className={`font-bold ${darkMode ? 'text-indigo-300' : 'text-gray-800'}`}>{product.currency}{product.price}</p>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      product.inStock
+                        ? darkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'
+                        : darkMode ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800'
+                    }`}>
                       {product.inStock ? 'In Stock' : 'Out of Stock'}
                     </span>
                   </div>
@@ -528,8 +550,11 @@ export default function ProductCatalog() {
         {/* Product Modal */}
         {showProductModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className={`rounded-lg shadow-lg max-w-lg w-full p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'
-              }`}>
+            <div className={`rounded-xl shadow-lg max-w-lg w-full p-6 backdrop-blur-md border ${
+              darkMode
+                ? 'bg-gray-800/40 border-gray-700 hover:border-indigo-400/60'
+                : 'bg-white/50 border-gray-200 hover:border-indigo-400/60'
+            }`}>
               <div className="flex justify-between items-center mb-4">
                 <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'
                   }`}>

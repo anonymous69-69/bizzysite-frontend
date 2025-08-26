@@ -62,20 +62,23 @@ export default function ProfilePage() {
       navigate('/login');
       return;
     }
-
     try {
       setLoading(true);
       setError('');
-      
-      const response = await axios.put('https://bizzysite.onrender.com/api/user', userData, {
-        headers: {
-          'Authorization': `Bearer ${userId}`
+      const response = await axios.put(
+        "https://bizzysite.onrender.com/api/user",
+        {
+          name: userData.name,
+          email: userData.email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userId}`,
+          },
         }
-      });
-
+      );
       localStorage.setItem('userName', userData.name);
       localStorage.setItem('userEmail', userData.email);
-
       toast.success('Profile updated successfully!');
     } catch (err) {
       console.error('Update profile error:', err);
