@@ -107,41 +107,33 @@ const OrderForm = () => {
     }
   };
 
-  // Handle form submission
+  // Handle form submission (support Razorpay and PayPal)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Basic validation
     if (!slug) {
       alert("Store information is missing. Please return to the store and try again.");
       navigate(`/view/${slug}`);
       return;
     }
-  
+
     // Validate form data
     if (!formData.fullName || !formData.phone || !formData.email || !formData.address) {
       alert("Please fill in all required fields (Name, Phone, Email, Address)");
       return;
     }
-  
+
     setIsSubmitting(true);
-  
+
     try {
       // Calculate and validate amount
       const amountInPaise = Math.round(orderTotal * 100);
       if (amountInPaise < 100) {
         throw new Error("Order amount must be at least ₹1 (100 paise)");
       }
-  
-      console.log('Attempting to create Razorpay order with:', {
-        amount: amountInPaise,
-        slug,
-        customer: formData.fullName,
-        cartItems: cart.length,
-        totalItems: cart.reduce((sum, item) => sum + item.quantity, 0)
-      });
-  
-      // Step 1: Create Razorpay Order
+
+      // Step 1: Create Order (backend decides gateway)
       const createOrderRes = await fetch(
         "https://bizzysite.onrender.com/api/create-order",
         {
@@ -157,9 +149,9 @@ const OrderForm = () => {
           }),
         }
       );
-  
+
       const responseData = await createOrderRes.json();
-      
+
       if (!createOrderRes.ok) {
         console.error('Order creation failed:', {
           status: createOrderRes.status,
@@ -170,16 +162,13 @@ const OrderForm = () => {
             customerName: formData.fullName
           }
         });
-        
         throw new Error(
-          responseData.message || 
+          responseData.message ||
           `Payment initialization failed (Status ${createOrderRes.status})`
         );
       }
-  
-      console.log('Razorpay order created:', responseData);
-  
-      // Step 2: Prepare order data for saving
+
+      // Step 2: Prepare order data for saving (for both gateways)
       const orderData = {
         storeId: business?.storeId,
         customer: {
@@ -206,86 +195,150 @@ const OrderForm = () => {
         currency: cart[0]?.currency || "INR",
         status: "Pending",
       };
-  
-      // Step 3: Launch Razorpay Checkout
-      const options = {
-        key: process.env.RAZORPAY_KEY_ID || "rzp_live_QIjpR4yQhX9L3h",
-        amount: responseData.amount,
-        currency: responseData.currency,
-        name: business?.business?.name || "My Store",
-        description: `Order for ${formData.fullName}`,
-        order_id: responseData.id,
-        handler: async function (response) {
-          try {
-            console.log('Payment successful:', response);
-            
-            // Save order with payment details
-            const orderToSave = {
-              ...orderData,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpayOrderId: responseData.id,
-              status: "Confirmed",
-              paid: true
-            };
-  
-            const saveRes = await fetch(
-              "https://bizzysite.onrender.com/api/orders",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(orderToSave),
+
+      // Step 3: Handle gateway-specific logic
+      if (responseData.gateway === "razorpay") {
+        // Razorpay checkout flow (existing logic)
+        const options = {
+          key: process.env.RAZORPAY_KEY_ID || "rzp_live_QIjpR4yQhX9L3h",
+          amount: responseData.amount,
+          currency: responseData.currency,
+          name: business?.business?.name || "My Store",
+          description: `Order for ${formData.fullName}`,
+          order_id: responseData.id,
+          handler: async function (response) {
+            try {
+              // Save order with payment details
+              const orderToSave = {
+                ...orderData,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpayOrderId: responseData.id,
+                status: "Confirmed",
+                paid: true
+              };
+              const saveRes = await fetch(
+                "https://bizzysite.onrender.com/api/orders",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(orderToSave),
+                }
+              );
+              if (!saveRes.ok) {
+                throw new Error("Failed to save order details");
               }
-            );
-  
-            if (!saveRes.ok) {
-              throw new Error("Failed to save order details");
+              localStorage.removeItem('cart');
+              setShowSuccessModal(true);
+            } catch (saveError) {
+              console.error("Order save failed:", saveError);
+              alert("Payment was successful but we couldn't save your order details. Please contact support with your payment ID.");
             }
-  
-            // Clear cart and show success
-            localStorage.removeItem('cart');
-            setShowSuccessModal(true);
-          } catch (saveError) {
-            console.error("Order save failed:", saveError);
-            alert("Payment was successful but we couldn't save your order details. Please contact support with your payment ID.");
-          }
-        },
-        prefill: {
-          name: formData.fullName,
-          email: formData.email,
-          contact: formData.phone,
-        },
-        notes: {
-          slug: slug,
-          customerName: formData.fullName,
-          storeName: business?.business?.name || "Unknown Store"
-        },
-        theme: {
-          color: "#6366F1"
-        },
-      };
-  
-      // Load Razorpay script if not already loaded
-      if (!window.Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onerror = () => {
-          throw new Error("Failed to load Razorpay checkout");
+          },
+          prefill: {
+            name: formData.fullName,
+            email: formData.email,
+            contact: formData.phone,
+          },
+          notes: {
+            slug: slug,
+            customerName: formData.fullName,
+            storeName: business?.business?.name || "Unknown Store"
+          },
+          theme: {
+            color: "#6366F1"
+          },
         };
-        document.body.appendChild(script);
-      }
-  
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', (response) => {
-        console.error('Payment failed details:', {
-          error: response.error,
-          metadata: response.error.metadata
+        // Load Razorpay script if not already loaded
+        if (!window.Razorpay) {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onerror = () => {
+            throw new Error("Failed to load Razorpay checkout");
+          };
+          document.body.appendChild(script);
+        }
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', (response) => {
+          alert(`Payment failed: ${response.error.description}\nError code: ${response.error.code}`);
         });
-        alert(`Payment failed: ${response.error.description}\nError code: ${response.error.code}`);
-      });
-      rzp.open();
-  
+        rzp.open();
+      } else if (responseData.gateway === "paypal") {
+        // PayPal checkout flow
+        // Load PayPal JS SDK if not already present
+        const PAYPAL_CLIENT_ID = responseData.paypalClientId || "sb";
+        const currency = responseData.currency || "USD";
+        const loadPayPalScript = () => {
+          return new Promise((resolve, reject) => {
+            if (window.paypal) return resolve();
+            const script = document.createElement("script");
+            script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=${currency}`;
+            script.async = true;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.body.appendChild(script);
+          });
+        };
+        // Remove any existing PayPal button
+        const paypalContainer = document.getElementById("paypal-button-container");
+        if (paypalContainer) paypalContainer.innerHTML = "";
+        // Show PayPal button
+        await loadPayPalScript();
+        if (window.paypal && paypalContainer) {
+          window.paypal.Buttons({
+            createOrder: (data, actions) => {
+              // Use order id provided by backend, not create a new one
+              return responseData.id;
+            },
+            onApprove: async (data, actions) => {
+              try {
+                // Capture PayPal order via backend
+                const captureRes = await fetch(
+                  "https://bizzysite.onrender.com/api/capture-paypal-order",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderID: data.orderID }),
+                  }
+                );
+                if (!captureRes.ok) {
+                  throw new Error("Failed to capture PayPal order");
+                }
+                // Save order with PayPal details
+                const orderToSave = {
+                  ...orderData,
+                  paypalOrderId: data.orderID,
+                  status: "Confirmed",
+                  paid: true
+                };
+                const saveRes = await fetch(
+                  "https://bizzysite.onrender.com/api/orders",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(orderToSave),
+                  }
+                );
+                if (!saveRes.ok) {
+                  throw new Error("Failed to save order details");
+                }
+                localStorage.removeItem('cart');
+                setShowSuccessModal(true);
+              } catch (err) {
+                alert("Payment was successful but we couldn't save your order details. Please contact support with your payment ID.");
+              }
+            },
+            onError: (err) => {
+              alert("PayPal payment failed: " + err);
+            }
+          }).render("#paypal-button-container");
+        } else {
+          alert("Failed to load PayPal payment system. Please refresh and try again.");
+        }
+      } else {
+        throw new Error("Unknown payment gateway.");
+      }
+
     } catch (err) {
-      console.error("Payment processing error:", err);
       alert(`Payment failed: ${err.message}\n\nPlease try again or contact support.`);
     } finally {
       setIsSubmitting(false);
@@ -583,6 +636,8 @@ useEffect(() => {
               >
                 {isSubmitting ? "Processing..." : "Proceed to Pay"}
               </button>
+              {/* PayPal Button container (shown only if PayPal is selected) */}
+              <div id="paypal-button-container" className="mt-4"></div>
             </form>
           </div>
 
