@@ -1,11 +1,49 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from './ThemeContext';
 import toast, { Toaster } from 'react-hot-toast';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+
+// Helper: showToast function (with dismiss button)
+const showToast = (type, message, options = {}) => {
+  const config = { duration: 4000, ...options };
+
+  if (type === "success") {
+    toast.success(
+      (t) => (
+        <div className="flex items-center justify-between">
+          <span>{message}</span>
+          <button
+            className="ml-3 text-sm text-gray-300 hover:text-white"
+            onClick={() => toast.dismiss(t.id)}
+          >
+            ✕
+          </button>
+        </div>
+      ),
+      config
+    );
+  } else {
+    toast.error(
+      (t) => (
+        <div className="flex items-center justify-between">
+          <span>{message}</span>
+          <button
+            className="ml-3 text-sm text-gray-300 hover:text-white"
+            onClick={() => toast.dismiss(t.id)}
+          >
+            ✕
+          </button>
+        </div>
+      ),
+      config
+    );
+  }
+};
 
 export default function BusinessDashboard() {
   const theme = useTheme() || {};
   const { darkMode } = theme;
+  const location = useLocation();
   const navigate = useNavigate();
   const menuRef = useRef(null);
   const [businessInfo, setBusinessInfo] = useState({
@@ -74,6 +112,7 @@ export default function BusinessDashboard() {
     };
   }, []);
 
+
   const fetchBusinessInfo = async (storeId) => {
     try {
       const userId = localStorage.getItem("userId");
@@ -106,7 +145,7 @@ export default function BusinessDashboard() {
       }));
     } catch (err) {
       console.error('Failed to fetch business info:', err);
-      toast.error('Failed to load store information');
+      showToast("error", "Failed to load store information");
     }
   };
 
@@ -187,10 +226,10 @@ export default function BusinessDashboard() {
         if (updated.phone) localStorage.setItem('businessPhone', updated.phone);
       }
   
-      toast.success('Business information saved successfully!');
+      showToast("success", "Business information saved successfully!");
     } catch (err) {
       setError(`Save failed: ${err.message}`);
-      toast.error(`Save failed: ${err.message}`);
+      showToast("error", `Save failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -225,7 +264,10 @@ export default function BusinessDashboard() {
         ? 'bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white'
         : 'bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black'
     }`}>
-      <Toaster position="top-right" />
+      <Toaster
+        position="top-right"
+        toastOptions={{ duration: 4000 }}
+      />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 flex-grow w-full">
         {error && (
           <div className={`border rounded mb-6 px-4 py-3 ${darkMode ? 'bg-red-900 border-red-700 text-red-100' : 'bg-red-100 border-red-400 text-red-700'}`}>

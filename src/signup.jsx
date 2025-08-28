@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { TypeAnimation } from "react-type-animation";
-import toast, { Toaster } from "react-hot-toast";
+
+
 import { Link, useNavigate } from "react-router-dom";
 import { auth, provider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
@@ -24,12 +25,12 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (!isLogin && (!name || !email || !password)) {
-    toast.error("Please fill all required fields");
+    // showToast removed
     return;
   }
 
   if (!isLogin && password.length < 6) {
-    toast.error("Password must be at least 6 characters");
+    // showToast removed
     return;
   }
 
@@ -104,20 +105,18 @@ const handleSubmit = async (e) => {
           body: JSON.stringify({ email, name }),
         });
       } catch (error) {
-        toast.error("Failed to initialize your store. Please try again.");
+        // showToast removed
         setIsLoading(false);
         return;
       }
     }
 
-    toast.success(data.message || (isLogin ? "Login successful" : "Signup successful"));
+    // showToast removed
     setIsLoading(false);
     setShowModal(false);
-    navigate("/storefront");
+    navigate("/storefront", { state: { fromLogin: true } });
   } catch (error) {
-    toast.error(
-      error.message || "Registration failed. Please check your details and try again."
-    );
+    // showToast removed
     setIsLoading(false);
   }
 };
@@ -145,7 +144,7 @@ const handleSubmit = async (e) => {
         </div>
       </div>
 
-      <Toaster position="top-right" />
+
 
       {/* Header - Dark Theme */}
       <header className="fixed w-full bg-gray-900/80 backdrop-blur-md shadow-sm z-30 border-b border-gray-800">
@@ -722,12 +721,12 @@ const handleSubmit = async (e) => {
                         localStorage.setItem("userPhone", data.phone || "");
                         localStorage.setItem("userRole", "vendor");
 
-                        toast.success(data.message || "Signed in with Google");
+                        // showToast removed
                         setShowModal(false);
-                        navigate("/storefront");
+                        navigate("/storefront", { state: { fromLogin: true } });
                       } catch (error) {
                         console.error(error);
-                        toast.error(error.message || "Google sign-in failed");
+                        // showToast removed
                       }
                     }}
                     className="w-full inline-flex items-center justify-center gap-3 px-4 py-2 border border-gray-700 rounded-md bg-gray-800/70 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
@@ -821,7 +820,7 @@ const handleSubmit = async (e) => {
             type="button"
             onClick={async () => {
               if (!resetEmail) {
-                toast.error("Please enter your email address");
+                // showToast removed
                 return;
               }
               
@@ -839,11 +838,11 @@ const handleSubmit = async (e) => {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || "Something went wrong");
                 
-                toast.success("Password reset email sent. Please check your inbox.");
+                // showToast removed
                 setShowForgotPasswordModal(false);
                 setResetEmail("");
               } catch (err) {
-                toast.error(err.message);
+                // showToast removed
               } finally {
                 setIsSendingReset(false);
               }
@@ -865,3 +864,4 @@ const handleSubmit = async (e) => {
     </div>
   );
 }
+

@@ -31,6 +31,7 @@ const ProductSkeleton = ({ layout }) => {
   );
 };
 
+// IMPORTANT: Ensure your Route uses key={slug} for full component remount per store.
 const ViewSite = () => {
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,6 +41,11 @@ const ViewSite = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [cart, setCart] = useState([]);
   const { slug } = useParams(); // Added storeId state
+  console.log("[ViewSite] Mounted with slug:", slug);
+  if (!slug) {
+    console.error("[ViewSite] No slug found in URL!");
+  }
+  const CART_KEY = `cart_${slug}`;
   const navigate = useNavigate();
   const [textColor, setTextColor] = useState("white");
 
@@ -89,8 +95,9 @@ const ViewSite = () => {
     fetchBusiness();
   }, [slug]);
 
-  // Add to cart function (syncs to localStorage 'cart')
+  // Add to cart function (syncs to localStorage per-store cart)
   const addToCart = (product) => {
+    console.log("[Cart] Operation:", "addToCart", "Slug:", slug, "Key:", CART_KEY);
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item._id === product._id);
       const updatedCart = existingItem
@@ -100,13 +107,14 @@ const ViewSite = () => {
               : item
           )
         : [...prevCart, { ...product, quantity: 1 }];
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      localStorage.setItem(CART_KEY, JSON.stringify(updatedCart));
       return updatedCart;
     });
   };
 
-  // Update quantity function (syncs to localStorage 'cart')
+  // Update quantity function (syncs to localStorage per-store cart)
   const updateQuantity = (productId, newQuantity) => {
+    console.log("[Cart] Operation:", "updateQuantity", "Slug:", slug, "Key:", CART_KEY);
     if (newQuantity < 1) {
       removeFromCart(productId);
       return;
@@ -115,26 +123,41 @@ const ViewSite = () => {
       const updatedCart = prevCart.map((item) =>
         item._id === productId ? { ...item, quantity: newQuantity } : item
       );
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      localStorage.setItem(CART_KEY, JSON.stringify(updatedCart));
       return updatedCart;
     });
   };
   
 
  
-  // Initialize cart from localStorage 'cart'
+  // Initialize cart from localStorage per-store cart when slug changes
   useEffect(() => {
-    const storedCart = localStorage.getItem('cart');
+    console.log("[Cart] Slug changed. Forcing hard reset for slug:", slug);
+    setCart([]); // Clear previous cart immediately
+    const storedCart = localStorage.getItem(CART_KEY);
     if (storedCart) {
+      console.log("[Cart] Loaded cart for this slug:", storedCart);
       setCart(JSON.parse(storedCart));
+    } else {
+      console.log("[Cart] No cart found for this slug");
+      setCart([]);
     }
-  }, []);
+  }, [slug]);
 
-  // Remove from cart function (syncs to localStorage 'cart')
+  // Cleanup effect to ensure any pending state resets when slug changes
+  useEffect(() => {
+    return () => {
+      console.log("[ViewSite] Component unmounting or slug changing. Clearing cart state.");
+      setCart([]);
+    };
+  }, [slug]);
+
+  // Remove from cart function (syncs to localStorage per-store cart)
   const removeFromCart = (productId) => {
+    console.log("[Cart] Operation:", "removeFromCart", "Slug:", slug, "Key:", CART_KEY);
     setCart((prevCart) => {
       const updatedCart = prevCart.filter((item) => item._id !== productId);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      localStorage.setItem(CART_KEY, JSON.stringify(updatedCart));
       return updatedCart;
     });
   };
@@ -254,10 +277,12 @@ const ViewSite = () => {
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <div
-      className="min-h-screen flex flex-col relative overflow-x-hidden"
-      style={{ fontFamily }}
-    >
+    <>
+      <div
+        key={slug}
+        className="min-h-screen flex flex-col relative overflow-x-hidden"
+        style={{ fontFamily }}
+      >
       {/* Mobile Menu Overlay */}
       <div
         className={`fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity duration-300 ${
@@ -815,7 +840,8 @@ const ViewSite = () => {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -21,6 +21,7 @@ import Profile from './profile';
 import ResetPassword from './resetpassword';
 import Settings from './settings';
 
+
 /**
  * A reusable component to protect routes that require authentication.
  * It checks if a 'userId' exists in localStorage.
@@ -55,10 +56,9 @@ function App() {
           <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
           <Route path="/:slug/product/:productId" element={<InProduct />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/store/:storeName" element={<ViewSite />} />
-          <Route path="/store/:slug" element={<ViewSite />} />
+        <Route path="/store/:slug" element={<ViewSite />} />
           <Route path="/order/:slug" element={<OrderForm />} />
-          <Route path="/:slug" element={<ViewSite />} />
+        <Route path="/:slug" element={<ViewSite />} />
           <Route path="/preview" element={<ViewSite />} />
 
 
