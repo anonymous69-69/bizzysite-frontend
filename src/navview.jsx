@@ -109,7 +109,13 @@ export default function NavView() {
       toast.error('Please set up your business name first');
       return;
     }
-    window.open(`https://bizzysite.shop/${slugToUse}`, '_blank');
+
+    const baseURL =
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:3000"
+        : "https://bizzysite.shop";
+
+    window.open(`${baseURL}/${slugToUse}`, "_blank");
   };
 
   return (

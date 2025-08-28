@@ -277,9 +277,8 @@ const ViewSite = () => {
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <>
+    <React.Fragment key={slug}>
       <div
-        key={slug}
         className="min-h-screen flex flex-col relative overflow-x-hidden"
         style={{ fontFamily }}
       >
@@ -841,7 +840,7 @@ const ViewSite = () => {
         </div>
       </footer>
       </div>
-    </>
+    </React.Fragment>
   );
 };
 
