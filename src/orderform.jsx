@@ -89,7 +89,7 @@ const OrderForm = () => {
             ...prev,
             city: locationInfo.District,
             state: locationInfo.State,
-            country: "India",
+            country: "IN",
           }));
         }
       } catch (err) {
@@ -107,7 +107,7 @@ const OrderForm = () => {
     }
   };
 
-  // Handle form submission (Dodo Payments only)
+  // Handle form submission (Cashfree Payments)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -127,27 +127,66 @@ const OrderForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Prepare payload for Dodo Payments
+      // Map symbols to ISO currency codes
+      const currencyMap = {
+        "₹": "INR",
+        "$": "USD",
+        "€": "EUR",
+        "£": "GBP",
+        "¥": "JPY",
+        "₩": "KRW",
+        "₽": "RUB",
+        "A$": "AUD",
+        "C$": "CAD",
+        "S$": "SGD",
+        "฿": "THB",
+        "₫": "VND",
+        "₱": "PHP",
+        "R$": "BRL",
+        "₴": "UAH",
+        "₦": "NGN",
+        "₵": "GHS",
+        "د.إ": "AED",
+        "﷼": "SAR",
+      };
+      const symbol = cart[0]?.currency || "₹";
+      const currencyCode = currencyMap[symbol] || symbol || "INR";
+      // Prepare payload for Cashfree Payments
       const payload = {
-        product_id: cart[0]?.id || "custom_product",
-        quantity: cart[0]?.quantity || 1,
+        orderId: `order_${Date.now()}`,
+        amount: orderTotal,
+        currency: currencyCode,
         customer: {
+          id: `${Date.now()}`,
           name: formData.fullName,
           email: formData.email,
           phone: formData.phone,
         },
       };
 
-      const res = await fetch("/api/create-dodo-payment", {
+      const API_BASE = process.env.NODE_ENV === "production"
+        ? "https://bizzysite.onrender.com"
+        : "http://localhost:5050";
+
+      const res = await fetch(`${API_BASE}/api/create-cashfree-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (res.ok && data.paymentLink) {
-        window.location.href = data.paymentLink;
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        const text = await res.text();
+        throw new Error(`Server returned ${res.status}: ${text || "Invalid JSON response"}`);
+      }
+
+      if (res.ok && data.payment_link) {
+        // Redirect to Cashfree payment link
+        window.location.href = data.payment_link;
       } else {
-        throw new Error(data.message || "Failed to initiate payment.");
+        throw new Error(data.message || `Request failed with status ${res.status}`);
       }
     } catch (err) {
       alert(`Payment failed: ${err.message}\n\nPlease try again or contact support.`);
@@ -155,7 +194,7 @@ const OrderForm = () => {
     }
   };
 
-  // (No payment gateway script loading required for Dodo Payments)
+  // (No payment gateway script loading required for Cashfree Payments)
 
   // Handle missing cart or state data
   if (!cart || cart.length === 0 || !location.state) {
@@ -387,15 +426,118 @@ const OrderForm = () => {
                       >
                         Country *
                       </label>
-                      <input
-                        type="text"
+                      <select
                         id="country"
                         name="country"
                         value={formData.country}
                         onChange={handleChange}
                         required
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
+                      >
+                        <option value="">Select Country</option>
+                        {/* Asia */}
+                        <option value="IN">India</option>
+                        <option value="AE">United Arab Emirates</option>
+                        <option value="SA">Saudi Arabia</option>
+                        <option value="SG">Singapore</option>
+                        <option value="MY">Malaysia</option>
+                        <option value="ID">Indonesia</option>
+                        <option value="TH">Thailand</option>
+                        <option value="PH">Philippines</option>
+                        <option value="VN">Vietnam</option>
+                        <option value="BD">Bangladesh</option>
+                        <option value="PK">Pakistan</option>
+                        <option value="LK">Sri Lanka</option>
+                        <option value="NP">Nepal</option>
+                        <option value="BH">Bahrain</option>
+                        <option value="KW">Kuwait</option>
+                        <option value="QA">Qatar</option>
+                        <option value="OM">Oman</option>
+                        <option value="TR">Turkey</option>
+                        <option value="IL">Israel</option>
+                        <option value="CN">China</option>
+                        <option value="HK">Hong Kong</option>
+                        <option value="TW">Taiwan</option>
+                        <option value="JP">Japan</option>
+                        <option value="KR">South Korea</option>
+
+                        {/* Europe */}
+                        <option value="GB">United Kingdom</option>
+                        <option value="IE">Ireland</option>
+                        <option value="DE">Germany</option>
+                        <option value="FR">France</option>
+                        <option value="IT">Italy</option>
+                        <option value="ES">Spain</option>
+                        <option value="PT">Portugal</option>
+                        <option value="NL">Netherlands</option>
+                        <option value="BE">Belgium</option>
+                        <option value="LU">Luxembourg</option>
+                        <option value="AT">Austria</option>
+                        <option value="CH">Switzerland</option>
+                        <option value="SE">Sweden</option>
+                        <option value="NO">Norway</option>
+                        <option value="DK">Denmark</option>
+                        <option value="FI">Finland</option>
+                        <option value="PL">Poland</option>
+                        <option value="CZ">Czechia</option>
+                        <option value="SK">Slovakia</option>
+                        <option value="HU">Hungary</option>
+                        <option value="RO">Romania</option>
+                        <option value="BG">Bulgaria</option>
+                        <option value="GR">Greece</option>
+                        <option value="HR">Croatia</option>
+                        <option value="SI">Slovenia</option>
+                        <option value="LT">Lithuania</option>
+                        <option value="LV">Latvia</option>
+                        <option value="EE">Estonia</option>
+                        <option value="IS">Iceland</option>
+                        <option value="UA">Ukraine</option>
+                        <option value="RU">Russia</option>
+
+                        {/* Americas */}
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="MX">Mexico</option>
+                        <option value="BR">Brazil</option>
+                        <option value="AR">Argentina</option>
+                        <option value="CL">Chile</option>
+                        <option value="CO">Colombia</option>
+                        <option value="PE">Peru</option>
+                        <option value="EC">Ecuador</option>
+                        <option value="UY">Uruguay</option>
+                        <option value="PY">Paraguay</option>
+                        <option value="BO">Bolivia</option>
+                        <option value="VE">Venezuela</option>
+                        <option value="CR">Costa Rica</option>
+                        <option value="PA">Panama</option>
+                        <option value="GT">Guatemala</option>
+                        <option value="HN">Honduras</option>
+                        <option value="NI">Nicaragua</option>
+                        <option value="SV">El Salvador</option>
+                        <option value="DO">Dominican Republic</option>
+                        <option value="PR">Puerto Rico</option>
+                        <option value="JM">Jamaica</option>
+                        <option value="TT">Trinidad and Tobago</option>
+
+                        {/* Africa */}
+                        <option value="ZA">South Africa</option>
+                        <option value="EG">Egypt</option>
+                        <option value="MA">Morocco</option>
+                        <option value="DZ">Algeria</option>
+                        <option value="TN">Tunisia</option>
+                        <option value="KE">Kenya</option>
+                        <option value="NG">Nigeria</option>
+                        <option value="GH">Ghana</option>
+                        <option value="TZ">Tanzania</option>
+                        <option value="UG">Uganda</option>
+                        <option value="ET">Ethiopia</option>
+
+                        {/* Oceania */}
+                        <option value="AU">Australia</option>
+                        <option value="NZ">New Zealand</option>
+                        <option value="FJ">Fiji</option>
+                        <option value="PG">Papua New Guinea</option>
+                      </select>
                     </div>
                   </div>
                 </div>
