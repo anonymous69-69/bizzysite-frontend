@@ -184,26 +184,15 @@ const OrderForm = () => {
 
       if (res.ok) {
         if (data.payment_session_id) {
-          // Dynamically load Cashfree SDK if not loaded (optional: could check window.Cashfree)
-          if (typeof window.Cashfree === "undefined") {
-            // If not loaded, load script and then continue (not strictly required if already loaded)
-            const script = document.createElement("script");
-            script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
-            script.onload = () => {
-              const cashfree = new window.Cashfree();
-              cashfree.checkout({
-                paymentSessionId: data.payment_session_id,
-                redirectTarget: "_self"
-              });
-            };
-            document.body.appendChild(script);
-          } else {
-            const cashfree = new window.Cashfree();
-            cashfree.checkout({
-              paymentSessionId: data.payment_session_id,
-              redirectTarget: "_self"
-            });
-          }
+          // Cashfree SDK is always preloaded. Just use it directly.
+          const mode =
+            process.env.NODE_ENV === "production" ? "PROD" : "TEST";
+          console.log("Initializing Cashfree checkout with session ID:", data.payment_session_id);
+          const cashfree = new window.Cashfree({ mode });
+          cashfree.checkout({
+            paymentSessionId: data.payment_session_id,
+            redirectTarget: "_self"
+          });
         } else {
           console.error("Unexpected Cashfree response (missing payment_session_id):", data);
           throw new Error("No payment_session_id returned from Cashfree");
