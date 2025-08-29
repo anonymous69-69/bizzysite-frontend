@@ -183,16 +183,30 @@ const OrderForm = () => {
       }
 
       if (res.ok) {
-        const paymentLink =
-          data.payment_link ||
-          data?.order?.payment_link ||
-          data?.data?.payment_link; // fallback in case it's nested
-
-        if (paymentLink) {
-          window.location.href = paymentLink; // ✅ redirect to Cashfree checkout
+        if (data.payment_session_id) {
+          // Dynamically load Cashfree SDK if not loaded (optional: could check window.Cashfree)
+          if (typeof window.Cashfree === "undefined") {
+            // If not loaded, load script and then continue (not strictly required if already loaded)
+            const script = document.createElement("script");
+            script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+            script.onload = () => {
+              const cashfree = new window.Cashfree();
+              cashfree.checkout({
+                paymentSessionId: data.payment_session_id,
+                redirectTarget: "_self"
+              });
+            };
+            document.body.appendChild(script);
+          } else {
+            const cashfree = new window.Cashfree();
+            cashfree.checkout({
+              paymentSessionId: data.payment_session_id,
+              redirectTarget: "_self"
+            });
+          }
         } else {
-          console.error("Unexpected Cashfree response:", data);
-          throw new Error("No payment link returned from Cashfree");
+          console.error("Unexpected Cashfree response (missing payment_session_id):", data);
+          throw new Error("No payment_session_id returned from Cashfree");
         }
       } else {
         throw new Error(data.message || `Request failed with status ${res.status}`);
