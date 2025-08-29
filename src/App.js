@@ -12,6 +12,7 @@ import Customize from './customize';
 import Products from './products';
 import Orders from './orders';
 import Signup from './signup';
+import WaitlistPage from './waitlist';
 import ViewSite from './viewsite';
 import Payment from './payments';
 import InProduct from './inproduct';
@@ -47,7 +48,7 @@ function App() {
         <Routes>
           {/* --- Public Routes --- */}
           {/* These routes are accessible to everyone, logged in or not. */}
-          <Route path="/" element={<Signup />} />
+          <Route path="/" element={<WaitlistPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/site/:storeId" element={<ViewSite />} />
           <Route path="/product/:id" element={<InProduct />} />
