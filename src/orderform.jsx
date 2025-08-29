@@ -186,13 +186,19 @@ const OrderForm = () => {
         if (data.payment_session_id) {
           // Cashfree SDK is always preloaded. Just use it directly.
           const mode =
-            process.env.NODE_ENV === "production" ? "PROD" : "TEST";
+            process.env.NODE_ENV === "production" ? "production" : "sandbox";
           console.log("Initializing Cashfree checkout with session ID:", data.payment_session_id);
           const cashfree = new window.Cashfree({ mode });
-          cashfree.checkout({
-            paymentSessionId: data.payment_session_id,
-            redirectTarget: "_self"
-          });
+          try {
+            await cashfree.checkout({
+              paymentSessionId: data.payment_session_id,
+              redirectTarget: "_self"
+            });
+          } catch (checkoutErr) {
+            console.error("Cashfree checkout failed:", checkoutErr);
+            setIsSubmitting(false);
+            return;
+          }
         } else {
           console.error("Unexpected Cashfree response (missing payment_session_id):", data);
           throw new Error("No payment_session_id returned from Cashfree");
