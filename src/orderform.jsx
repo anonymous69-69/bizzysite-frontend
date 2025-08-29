@@ -183,8 +183,13 @@ const OrderForm = () => {
       }
 
       if (res.ok) {
-        if (data.payment_link) {
-          window.location.href = data.payment_link; // redirect to Cashfree checkout
+        const paymentLink =
+          data.payment_link ||
+          data?.order?.payment_link ||
+          data?.data?.payment_link; // fallback in case it's nested
+
+        if (paymentLink) {
+          window.location.href = paymentLink; // ✅ redirect to Cashfree checkout
         } else {
           console.error("Unexpected Cashfree response:", data);
           throw new Error("No payment link returned from Cashfree");
