@@ -160,7 +160,7 @@ const OrderForm = () => {
           id: `${Date.now()}`,
           name: formData.fullName,
           email: formData.email,
-          phone: formData.phone,
+          phone: formData.phone.replace(/\D/g, "") || "9999999999",
         },
       };
 
@@ -182,9 +182,13 @@ const OrderForm = () => {
         throw new Error(`Server returned ${res.status}: ${text || "Invalid JSON response"}`);
       }
 
-      if (res.ok && data.payment_link) {
-        // Redirect to Cashfree payment link
-        window.location.href = data.payment_link;
+      if (res.ok) {
+        if (data.payment_link) {
+          window.location.href = data.payment_link; // redirect to Cashfree checkout
+        } else {
+          console.error("Unexpected Cashfree response:", data);
+          throw new Error("No payment link returned from Cashfree");
+        }
       } else {
         throw new Error(data.message || `Request failed with status ${res.status}`);
       }
