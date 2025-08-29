@@ -15,10 +15,16 @@ export default function WaitlistPage() {
     if (!waitlistEmail) return;
     setIsSubmittingWaitlist(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      // Here you would typically send the email to your backend
-      console.log("Waitlist email:", waitlistEmail);
+      const response = await fetch("https://bizzysite.onrender.com/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: waitlistEmail }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed with status ${response.status}`);
+      }
+
       setWaitlistSuccess(true);
       setTimeout(() => {
         setShowWaitlistModal(false);
@@ -27,6 +33,7 @@ export default function WaitlistPage() {
       }, 2000);
     } catch (error) {
       console.error("Error submitting to waitlist:", error);
+      alert("Failed to join waitlist. Please try again later.");
     } finally {
       setIsSubmittingWaitlist(false);
     }
