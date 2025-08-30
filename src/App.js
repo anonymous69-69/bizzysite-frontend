@@ -49,6 +49,7 @@ function App() {
           {/* --- Public Routes --- */}
           {/* These routes are accessible to everyone, logged in or not. */}
           <Route path="/" element={<WaitlistPage />} />
+          <Route path="/admin-login" element={<Signup />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/site/:storeId" element={<ViewSite />} />
           <Route path="/product/:id" element={<InProduct />} />
