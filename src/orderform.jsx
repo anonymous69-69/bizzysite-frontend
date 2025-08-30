@@ -194,6 +194,39 @@ const OrderForm = () => {
               paymentSessionId: data.payment_session_id,
               redirectTarget: "_self"
             });
+            // Save order to backend after successful checkout
+            try {
+              const orderRes = await fetch(`${API_BASE}/api/orders`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  storeId: business?._id,
+                  items: cart,
+                  total: total,
+                  shippingCharge: shippingCharge,
+                  customer: {
+                    name: formData.fullName,
+                    instagramId: formData.instagramId,
+                    phone: formData.phone,
+                    email: formData.email,
+                    address: formData.address,
+                    city: formData.city,
+                    state: formData.state,
+                    pincode: formData.pincode,
+                    country: formData.country,
+                    specialNote: formData.specialNote,
+                  },
+                }),
+              });
+
+              if (orderRes.ok) {
+                setShowSuccessModal(true);
+              } else {
+                console.error("Failed to save order:", await orderRes.text());
+              }
+            } catch (saveErr) {
+              console.error("Error saving order:", saveErr);
+            }
           } catch (checkoutErr) {
             console.error("Cashfree checkout failed:", checkoutErr);
             setIsSubmitting(false);
