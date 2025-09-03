@@ -22,6 +22,11 @@ export default function ProductCatalog() {
     images: [],
     inStock: true
   });
+
+  // Store currency state
+  const [storeCurrency, setStoreCurrency] = useState('USD');
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [tempCurrency, setTempCurrency] = useState(storeCurrency);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [activeTab, setActiveTab] = useState('Products');
   const [storeId, setStoreId] = useState('');
@@ -34,7 +39,6 @@ export default function ProductCatalog() {
   const [showMenu, setShowMenu] = useState(false);
 
   const menuRef = useRef(null);
-
 
   // FIXED: Updated API endpoint and headers
   const fetchProducts = useCallback(async (storeId, userId) => {
@@ -51,6 +55,9 @@ export default function ProductCatalog() {
       // FIX: Corrected data path to products array
       const products = response.data?.products || [];
       setProducts(Array.isArray(products) ? products : []);
+      // Set currency from backend, fallback to USD
+      const businessData = response.data;
+      setStoreCurrency(businessData.defaultCurrency || businessData.currency || 'USD');
     } catch (err) {
       console.error('Fetch products error:', err);
       setError(err.response?.data?.message || 'Failed to load products');
@@ -111,7 +118,7 @@ export default function ProductCatalog() {
       description: '',
       images: [],
       inStock: true,
-      currency: '₹'
+      currency: storeCurrency
     });
     setImagePreviews([]);
     setImageUploadError('');
@@ -137,7 +144,7 @@ export default function ProductCatalog() {
       description: '',
       images: [],
       inStock: true,
-      currency: '₹'
+      currency: storeCurrency
     });
     setImagePreviews([]);
     setImageUploadError('');
@@ -236,6 +243,7 @@ export default function ProductCatalog() {
         ? products.map(p => p._id === currentProduct._id ? productData : p)
         : [...products, productData];
 
+      // Save products
       await axios.put(`${API_BASE_URL}/business`, {
         type: 'products',
         data: updatedProducts
@@ -275,7 +283,7 @@ export default function ProductCatalog() {
       setIsLoading(false);
     }
   };
-
+  
   // FIXED: Added storeId to headers
   const handleDeleteProduct = async (productId) => {
     if (!window.confirm('Delete this product permanently?')) return;
@@ -304,6 +312,27 @@ export default function ProductCatalog() {
       setIsLoading(false);
     }
   };
+
+  // Save currency handler (fixed to use "settings" type)
+  async function handleCurrencySave(currencyToSave = storeCurrency) {
+    try {
+      await axios.put(`${API_BASE_URL}/business`, {
+        type: "settings",
+        data: { defaultCurrency: currencyToSave },
+      }, {
+        headers: {
+          Authorization: `Bearer ${userId}`,
+          "x-store-id": storeId,
+          "Content-Type": "application/json",
+        },
+      });
+      setStoreCurrency(currencyToSave);
+      toast.success("Currency saved successfully!");
+    } catch (error) {
+      console.error("Failed to save currency", error);
+      toast.error("Failed to save currency.");
+    }
+  }
 
   return (
     <div className={`min-h-screen flex flex-col overflow-x-hidden ${
@@ -423,12 +452,34 @@ export default function ProductCatalog() {
               Manage your products and inventory
             </p>
           </div>
-          <button
-            onClick={handleAddProductClick}
-            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center text-sm sm:text-base w-fit"
-          >
-            <span className="text-xl mr-1">+</span> Add Product
-          </button>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} text-sm font-medium`}>
+                Currency:
+              </label>
+              <select
+                value={storeCurrency}
+                onChange={(e) => {
+                  setTempCurrency(e.target.value);
+                  setShowCurrencyModal(true);
+                }}
+                className={`px-3 py-2 border rounded text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+              >
+                <option value="USD">USD ($)</option>
+                <option value="INR">INR (₹)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="AUD">AUD (A$)</option>
+                <option value="CAD">CAD (C$)</option>
+              </select>
+            </div>
+            <button
+              onClick={handleAddProductClick}
+              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center text-sm sm:text-base w-fit"
+            >
+              <span className="text-xl mr-1">+</span> Add Product
+            </button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -470,11 +521,7 @@ export default function ProductCatalog() {
                 stroke="currentColor"
                 aria-hidden="true"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                />
+                {/* SVG cleaned: removed empty path */}
               </svg>
               <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'
                 }`}>
@@ -518,7 +565,9 @@ export default function ProductCatalog() {
                   <h3 className={`text-lg font-semibold ${darkMode ? 'text-indigo-200' : 'text-gray-800'}`}>{product.name}</h3>
                   <p className={`mt-1 text-sm line-clamp-2 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{product.description}</p>
                   <div className="mt-3 flex justify-between items-center">
-                    <p className={`font-bold ${darkMode ? 'text-indigo-300' : 'text-gray-800'}`}>{product.currency}{product.price}</p>
+                    <p className={`font-bold ${darkMode ? 'text-indigo-300' : 'text-gray-800'}`}>
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(product.price)}
+                    </p>
                     <span className={`px-2 py-1 text-xs rounded-full ${
                       product.inStock
                         ? darkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'
@@ -585,7 +634,7 @@ export default function ProductCatalog() {
 
                 <div className="mb-4 sm:mb-6">
                   <label className={`block mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'} text-sm sm:text-base`}>
-                    Description(also add delivering time)
+                    Description
                   </label>
                   <textarea
                     name="description"
@@ -602,7 +651,7 @@ export default function ProductCatalog() {
                   </label>
                   <div className="flex">
                     <span className={`px-3 py-2 border rounded-l text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-700'}`}>
-                      ₹
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(0).replace(/\d+.*$/, '')}
                     </span>
                     <input
                       type="number"
@@ -736,8 +785,8 @@ export default function ProductCatalog() {
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Resources</h4>
               <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-              <li>Email: your-store@bizzysite.com</li>
-              <li></li>
+                <li>Email: {userName.toLowerCase().replace(/\s+/g, '') || 'your-store'}@bizzysite.com</li>
+                <li></li>
               </ul>
             </div>
           </div>
@@ -747,6 +796,37 @@ export default function ProductCatalog() {
           </div>
         </div>
       </footer>
+      {/* Currency Modal */}
+      {showCurrencyModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className={`p-6 rounded-xl shadow-xl max-w-sm w-full transform transition-all duration-300 ${
+            darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+          }`}>
+            <div className="flex items-center justify-center mb-4 text-3xl">💱</div>
+            <h2 className="text-xl font-bold mb-2">Change Store Currency</h2>
+            <p className="mb-6 text-sm opacity-80">You're about to switch your store currency to <span className="font-semibold">{tempCurrency}</span>. This will affect how prices are displayed.</p>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowCurrencyModal(false)}
+                className={`px-4 py-2 rounded-md font-medium transition ${
+                  darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  await handleCurrencySave(tempCurrency);
+                  setShowCurrencyModal(false);
+                }}
+                className="px-4 py-2 rounded-md font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

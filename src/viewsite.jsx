@@ -40,6 +40,7 @@ const ViewSite = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [cart, setCart] = useState([]);
+  const [storeCurrency, setStoreCurrency] = useState("USD"); // Default currency, later can sync with products.jsx
   const { slug } = useParams(); // Added storeId state
   console.log("[ViewSite] Mounted with slug:", slug);
   if (!slug) {
@@ -431,8 +432,7 @@ const ViewSite = () => {
                   <div className="flex-1">
                     <h4 className="font-medium">{item.name}</h4>
                     <p className="text-sm text-gray-600">
-                      {item.currency || "$"}
-                      {item.price}
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(item.price || 0)}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -469,14 +469,13 @@ const ViewSite = () => {
           <div className="flex justify-between mb-4">
             <span className="font-semibold">Total:</span>
             <span className="font-semibold">
-              {cart.length > 0 ? cart[0].currency || "$" : "$"}
-              {cart
-                .reduce(
+              {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(
+                cart.reduce(
                   (total, item) =>
                     total + parseFloat(item.price) * item.quantity,
                   0
                 )
-                .toFixed(2)}
+              )}
             </span>
           </div>
 
@@ -492,6 +491,7 @@ const ViewSite = () => {
                   0
                 ),
                 shippingCharge: business.shippingCharge || 0,
+                currency: storeCurrency,
               },
             });
           }}
@@ -743,8 +743,7 @@ const ViewSite = () => {
                           className="font-bold"
                           style={{ color: primaryColor }}
                         >
-                          {product.currency || "$"}
-                          {product.price || "0.00"}
+                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(product.price || 0)}
                         </span>
 
                         {product.inStock ? (
