@@ -3,6 +3,18 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const OrderForm = () => {
+  // Helper to get currency symbol from currency code
+  function getCurrencySymbol(currencyCode) {
+    try {
+      const parts = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currencyCode
+      }).formatToParts(0);
+      return parts.find(p => p.type === 'currency')?.value || '';
+    } catch {
+      return '';
+    }
+  }
   const { slug } = useParams();
   const navigate = useNavigate();
   useEffect(() => {
@@ -130,30 +142,8 @@ const OrderForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Map symbols to ISO currency codes
-      const currencyMap = {
-        "₹": "INR",
-        "$": "USD",
-        "€": "EUR",
-        "£": "GBP",
-        "¥": "JPY",
-        "₩": "KRW",
-        "₽": "RUB",
-        "A$": "AUD",
-        "C$": "CAD",
-        "S$": "SGD",
-        "฿": "THB",
-        "₫": "VND",
-        "₱": "PHP",
-        "R$": "BRL",
-        "₴": "UAH",
-        "₦": "NGN",
-        "₵": "GHS",
-        "د.إ": "AED",
-        "﷼": "SAR",
-      };
-      const symbol = cart[0]?.currency || "₹";
-      const currencyCode = currencyMap[symbol] || symbol || "INR";
+      // Use storeCurrency directly for payload currency
+      const currencyCode = storeCurrency || "INR";
       // Prepare payload for Cashfree Payments
       const payload = {
         orderId: `order_${Date.now()}`,
@@ -646,8 +636,7 @@ const OrderForm = () => {
                         </span>
                       </div>
                       <span>
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
-                        {(item.price * item.quantity).toFixed(2)}
+                        {`${getCurrencySymbol(storeCurrency)}${(item.price * item.quantity).toFixed(2)}`}
                       </span>
                     </li>
                   ))}
@@ -658,32 +647,28 @@ const OrderForm = () => {
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span>
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
-                    {total.toFixed(2)}
+                    {`${getCurrencySymbol(storeCurrency)}${total.toFixed(2)}`}
                   </span>
                 </div>
 
                 <div className="flex justify-between">
                   <span>Shipping</span>
                   <span>
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
-                    {shippingCharge.toFixed(2)}
+                    {`${getCurrencySymbol(storeCurrency)}${shippingCharge.toFixed(2)}`}
                   </span>
                 </div>
 
                 <div className="flex justify-between">
                   <span>Platform Fee (3%)</span>
                   <span>
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
-                    {platformFee.toFixed(2)}
+                    {`${getCurrencySymbol(storeCurrency)}${platformFee.toFixed(2)}`}
                   </span>
                 </div>
 
                 <div className="border-t border-gray-200 pt-3 flex justify-between font-bold text-lg">
                   <span>Total</span>
                   <span>
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
-                    {orderTotal.toFixed(2)}
+                    {`${getCurrencySymbol(storeCurrency)}${orderTotal.toFixed(2)}`}
                   </span>
                 </div>
               </div>

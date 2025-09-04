@@ -33,6 +33,22 @@ const ProductSkeleton = ({ layout }) => {
 
 // IMPORTANT: Ensure your Route uses key={slug} for full component remount per store.
 const ViewSite = () => {
+  // Helper to get the currency symbol for a given code using Intl.NumberFormat
+  function getCurrencySymbol(currencyCode) {
+    try {
+      const parts = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currencyCode,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).formatToParts(0);
+      const symbolPart = parts.find(part => part.type === 'currency');
+      return symbolPart ? symbolPart.value : '';
+    } catch (e) {
+      // fallback to $
+      return '$';
+    }
+  }
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -433,7 +449,10 @@ const ViewSite = () => {
                   <div className="flex-1">
                     <h4 className="font-medium">{item.name}</h4>
                     <p className="text-sm text-gray-600">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(item.price || 0)}
+                      {(() => {
+                        const symbol = getCurrencySymbol(storeCurrency);
+                        return `${symbol}${(item.price || 0).toFixed(2)}`;
+                      })()}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -470,13 +489,15 @@ const ViewSite = () => {
           <div className="flex justify-between mb-4">
             <span className="font-semibold">Total:</span>
             <span className="font-semibold">
-              {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(
-                cart.reduce(
+              {(() => {
+                const symbol = getCurrencySymbol(storeCurrency);
+                const total = cart.reduce(
                   (total, item) =>
                     total + parseFloat(item.price) * item.quantity,
                   0
-                )
-              )}
+                );
+                return `${symbol}${total.toFixed(2)}`;
+              })()}
             </span>
           </div>
 
@@ -744,7 +765,10 @@ const ViewSite = () => {
                           className="font-bold"
                           style={{ color: primaryColor }}
                         >
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(product.price || 0)}
+                          {(() => {
+                            const symbol = getCurrencySymbol(storeCurrency);
+                            return `${symbol}${(product.price || 0).toFixed(2)}`;
+                          })()}
                         </span>
 
                         {product.inStock ? (

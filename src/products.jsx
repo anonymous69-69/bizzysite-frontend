@@ -465,12 +465,36 @@ export default function ProductCatalog() {
                 }}
                 className={`px-3 py-2 border rounded text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
               >
-                <option value="USD">USD ($)</option>
                 <option value="INR">INR (₹)</option>
+                <option value="USD">USD ($)</option>
                 <option value="EUR">EUR (€)</option>
                 <option value="GBP">GBP (£)</option>
+                <option value="AED">AED (د.إ)</option>
                 <option value="AUD">AUD (A$)</option>
                 <option value="CAD">CAD (C$)</option>
+                <option value="SGD">SGD (S$)</option>
+                <option value="HKD">HKD (HK$)</option>
+                <option value="JPY">JPY (¥)</option>
+                <option value="CNY">CNY (¥)</option>
+                <option value="CHF">CHF (CHF)</option>
+                <option value="SEK">SEK (kr)</option>
+                <option value="NOK">NOK (kr)</option>
+                <option value="DKK">DKK (kr)</option>
+                <option value="NZD">NZD (NZ$)</option>
+                <option value="ZAR">ZAR (R)</option>
+                <option value="SAR">SAR (﷼)</option>
+                <option value="QAR">QAR (﷼)</option>
+                <option value="BHD">BHD (BD)</option>
+                <option value="KWD">KWD (KD)</option>
+                <option value="OMR">OMR (﷼)</option>
+                <option value="THB">THB (฿)</option>
+                <option value="MYR">MYR (RM)</option>
+                <option value="IDR">IDR (Rp)</option>
+                <option value="PHP">PHP (₱)</option>
+                <option value="TRY">TRY (₺)</option>
+                <option value="PLN">PLN (zł)</option>
+                <option value="RUB">RUB (₽)</option>
+                <option value="BRL">BRL (R$)</option>
               </select>
             </div>
             <button
