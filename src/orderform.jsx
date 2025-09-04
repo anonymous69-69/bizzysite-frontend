@@ -20,6 +20,8 @@ const OrderForm = () => {
   }, [slug]);
   const location = useLocation();
   const [business, setBusiness] = useState(null);
+  // Store currency state
+  const [storeCurrency, setStoreCurrency] = useState("INR");
 
   // Use passed state values instead of recalculating
   const {
@@ -64,6 +66,7 @@ const OrderForm = () => {
         if (res.ok) {
           const data = await res.json();
           setBusiness(data);
+          setStoreCurrency(data.defaultCurrency || "INR");
         }
       } catch (err) {
         console.error("Failed to fetch business info:", err);
@@ -643,7 +646,7 @@ const OrderForm = () => {
                         </span>
                       </div>
                       <span>
-                        {item.currency}
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
                         {(item.price * item.quantity).toFixed(2)}
                       </span>
                     </li>
@@ -655,7 +658,7 @@ const OrderForm = () => {
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span>
-                    {cart[0]?.currency || "₹"}
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
                     {total.toFixed(2)}
                   </span>
                 </div>
@@ -663,7 +666,7 @@ const OrderForm = () => {
                 <div className="flex justify-between">
                   <span>Shipping</span>
                   <span>
-                    {cart[0]?.currency || "₹"}
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
                     {shippingCharge.toFixed(2)}
                   </span>
                 </div>
@@ -671,7 +674,7 @@ const OrderForm = () => {
                 <div className="flex justify-between">
                   <span>Platform Fee (3%)</span>
                   <span>
-                    {cart[0]?.currency || "₹"}
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
                     {platformFee.toFixed(2)}
                   </span>
                 </div>
@@ -679,7 +682,7 @@ const OrderForm = () => {
                 <div className="border-t border-gray-200 pt-3 flex justify-between font-bold text-lg">
                   <span>Total</span>
                   <span>
-                    {cart[0]?.currency || "₹"}
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
                     {orderTotal.toFixed(2)}
                   </span>
                 </div>

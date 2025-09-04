@@ -13,18 +13,17 @@ export default function ProductCatalog() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [showProductModal, setShowProductModal] = useState(false);
+  // Store currency state
+  const [storeCurrency, setStoreCurrency] = useState('USD');
   const [currentProduct, setCurrentProduct] = useState({
     _id: uuidv4(),
     name: '',
     price: 0,
-    currency: '$',
+    currency: storeCurrency,
     description: '',
     images: [],
     inStock: true
   });
-
-  // Store currency state
-  const [storeCurrency, setStoreCurrency] = useState('USD');
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [tempCurrency, setTempCurrency] = useState(storeCurrency);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -236,7 +235,8 @@ export default function ProductCatalog() {
     try {
       const productData = {
         ...currentProduct,
-        price: Number(currentProduct.price)
+        price: Number(currentProduct.price),
+        currency: storeCurrency
       };
 
       const updatedProducts = products.some(p => p._id === currentProduct._id)
@@ -651,7 +651,7 @@ export default function ProductCatalog() {
                   </label>
                   <div className="flex">
                     <span className={`px-3 py-2 border rounded-l text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-700'}`}>
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(0).replace(/\d+.*$/, '')}
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}
                     </span>
                     <input
                       type="number"

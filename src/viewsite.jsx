@@ -82,6 +82,7 @@ const ViewSite = () => {
         } else {
           const data = await res.json();
           setBusiness(data);
+          setStoreCurrency(data.defaultCurrency || "USD");
           // Update slug in state if we used pathSlug
           // Slug comes from URL; no need to update it in state
         }
