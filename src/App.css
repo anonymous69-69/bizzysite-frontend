@@ -38,3 +38,9 @@
     transform: rotate(360deg);
   }
 }
+
+.story-script-regular {
+  font-family: "Story Script", cursive !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
