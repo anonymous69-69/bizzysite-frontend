@@ -176,10 +176,16 @@ const OrderForm = () => {
     setIsSubmitting(true);
 
     try {
+        // FIX: Map `fullName` from form state to `name` for the backend schema.
+        const { fullName, ...customerData } = formData;
+        
         // Step 1: Create the order in your own database first
         const orderPayload = {
             storeId: business.storeId,
-            customer: { ...formData },
+            customer: {
+              name: fullName, // Correctly mapped field
+              ...customerData
+            },
             items: cart,
             subtotal: total,
             shipping: shippingCharge,
