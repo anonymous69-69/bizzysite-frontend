@@ -17,35 +17,20 @@ const OrderForm = () => {
   }
   const { slug } = useParams();
   const navigate = useNavigate();
-  useEffect(() => {
-    if (!slug) {
-      const storedSlug = localStorage.getItem("bizzySlug");
-      if (storedSlug) {
-        navigate(`/order/${storedSlug}`);
-      } else {
-        alert("Store slug is missing. Please return to the store.");
-        navigate("/");
-      }
-    } else {
-      localStorage.setItem("bizzySlug", slug);
-    }
-  }, [slug]);
   const location = useLocation();
+  
   const [business, setBusiness] = useState(null);
-  // Store currency state
   const [storeCurrency, setStoreCurrency] = useState("INR");
+  const [razorpayKey, setRazorpayKey] = useState(""); // State for Razorpay Key
 
-  // Use passed state values instead of recalculating
   const {
     cart = [],
     total: passedTotal = 0,
     shippingCharge: sc = 0
   } = location.state || {};
 
-  // Use passed total directly
   const total = passedTotal;
 
-  // Form state
   const [formData, setFormData] = useState({
     fullName: "",
     instagramId: "",
@@ -68,6 +53,60 @@ const OrderForm = () => {
   const orderTotal = !isNaN(total + shippingCharge + platformFee)
     ? total + shippingCharge + platformFee
     : 0;
+  
+  const API_BASE = process.env.NODE_ENV === "production"
+    ? "https://bizzysite.onrender.com"
+    : "http://localhost:5050";
+
+  // Effect to load Razorpay script and fetch API Key
+  useEffect(() => {
+    // Load Razorpay script
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    // Fetch Razorpay Key
+    const fetchKey = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/get-razorpay-key`);
+        const data = await res.json();
+        if (data.key) {
+          setRazorpayKey(data.key);
+        } else {
+          console.error("Razorpay Key ID not received from server.");
+        }
+      } catch (err) {
+        console.error("Failed to fetch Razorpay key:", err);
+      }
+    };
+
+    fetchKey();
+
+    return () => {
+      // Cleanup script when component unmounts
+       const razorpayScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+       if (razorpayScript) {
+        document.body.removeChild(razorpayScript);
+       }
+    };
+  }, [API_BASE]);
+
+
+  useEffect(() => {
+    if (!slug) {
+      const storedSlug = localStorage.getItem("bizzySlug");
+      if (storedSlug) {
+        navigate(`/order/${storedSlug}`);
+      } else {
+        // Using a more user-friendly notification than alert
+        console.error("Store slug is missing.");
+        navigate("/");
+      }
+    } else {
+      localStorage.setItem("bizzySlug", slug);
+    }
+  }, [slug, navigate]);
 
   useEffect(() => {
     const fetchBusiness = async () => {
@@ -85,10 +124,10 @@ const OrderForm = () => {
       }
     };
 
-    if (slug) {  // Only fetch if slug exists
+    if (slug) {
       fetchBusiness();
     }
-  }, [slug]);  // Add slug to dependency array
+  }, [slug]);
 
   // Handle pincode lookup
   const handlePincodeLookup = async (pincode) => {
@@ -122,125 +161,118 @@ const OrderForm = () => {
     }
   };
 
-  // Handle form submission (Cashfree Payments)
+  // Handle form submission with new Razorpay logic
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Basic validation
-    if (!slug) {
-      alert("Store information is missing. Please return to the store and try again.");
-      navigate(`/view/${slug}`);
-      return;
+    if (!slug || !business?.storeId) {
+        alert("Store information is missing. Cannot proceed.");
+        return;
     }
-
-    // Validate form data
-    if (!formData.fullName || !formData.phone || !formData.email || !formData.address) {
-      alert("Please fill in all required fields (Name, Phone, Email, Address)");
-      return;
+    if (!razorpayKey) {
+        alert("Payment gateway is not configured correctly. Please try again later.");
+        return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Use storeCurrency directly for payload currency
-      const currencyCode = storeCurrency || "INR";
-      // Prepare payload for Cashfree Payments
-      const payload = {
-        orderId: `order_${Date.now()}`,
-        amount: orderTotal,
-        currency: currencyCode,
-        customer: {
-          id: `${Date.now()}`,
-          name: formData.fullName,
-          email: formData.email,
-          phone: formData.phone.replace(/\D/g, "") || "9999999999",
-        },
-      };
+        // Step 1: Create the order in your own database first
+        const orderPayload = {
+            storeId: business.storeId,
+            customer: { ...formData },
+            items: cart,
+            subtotal: total,
+            shipping: shippingCharge,
+            platformFee: platformFee,
+            total: orderTotal,
+            currency: storeCurrency,
+            paid: false, // Mark as not paid initially
+        };
 
-      const API_BASE = process.env.NODE_ENV === "production"
-        ? "https://bizzysite.onrender.com"
-        : "http://localhost:5050";
+        const orderRes = await fetch(`${API_BASE}/api/orders`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderPayload),
+        });
 
-      const res = await fetch(`${API_BASE}/api/create-cashfree-payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      let data;
-      try {
-        data = await res.json();
-      } catch (parseErr) {
-        const text = await res.text();
-        throw new Error(`Server returned ${res.status}: ${text || "Invalid JSON response"}`);
-      }
-
-      if (res.ok) {
-        if (data.payment_session_id) {
-          // Cashfree SDK is always preloaded. Just use it directly.
-          const mode =
-            process.env.NODE_ENV === "production" ? "production" : "sandbox";
-          console.log("Initializing Cashfree checkout with session ID:", data.payment_session_id);
-          const cashfree = new window.Cashfree({ mode });
-          try {
-            await cashfree.checkout({
-              paymentSessionId: data.payment_session_id,
-              redirectTarget: "_self"
-            });
-            // Save order to backend after successful checkout
-            try {
-              const orderRes = await fetch(`${API_BASE}/api/orders`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  storeId: business?._id,
-                  items: cart,
-                  total: total,
-                  shippingCharge: shippingCharge,
-                  customer: {
-                    name: formData.fullName,
-                    instagramId: formData.instagramId,
-                    phone: formData.phone,
-                    email: formData.email,
-                    address: formData.address,
-                    city: formData.city,
-                    state: formData.state,
-                    pincode: formData.pincode,
-                    country: formData.country,
-                    specialNote: formData.specialNote,
-                  },
-                }),
-              });
-
-              if (orderRes.ok) {
-                setShowSuccessModal(true);
-              } else {
-                console.error("Failed to save order:", await orderRes.text());
-              }
-            } catch (saveErr) {
-              console.error("Error saving order:", saveErr);
-            }
-          } catch (checkoutErr) {
-            console.error("Cashfree checkout failed:", checkoutErr);
-            setIsSubmitting(false);
-            return;
-          }
-        } else {
-          console.error("Unexpected Cashfree response (missing payment_session_id):", data);
-          throw new Error("No payment_session_id returned from Cashfree");
+        const orderData = await orderRes.json();
+        if (!orderRes.ok) {
+            throw new Error(orderData.message || "Failed to create order");
         }
-      } else {
-        throw new Error(data.message || `Request failed with status ${res.status}`);
-      }
+        const dbOrderId = orderData.orderId;
+
+        // Step 2: Create a Razorpay Order from your server
+        const razorpayOrderRes = await fetch(`${API_BASE}/api/create-razorpay-order`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                amount: orderTotal,
+                currency: storeCurrency,
+                orderId: dbOrderId, // Pass your internal order ID as the receipt
+            }),
+        });
+        
+        const razorpayOrderData = await razorpayOrderRes.json();
+        if (!razorpayOrderRes.ok) {
+            throw new Error(razorpayOrderData.error || "Failed to create Razorpay order");
+        }
+
+        // Step 3: Open Razorpay Checkout
+        const options = {
+            key: razorpayKey,
+            amount: razorpayOrderData.amount,
+            currency: razorpayOrderData.currency,
+            name: business.name || "BizzySite Store",
+            description: `Payment for Order #${dbOrderId}`,
+            order_id: razorpayOrderData.id,
+            handler: async function (response) {
+                // Step 4: Verify the payment on your server
+                const verificationPayload = {
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    db_order_id: dbOrderId,
+                };
+
+                const verifyRes = await fetch(`${API_BASE}/api/verify-razorpay-payment`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(verificationPayload),
+                });
+                
+                const verifyData = await verifyRes.json();
+
+                if (verifyData.success) {
+                    setShowSuccessModal(true);
+                } else {
+                    alert(`Payment verification failed: ${verifyData.message}. Please contact support.`);
+                }
+            },
+            prefill: {
+                name: formData.fullName,
+                email: formData.email,
+                contact: formData.phone,
+            },
+            theme: {
+                color: "#4f46e5", // Indigo color from your theme
+            },
+        };
+        
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response){
+          alert(`Payment failed: ${response.error.description} (Code: ${response.error.code})`);
+          // Optionally, you can update your order status to 'failed' here
+        });
+
+        rzp.open();
+
     } catch (err) {
-      alert(`Payment failed: ${err.message}\n\nPlease try again or contact support.`);
-      setIsSubmitting(false);
+        alert(`An error occurred: ${err.message}`);
+    } finally {
+        setIsSubmitting(false);
     }
-  };
+};
 
-  // (No payment gateway script loading required for Cashfree Payments)
-
-  // Handle missing cart or state data
   if (!cart || cart.length === 0 || !location.state) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -681,3 +713,4 @@ const OrderForm = () => {
 };
 
 export default OrderForm;
+
