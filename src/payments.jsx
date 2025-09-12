@@ -15,6 +15,7 @@ const PayPalIcon = () => (
 
 export default function PaymentMethodForm() {
   const navigate = useNavigate();
+  const darkMode = true;
   
   const [paymentDetails, setPaymentDetails] = useState({
     upiId: '',
@@ -223,12 +224,12 @@ export default function PaymentMethodForm() {
   
   if (isLoading) {
     return (
-      <div className={`min-h-screen flex flex-col bg-gray-50 text-black`}>
+      <div className={`min-h-screen flex flex-col bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white`}>
         <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow space-y-6 animate-pulse">
-          <div className={`h-6 rounded w-1/3 bg-gray-300`}></div>
-          <div className={`h-4 rounded w-1/2 bg-gray-300`}></div>
-          <div className={`p-4 sm:p-6 rounded-lg shadow space-y-4 bg-white`}>
-            <div className={`h-5 rounded w-1/4 bg-gray-300`}></div>
+          <div className={`h-6 rounded w-1/3 bg-gray-700`}></div>
+          <div className={`h-4 rounded w-1/2 bg-gray-700`}></div>
+          <div className={`p-4 sm:p-6 rounded-lg shadow space-y-4 bg-gray-800/40`}>
+            <div className={`h-5 rounded w-1/4 bg-gray-700`}></div>
           </div>
         </div>
       </div>
@@ -236,14 +237,14 @@ export default function PaymentMethodForm() {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col overflow-x-hidden bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black`}>
+    <div className={`min-h-screen flex flex-col overflow-x-hidden bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white`}>
       <Toaster />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
         {errorMessage && (
-          <div className={`mb-6 p-4 bg-red-50 border-l-4 border-red-500`}>
+          <div className={`mb-6 p-4 bg-red-900/60 border-l-4 border-red-500`}>
             <div className="flex">
               <div className="ml-3">
-                <p className={`text-sm text-red-700`}>{errorMessage}</p>
+                <p className={`text-sm text-red-200`}>{errorMessage}</p>
               </div>
             </div>
           </div>
@@ -252,7 +253,7 @@ export default function PaymentMethodForm() {
         {/* Header Section */}
         <div className="mb-6 rounded-md p-3">
           <div className="flex justify-between items-center mb-2">
-            <Link to="/signup" className={`text-3xl sm:text-4xl font-extrabold text-gray-900`}>
+            <Link to="/signup" className={`text-3xl sm:text-4xl font-extrabold text-white`}>
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
@@ -268,7 +269,7 @@ export default function PaymentMethodForm() {
               </div>
             </div>
           </div>
-          <h2 className={`text-xl sm:text-2xl font-semibold mb-2 text-gray-900`}>
+          <h2 className={`text-xl sm:text-2xl font-semibold mb-2 text-white`}>
             {(() => {
               const hour = new Date().getHours();
               if (hour >= 5 && hour < 12) return <>🌞 Good Morning, {userName}!</>;
@@ -278,7 +279,7 @@ export default function PaymentMethodForm() {
             })()} 💳
           </h2>
           <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full mb-6"></div>
-          <p className="mb-6 sm:mb-8 text-base sm:text-lg text-gray-900 dark:text-gray-400 max-w-2xl">
+          <p className="mb-6 sm:mb-8 text-base sm:text-lg text-gray-300 max-w-2xl">
             Manage your payments securely and effortlessly.
           </p>
         </div>
@@ -297,66 +298,66 @@ export default function PaymentMethodForm() {
           </div>
         </div>
 
-        <div className="rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border border-white/20">
-          <h3 className={`text-lg font-semibold mb-3 sm:mb-4 text-gray-800`}>
+        <div className="rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 bg-gray-800/40 backdrop-blur-md border border-gray-700">
+          <h3 className={`text-lg font-semibold mb-3 sm:mb-4 text-white`}>
             Payout Methods
           </h3>
-          <p className={`mb-4 sm:mb-6 text-gray-600`}>
+          <p className={`mb-4 sm:mb-6 text-gray-400`}>
             Configure how you want to receive payments from your sales.
           </p>
 
           <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
              {/* UPI Section */}
-            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
+            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
               <div className="mr-2">
-                <h3 className={`text-base sm:text-lg font-semibold text-gray-800`}>🇮🇳 UPI Payment (India)</h3>
-                <p className={`text-xs sm:text-sm text-gray-500`}>Receive payouts via UPI</p>
+                <h3 className={`text-base sm:text-lg font-semibold text-white`}>🇮🇳 UPI Payment (India)</h3>
+                <p className={`text-xs sm:text-sm text-gray-400`}>Receive payouts via UPI</p>
               </div>
               <label className="inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only" checked={isUPIEnabled} onChange={() => handleToggleChange('upiEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isUPIEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isUPIEnabled ? 'bg-indigo-600' : 'bg-gray-700'}`}>
                   <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isUPIEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
                 </div>
               </label>
             </div>
             {isUPIEnabled && (
-              <div className="p-4 border rounded-lg animate-slideDown bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
+              <div className="p-4 border rounded-lg animate-slideDown bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
                 <div className="space-y-3">
                   <div>
-                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>UPI ID *</label>
-                    <input type="text" name="upiId" value={paymentDetails.upiId} onChange={handleInputChange} placeholder="yourname@okhdfc" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required/>
+                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>UPI ID *</label>
+                    <input type="text" name="upiId" value={paymentDetails.upiId} onChange={handleInputChange} placeholder="yourname@okhdfc" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required/>
                   </div>
                 </div>
               </div>
             )}
             
             {/* Bank Transfer (India) Section */}
-            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
+            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
               <div className="mr-2">
-                <h3 className={`text-base sm:text-lg font-semibold text-gray-800`}>🇮🇳 Bank Transfer (India)</h3>
-                <p className={`text-xs sm:text-sm text-gray-500`}>Direct Indian bank account transfer for automated 95/5 splits.</p>
+                <h3 className={`text-base sm:text-lg font-semibold text-white`}>🇮🇳 Bank Transfer (India)</h3>
+                <p className={`text-xs sm:text-sm text-gray-400`}>Direct Indian bank account transfer for automated 95/5 splits.</p>
               </div>
               <label className="inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only" checked={isBankEnabled} onChange={() => handleToggleChange('bankEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isBankEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isBankEnabled ? 'bg-indigo-600' : 'bg-gray-700'}`}>
                   <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isBankEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
                 </div>
               </label>
             </div>
 
             {/* International Bank Transfer Section */}
-            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
+            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
               <div className="mr-2">
-                <h3 className={`text-base sm:text-lg font-semibold text-gray-800`}>
+                <h3 className={`text-base sm:text-lg font-semibold text-white`}>
                   🌍 International Bank Transfer
                 </h3>
-                <p className={`text-xs sm:text-sm text-gray-500`}>
+                <p className={`text-xs sm:text-sm text-gray-400`}>
                   Receive payouts to a non-Indian bank account.
                 </p>
               </div>
               <label className="inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only" checked={isInternationalBankEnabled} onChange={() => handleToggleChange('internationalBankEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isInternationalBankEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isInternationalBankEnabled ? 'bg-indigo-600' : 'bg-gray-700'}`}>
                   <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isInternationalBankEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
                 </div>
               </label>
@@ -364,35 +365,35 @@ export default function PaymentMethodForm() {
 
             {/* Shared Bank Details Form */}
             {(isBankEnabled || isInternationalBankEnabled) && (
-                 <div className="p-4 border rounded-lg animate-slideDown bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
+                 <div className="p-4 border rounded-lg animate-slideDown bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
                     {/* START: RAZORPAY LINKED ACCOUNT STATUS */}
                     {isBankEnabled && (
-                        <div className="mb-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
-                            <h4 className="font-semibold text-indigo-800">Automated Payout Status</h4>
+                        <div className="mb-4 p-3 rounded-lg bg-indigo-900/40 border border-indigo-700">
+                            <h4 className="font-semibold text-indigo-200">Automated Payout Status</h4>
                             {paymentDetails.razorpayLinkedAccountId ? (
-                                <p className="text-sm text-green-700">✓ Your account is linked with Razorpay and ready for automated 95/5 payouts.</p>
+                                <p className="text-sm text-green-300">✓ Your account is linked with Razorpay and ready for automated 95/5 payouts.</p>
                             ) : (
-                                <p className="text-sm text-yellow-800">! Please fill and save your bank details below to enable automated payouts.</p>
+                                <p className="text-sm text-yellow-300">! Please fill and save your bank details below to enable automated payouts.</p>
                             )}
                         </div>
                     )}
                     {/* END: RAZORPAY LINKED ACCOUNT STATUS */}
-                    <h4 className={`text-sm font-semibold mb-3 text-gray-700`}>Bank Account Details</h4>
+                    <h4 className={`text-sm font-semibold mb-3 text-gray-300`}>Bank Account Details</h4>
                     <div className="space-y-3">
                         <div>
-                            <label className={`block text-sm font-medium mb-1 text-gray-700`}>Account Holder Name *</label>
-                            <input type="text" name="accountHolderName" value={paymentDetails.accountHolderName} onChange={handleInputChange} placeholder="Full Name as on Bank Account" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required/>
+                            <label className={`block text-sm font-medium mb-1 text-gray-300`}>Account Holder Name *</label>
+                            <input type="text" name="accountHolderName" value={paymentDetails.accountHolderName} onChange={handleInputChange} placeholder="Full Name as on Bank Account" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required/>
                         </div>
                         
                         {isBankEnabled && (
                             <>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>Account Number *</label>
-                                    <input type="text" name="accountNumber" value={paymentDetails.accountNumber} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-md border-gray-300`} required/>
+                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>Account Number *</label>
+                                    <input type="text" name="accountNumber" value={paymentDetails.accountNumber} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-md border-gray-700 bg-gray-900 text-white`} required/>
                                 </div>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>IFSC Code *</label>
-                                    <input type="text" name="ifscCode" value={paymentDetails.ifscCode} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-md border-gray-300`} required/>
+                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>IFSC Code *</label>
+                                    <input type="text" name="ifscCode" value={paymentDetails.ifscCode} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-md border-gray-700 bg-gray-900 text-white`} required/>
                                 </div>
                             </>
                         )}
@@ -400,20 +401,20 @@ export default function PaymentMethodForm() {
                         {isInternationalBankEnabled && (
                             <>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>IBAN *</label>
-                                    <input type="text" name="iban" value={paymentDetails.iban} onChange={handleInputChange} placeholder="International Bank Account Number" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required/>
+                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>IBAN *</label>
+                                    <input type="text" name="iban" value={paymentDetails.iban} onChange={handleInputChange} placeholder="International Bank Account Number" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required/>
                                 </div>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>SWIFT / BIC Code *</label>
-                                    <input type="text" name="swiftBic" value={paymentDetails.swiftBic} onChange={handleInputChange} placeholder="e.g., CITIUS33" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required/>
+                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>SWIFT / BIC Code *</label>
+                                    <input type="text" name="swiftBic" value={paymentDetails.swiftBic} onChange={handleInputChange} placeholder="e.g., CITIUS33" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required/>
                                 </div>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>Beneficiary Address *</label>
-                                    <textarea name="beneficiaryAddress" value={paymentDetails.beneficiaryAddress} onChange={handleInputChange} placeholder="Your full address (Street, City, Country)" rows={2} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required />
+                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>Beneficiary Address *</label>
+                                    <textarea name="beneficiaryAddress" value={paymentDetails.beneficiaryAddress} onChange={handleInputChange} placeholder="Your full address (Street, City, Country)" rows={2} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required />
                                 </div>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>Bank's Address *</label>
-                                    <textarea name="bankAddress" value={paymentDetails.bankAddress} onChange={handleInputChange} placeholder="Your bank's full address (Street, City, Country)" rows={2} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required />
+                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>Bank's Address *</label>
+                                    <textarea name="bankAddress" value={paymentDetails.bankAddress} onChange={handleInputChange} placeholder="Your bank's full address (Street, City, Country)" rows={2} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required />
                                 </div>
                             </>
                         )}
@@ -422,29 +423,29 @@ export default function PaymentMethodForm() {
             )}
             
             {/* START: REORDERED PAYPAL PAYOUT SECTION */}
-            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
+            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
                 <div className="mr-2 flex items-center space-x-3">
                     <PayPalIcon />
                     <div>
-                        <h3 className={`text-base sm:text-lg font-semibold text-gray-800`}>
+                        <h3 className={`text-base sm:text-lg font-semibold text-white`}>
                         PayPal Payout
                         </h3>
-                        <p className={`text-xs sm:text-sm text-gray-500`}>Receive payouts via PayPal (International)</p>
+                        <p className={`text-xs sm:text-sm text-gray-400`}>Receive payouts via PayPal (International)</p>
                     </div>
                 </div>
               <label className="inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only" checked={isPayPalEnabled} onChange={() => handleToggleChange('payPalEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isPayPalEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isPayPalEnabled ? 'bg-indigo-600' : 'bg-gray-700'}`}>
                   <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isPayPalEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
                 </div>
               </label>
             </div>
             {isPayPalEnabled && (
-              <div className="p-4 border rounded-lg animate-slideDown bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
+              <div className="p-4 border rounded-lg animate-slideDown bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
                 <div className="space-y-3">
                   <div>
-                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>PayPal Email Address *</label>
-                    <input type="email" name="payPalEmail" value={paymentDetails.payPalEmail} onChange={handleInputChange} placeholder="your.email@example.com" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required/>
+                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>PayPal Email Address *</label>
+                    <input type="email" name="payPalEmail" value={paymentDetails.payPalEmail} onChange={handleInputChange} placeholder="your.email@example.com" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required/>
                   </div>
                 </div>
               </div>
@@ -459,7 +460,7 @@ export default function PaymentMethodForm() {
           </div>
         </div>
       </div>
-       <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-gray-800 text-white`}>
+       <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'}`}>
         <div className="max-w-7xl mx-auto"> 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div>
@@ -477,7 +478,7 @@ export default function PaymentMethodForm() {
               </ul>
             </div>
           </div>
-          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base border-gray-700 text-gray-400`}>
+          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'}`}>
             <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
