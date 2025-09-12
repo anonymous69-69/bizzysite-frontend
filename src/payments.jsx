@@ -1,18 +1,22 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useTheme } from "./ThemeContext";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
 
+// PayPal Icon Component
+const PayPalIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24">
+        <path d="M8.339 4.227c.184-.967.828-1.74 1.636-2.112.527-.243 1.12-.378 1.748-.378h5.275c3.22 0 5.86 2.518 5.998 5.712.13 2.968-1.75 4.75-4.837 4.75h-2.183c-.536 0-.982.348-1.12.868l-.83 3.053-.14 1.139c-.08.438-.45.76-.889.76h-2.12c-.56 0-1.02-.423-1.07-.98l-2.01-8.62z" fill="#003087"></path>
+        <path d="M9.135 7.42c.185-.965.828-1.74 1.636-2.112.527-.243 1.12-.378 1.748-.378h5.275c3.22 0 5.86 2.518 5.998 5.712.13 2.968-1.75 4.75-4.837 4.75h-2.183c-.536 0-.982.348-1.12.868l-.83 3.053-.14 1.139c-.08.438-.45.76-.889.76h-2.12c-.56 0-1.02-.423-1.07-.98L2.08 8.4h4.425c.57 0 1.05.44 1.08 1.01l.1 1.96-1.55-6.95z" fill="#009cde"></path>
+        <path d="M7.78 11.122c.174-.91.77-1.614 1.53-1.97.49-.226 1.04-.352 1.63-.352h5.275c3.22 0 5.86 2.518 5.998 5.712.13 2.968-1.75 4.75-4.837 4.75h-2.183c-.536 0-.982.348-1.12.868l-.83 3.053-.14 1.139c-.08.438-.45.76-.889.76h-2.12c-.56 0-1.02-.423-1.07-.98L.004 12.13h4.425c.57 0 1.05.44 1.08 1.01l.1 1.96 2.17-9.008z" fill="#002f86"></path>
+    </svg>
+);
+
+
 export default function PaymentMethodForm() {
-  const { darkMode } = useTheme();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('Payments');
   
   const [paymentDetails, setPaymentDetails] = useState({
-    upiEnabled: false,
-    bankEnabled: false,
-    internationalBankEnabled: false,
     upiId: '',
     accountHolderName: '',
     accountNumber: '',
@@ -21,11 +25,14 @@ export default function PaymentMethodForm() {
     swiftBic: '',
     bankAddress: '',
     beneficiaryAddress: '',
+    payPalEmail: '', 
+    razorpayLinkedAccountId: '', // To display status to the user
   });
 
   const [isUPIEnabled, setIsUPIEnabled] = useState(false);
   const [isBankEnabled, setIsBankEnabled] = useState(false);
   const [isInternationalBankEnabled, setIsInternationalBankEnabled] = useState(false);
+  const [isPayPalEnabled, setIsPayPalEnabled] = useState(false);
 
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -79,9 +86,6 @@ export default function PaymentMethodForm() {
           const paymentsData = data.payments || {};
           
           setPaymentDetails({
-            upiEnabled: paymentsData.upiEnabled || false,
-            bankEnabled: paymentsData.bankEnabled || false,
-            internationalBankEnabled: paymentsData.internationalBankEnabled || false,
             upiId: paymentsData.upiId || '',
             accountHolderName: paymentsData.accountHolderName || '',
             accountNumber: paymentsData.accountNumber || '',
@@ -90,11 +94,14 @@ export default function PaymentMethodForm() {
             swiftBic: paymentsData.swiftBic || '',
             bankAddress: paymentsData.bankAddress || '',
             beneficiaryAddress: paymentsData.beneficiaryAddress || '',
+            payPalEmail: paymentsData.payPalEmail || '',
+            razorpayLinkedAccountId: paymentsData.razorpayLinkedAccountId || '',
           });
           
           setIsUPIEnabled(paymentsData.upiEnabled || false);
           setIsBankEnabled(paymentsData.bankEnabled || false);
           setIsInternationalBankEnabled(paymentsData.internationalBankEnabled || false);
+          setIsPayPalEnabled(paymentsData.payPalEnabled || false);
         }
       } catch (error) {
         console.error('Error fetching payment settings:', error);
@@ -110,8 +117,6 @@ export default function PaymentMethodForm() {
     setPaymentDetails(prev => ({ ...prev, [name]: value }));
   };
 
-  // START: MODIFICATION FOR MUTUAL EXCLUSIVITY
-  // This logic ensures that only one payout method can be active at a time.
   const handleToggleChange = (field) => {
     if (field === 'upiEnabled') {
       const newState = !isUPIEnabled;
@@ -119,6 +124,7 @@ export default function PaymentMethodForm() {
       if (newState) {
         setIsBankEnabled(false);
         setIsInternationalBankEnabled(false);
+        setIsPayPalEnabled(false);
       }
     } else if (field === 'bankEnabled') {
       const newState = !isBankEnabled;
@@ -126,6 +132,7 @@ export default function PaymentMethodForm() {
       if (newState) {
         setIsUPIEnabled(false);
         setIsInternationalBankEnabled(false);
+        setIsPayPalEnabled(false);
       }
     } else if (field === 'internationalBankEnabled') {
       const newState = !isInternationalBankEnabled;
@@ -133,10 +140,18 @@ export default function PaymentMethodForm() {
       if (newState) {
         setIsUPIEnabled(false);
         setIsBankEnabled(false);
+        setIsPayPalEnabled(false);
+      }
+    } else if (field === 'payPalEnabled') {
+      const newState = !isPayPalEnabled;
+      setIsPayPalEnabled(newState);
+      if(newState) {
+        setIsUPIEnabled(false);
+        setIsBankEnabled(false);
+        setIsInternationalBankEnabled(false);
       }
     }
   };
-  // END: MODIFICATION FOR MUTUAL EXCLUSIVITY
 
   const handleSavePayments = async (e) => {
     e.preventDefault();
@@ -147,6 +162,7 @@ export default function PaymentMethodForm() {
       upiEnabled: isUPIEnabled,
       bankEnabled: isBankEnabled,
       internationalBankEnabled: isInternationalBankEnabled,
+      payPalEnabled: isPayPalEnabled,
       upiId: isUPIEnabled ? paymentDetails.upiId : "",
       accountHolderName: (isBankEnabled || isInternationalBankEnabled) ? paymentDetails.accountHolderName : "",
       accountNumber: isBankEnabled ? paymentDetails.accountNumber : "",
@@ -155,6 +171,7 @@ export default function PaymentMethodForm() {
       swiftBic: isInternationalBankEnabled ? paymentDetails.swiftBic : "",
       bankAddress: isInternationalBankEnabled ? paymentDetails.bankAddress : "",
       beneficiaryAddress: isInternationalBankEnabled ? paymentDetails.beneficiaryAddress : "",
+      payPalEmail: isPayPalEnabled ? paymentDetails.payPalEmail : "",
     };
 
     const token = localStorage.getItem('token');
@@ -183,12 +200,22 @@ export default function PaymentMethodForm() {
       const result = await response.json();
 
       if (response.ok) {
-        toast.success('Payment details saved successfully', { position: 'top-right' });
+        // START: UPDATE STATE AFTER SAVING
+        // This ensures the linked account ID is displayed immediately after creation.
+        const newPaymentsData = result.data?.payments || {};
+        setPaymentDetails(prev => ({
+            ...prev,
+            razorpayLinkedAccountId: newPaymentsData.razorpayLinkedAccountId || prev.razorpayLinkedAccountId,
+        }));
+        // END: UPDATE STATE AFTER SAVING
+        toast.success(result.message || 'Payment details saved!', { position: 'top-right' });
       } else {
         setErrorMessage(`Failed to save: ${result.message || 'Unknown error'}`);
+        toast.error(`Failed to save: ${result.message || 'Unknown error'}`);
       }
     } catch (error) {
       setErrorMessage(`Error: ${error.message}`);
+      toast.error(`An error occurred: ${error.message}`);
     } finally {
       setIsSaving(false);
     }
@@ -196,12 +223,12 @@ export default function PaymentMethodForm() {
   
   if (isLoading) {
     return (
-      <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
+      <div className={`min-h-screen flex flex-col bg-gray-50 text-black`}>
         <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow space-y-6 animate-pulse">
-          <div className={`h-6 rounded w-1/3 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
-          <div className={`h-4 rounded w-1/2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
-          <div className={`p-4 sm:p-6 rounded-lg shadow space-y-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <div className={`h-5 rounded w-1/4 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+          <div className={`h-6 rounded w-1/3 bg-gray-300`}></div>
+          <div className={`h-4 rounded w-1/2 bg-gray-300`}></div>
+          <div className={`p-4 sm:p-6 rounded-lg shadow space-y-4 bg-white`}>
+            <div className={`h-5 rounded w-1/4 bg-gray-300`}></div>
           </div>
         </div>
       </div>
@@ -209,14 +236,14 @@ export default function PaymentMethodForm() {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col overflow-x-hidden ${darkMode ? "bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white" : "bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black"}`}>
+    <div className={`min-h-screen flex flex-col overflow-x-hidden bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black`}>
       <Toaster />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
         {errorMessage && (
-          <div className={`mb-6 p-4 ${darkMode ? "bg-red-900 border-red-700 text-red-100" : "bg-red-50 border-l-4 border-red-500"}`}>
+          <div className={`mb-6 p-4 bg-red-50 border-l-4 border-red-500`}>
             <div className="flex">
               <div className="ml-3">
-                <p className={`text-sm ${darkMode ? "text-red-100" : "text-red-700"}`}>{errorMessage}</p>
+                <p className={`text-sm text-red-700`}>{errorMessage}</p>
               </div>
             </div>
           </div>
@@ -225,7 +252,7 @@ export default function PaymentMethodForm() {
         {/* Header Section */}
         <div className="mb-6 rounded-md p-3">
           <div className="flex justify-between items-center mb-2">
-            <Link to="/signup" className={`text-3xl sm:text-4xl font-extrabold ${darkMode ? "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent" : "text-gray-900"}`}>
+            <Link to="/signup" className={`text-3xl sm:text-4xl font-extrabold text-gray-900`}>
               BizzySite
             </Link>
             <div className="flex items-center space-x-4">
@@ -241,7 +268,7 @@ export default function PaymentMethodForm() {
               </div>
             </div>
           </div>
-          <h2 className={`text-xl sm:text-2xl font-semibold mb-2 ${darkMode ? "text-gray-300" : "text-gray-900"}`}>
+          <h2 className={`text-xl sm:text-2xl font-semibold mb-2 text-gray-900`}>
             {(() => {
               const hour = new Date().getHours();
               if (hour >= 5 && hour < 12) return <>🌞 Good Morning, {userName}!</>;
@@ -271,10 +298,10 @@ export default function PaymentMethodForm() {
         </div>
 
         <div className="rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border border-white/20">
-          <h3 className={`text-lg font-semibold mb-3 sm:mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+          <h3 className={`text-lg font-semibold mb-3 sm:mb-4 text-gray-800`}>
             Payout Methods
           </h3>
-          <p className={`mb-4 sm:mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`mb-4 sm:mb-6 text-gray-600`}>
             Configure how you want to receive payments from your sales.
           </p>
 
@@ -282,12 +309,12 @@ export default function PaymentMethodForm() {
              {/* UPI Section */}
             <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
               <div className="mr-2">
-                <h3 className={`text-base sm:text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🇮🇳 UPI Payment (India)</h3>
-                <p className={`text-xs sm:text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Receive payouts via UPI</p>
+                <h3 className={`text-base sm:text-lg font-semibold text-gray-800`}>🇮🇳 UPI Payment (India)</h3>
+                <p className={`text-xs sm:text-sm text-gray-500`}>Receive payouts via UPI</p>
               </div>
               <label className="inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only" checked={isUPIEnabled} onChange={() => handleToggleChange('upiEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isUPIEnabled ? 'bg-indigo-600' : darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isUPIEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
                   <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isUPIEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
                 </div>
               </label>
@@ -296,62 +323,76 @@ export default function PaymentMethodForm() {
               <div className="p-4 border rounded-lg animate-slideDown bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
                 <div className="space-y-3">
                   <div>
-                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>UPI ID *</label>
-                    <input type="text" name="upiId" value={paymentDetails.upiId} onChange={handleInputChange} placeholder="yourname@okhdfc" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`} required/>
+                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>UPI ID *</label>
+                    <input type="text" name="upiId" value={paymentDetails.upiId} onChange={handleInputChange} placeholder="yourname@okhdfc" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required/>
                   </div>
                 </div>
               </div>
             )}
             
-            {/* RESTRUCTURED BANK SECTION */}
+            {/* Bank Transfer (India) Section */}
             <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
               <div className="mr-2">
-                <h3 className={`text-base sm:text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🇮🇳 Bank Transfer (India)</h3>
-                <p className={`text-xs sm:text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Direct Indian bank account transfer</p>
+                <h3 className={`text-base sm:text-lg font-semibold text-gray-800`}>🇮🇳 Bank Transfer (India)</h3>
+                <p className={`text-xs sm:text-sm text-gray-500`}>Direct Indian bank account transfer for automated 95/5 splits.</p>
               </div>
               <label className="inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only" checked={isBankEnabled} onChange={() => handleToggleChange('bankEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isBankEnabled ? 'bg-indigo-600' : darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isBankEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
                   <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isBankEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
                 </div>
               </label>
             </div>
 
+            {/* International Bank Transfer Section */}
             <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
               <div className="mr-2">
-                <h3 className={`text-base sm:text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                <h3 className={`text-base sm:text-lg font-semibold text-gray-800`}>
                   🌍 International Bank Transfer
                 </h3>
-                <p className={`text-xs sm:text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                <p className={`text-xs sm:text-sm text-gray-500`}>
                   Receive payouts to a non-Indian bank account.
                 </p>
               </div>
               <label className="inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only" checked={isInternationalBankEnabled} onChange={() => handleToggleChange('internationalBankEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isInternationalBankEnabled ? 'bg-indigo-600' : darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isInternationalBankEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
                   <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isInternationalBankEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
                 </div>
               </label>
             </div>
 
+            {/* Shared Bank Details Form */}
             {(isBankEnabled || isInternationalBankEnabled) && (
                  <div className="p-4 border rounded-lg animate-slideDown bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
-                    <h4 className={`text-sm font-semibold mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Bank Account Details</h4>
+                    {/* START: RAZORPAY LINKED ACCOUNT STATUS */}
+                    {isBankEnabled && (
+                        <div className="mb-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                            <h4 className="font-semibold text-indigo-800">Automated Payout Status</h4>
+                            {paymentDetails.razorpayLinkedAccountId ? (
+                                <p className="text-sm text-green-700">✓ Your account is linked with Razorpay and ready for automated 95/5 payouts.</p>
+                            ) : (
+                                <p className="text-sm text-yellow-800">! Please fill and save your bank details below to enable automated payouts.</p>
+                            )}
+                        </div>
+                    )}
+                    {/* END: RAZORPAY LINKED ACCOUNT STATUS */}
+                    <h4 className={`text-sm font-semibold mb-3 text-gray-700`}>Bank Account Details</h4>
                     <div className="space-y-3">
                         <div>
-                            <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Account Holder Name *</label>
-                            <input type="text" name="accountHolderName" value={paymentDetails.accountHolderName} onChange={handleInputChange} placeholder="Full Name as on Bank Account" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`} required/>
+                            <label className={`block text-sm font-medium mb-1 text-gray-700`}>Account Holder Name *</label>
+                            <input type="text" name="accountHolderName" value={paymentDetails.accountHolderName} onChange={handleInputChange} placeholder="Full Name as on Bank Account" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required/>
                         </div>
                         
                         {isBankEnabled && (
                             <>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Account Number *</label>
-                                    <input type="text" name="accountNumber" value={paymentDetails.accountNumber} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-md ${darkMode ? 'bg-gray-700 border-gray-600' : 'border-gray-300'}`} required/>
+                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>Account Number *</label>
+                                    <input type="text" name="accountNumber" value={paymentDetails.accountNumber} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-md border-gray-300`} required/>
                                 </div>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>IFSC Code *</label>
-                                    <input type="text" name="ifscCode" value={paymentDetails.ifscCode} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-md ${darkMode ? 'bg-gray-700 border-gray-600' : 'border-gray-300'}`} required/>
+                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>IFSC Code *</label>
+                                    <input type="text" name="ifscCode" value={paymentDetails.ifscCode} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-md border-gray-300`} required/>
                                 </div>
                             </>
                         )}
@@ -359,26 +400,56 @@ export default function PaymentMethodForm() {
                         {isInternationalBankEnabled && (
                             <>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>IBAN *</label>
-                                    <input type="text" name="iban" value={paymentDetails.iban} onChange={handleInputChange} placeholder="International Bank Account Number" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`} required/>
+                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>IBAN *</label>
+                                    <input type="text" name="iban" value={paymentDetails.iban} onChange={handleInputChange} placeholder="International Bank Account Number" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required/>
                                 </div>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>SWIFT / BIC Code *</label>
-                                    <input type="text" name="swiftBic" value={paymentDetails.swiftBic} onChange={handleInputChange} placeholder="e.g., CITIUS33" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`} required/>
+                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>SWIFT / BIC Code *</label>
+                                    <input type="text" name="swiftBic" value={paymentDetails.swiftBic} onChange={handleInputChange} placeholder="e.g., CITIUS33" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required/>
                                 </div>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Beneficiary Address *</label>
-                                    <textarea name="beneficiaryAddress" value={paymentDetails.beneficiaryAddress} onChange={handleInputChange} placeholder="Your full address (Street, City, Country)" rows={2} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`} required />
+                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>Beneficiary Address *</label>
+                                    <textarea name="beneficiaryAddress" value={paymentDetails.beneficiaryAddress} onChange={handleInputChange} placeholder="Your full address (Street, City, Country)" rows={2} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required />
                                 </div>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Bank's Address *</label>
-                                    <textarea name="bankAddress" value={paymentDetails.bankAddress} onChange={handleInputChange} placeholder="Your bank's full address (Street, City, Country)" rows={2} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`} required />
+                                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>Bank's Address *</label>
+                                    <textarea name="bankAddress" value={paymentDetails.bankAddress} onChange={handleInputChange} placeholder="Your bank's full address (Street, City, Country)" rows={2} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required />
                                 </div>
                             </>
                         )}
                     </div>
                  </div>
             )}
+            
+            {/* START: REORDERED PAYPAL PAYOUT SECTION */}
+            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
+                <div className="mr-2 flex items-center space-x-3">
+                    <PayPalIcon />
+                    <div>
+                        <h3 className={`text-base sm:text-lg font-semibold text-gray-800`}>
+                        PayPal Payout
+                        </h3>
+                        <p className={`text-xs sm:text-sm text-gray-500`}>Receive payouts via PayPal (International)</p>
+                    </div>
+                </div>
+              <label className="inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only" checked={isPayPalEnabled} onChange={() => handleToggleChange('payPalEnabled')}/>
+                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isPayPalEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                  <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isPayPalEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
+                </div>
+              </label>
+            </div>
+            {isPayPalEnabled && (
+              <div className="p-4 border rounded-lg animate-slideDown bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border-white/20 shadow-lg">
+                <div className="space-y-3">
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 text-gray-700`}>PayPal Email Address *</label>
+                    <input type="email" name="payPalEmail" value={paymentDetails.payPalEmail} onChange={handleInputChange} placeholder="your.email@example.com" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300`} required/>
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* END: REORDERED PAYPAL PAYOUT SECTION */}
           </div>
 
           <div className="flex justify-end">
@@ -388,7 +459,7 @@ export default function PaymentMethodForm() {
           </div>
         </div>
       </div>
-       <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'}`}>
+       <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-gray-800 text-white`}>
         <div className="max-w-7xl mx-auto"> 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div>
@@ -406,7 +477,7 @@ export default function PaymentMethodForm() {
               </ul>
             </div>
           </div>
-          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'}`}>
+          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base border-gray-700 text-gray-400`}>
             <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
@@ -414,4 +485,3 @@ export default function PaymentMethodForm() {
     </div>
   );
 }
-

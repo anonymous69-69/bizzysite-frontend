@@ -73,14 +73,12 @@ const OrderForm = () => {
 
   // Order summary calculations
   const shippingCharge = !isNaN(parseFloat(sc)) ? parseFloat(sc) : 0;
-  const platformFee = !isNaN(total) ? total * 0.03 : 0;
+  const platformFee = !isNaN(total) ? total * 0.05 : 0; // Changed from 0.03 to 0.05
   const orderTotal = !isNaN(total + shippingCharge + platformFee)
     ? total + shippingCharge + platformFee
     : 0;
   
-  const API_BASE = process.env.NODE_ENV === "production"
-    ? "https://bizzysite.onrender.com"
-    : "http://localhost:5050";
+  const API_BASE = "https://bizzysite.onrender.com";
 
   // Effect to load Razorpay script and fetch API Key
   useEffect(() => {
@@ -136,7 +134,7 @@ const OrderForm = () => {
     const fetchBusiness = async () => {
       try {
         const res = await fetch(
-          `https://bizzysite.onrender.com/api/store/slug/${slug}`
+          `${API_BASE}/api/store/slug/${slug}`
         );
         if (res.ok) {
           const data = await res.json();
@@ -151,7 +149,7 @@ const OrderForm = () => {
     if (slug) {
       fetchBusiness();
     }
-  }, [slug]);
+  }, [slug, API_BASE]);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -209,6 +207,8 @@ const OrderForm = () => {
         }
         const dbOrderId = orderData.orderId;
 
+        // START: FIX FOR 95/5 SPLIT
+        // I am now sending the 'storeId' to the backend, which is essential for Razorpay Route.
         const razorpayOrderRes = await fetch(`${API_BASE}/api/create-razorpay-order`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -216,8 +216,10 @@ const OrderForm = () => {
                 amount: orderTotal,
                 currency: storeCurrency,
                 orderId: dbOrderId, 
+                storeId: business.storeId, // This is the crucial addition
             }),
         });
+        // END: FIX FOR 95/5 SPLIT
         
         const razorpayOrderData = await razorpayOrderRes.json();
         if (!razorpayOrderRes.ok) {
@@ -415,7 +417,7 @@ const OrderForm = () => {
                                     <span className="font-medium">{`${getCurrencySymbol(storeCurrency)}${shippingCharge.toFixed(2)}`}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600">
-                                    <span>Platform Fee (3%)</span>
+                                    <span>Platform Fee (5%)</span>
                                     <span className="font-medium">{`${getCurrencySymbol(storeCurrency)}${platformFee.toFixed(2)}`}</span>
                                 </div>
                                 <div className="flex justify-between font-bold text-xl text-gray-900 border-t pt-4 mt-4">
@@ -444,4 +446,3 @@ const OrderForm = () => {
 };
 
 export default OrderForm;
-
