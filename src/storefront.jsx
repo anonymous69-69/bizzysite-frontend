@@ -237,21 +237,59 @@ export default function BusinessDashboard() {
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
-        <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow space-y-6 animate-pulse">
-          <div className="h-8 bg-gray-300 rounded w-1/3"></div>
-          <div className="h-6 bg-gray-300 rounded w-1/2"></div>
-
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow space-y-4">
-            <div className="h-6 bg-gray-300 rounded w-1/4"></div>
-            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-300 rounded w-full"></div>
+      <div className={`min-h-screen flex flex-col overflow-x-hidden ${
+        darkMode
+          ? 'bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white'
+          : 'bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black'
+      }`}>
+        <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow space-y-8 animate-pulse">
+          {/* Header Skeleton */}
+          <div className="mb-6 rounded-md p-3">
+            <div className="flex justify-between items-center mb-2">
+              <div className={`h-8 w-32 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+              <div className={`h-10 w-10 rounded-full ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+            </div>
+            <div className={`h-7 w-1/2 rounded mb-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+            <div className={`h-1 w-24 rounded-full mb-6 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+            <div className={`h-5 w-3/4 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
           </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow space-y-4">
-            <div className="h-6 bg-gray-300 rounded w-1/4"></div>
-            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-300 rounded w-full"></div>
+          {/* Tabs Skeleton */}
+          <div className="flex space-x-2 sm:space-x-6 px-2 py-2">
+            <div className={`h-10 w-24 rounded-md ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+            <div className={`h-10 w-24 rounded-md ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+            <div className={`h-10 w-24 rounded-md ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+            <div className={`h-10 w-24 rounded-md ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+          </div>
+
+          {/* Form Card Skeleton */}
+          <div className={`rounded-xl shadow-lg p-6 sm:p-8 border ${
+            darkMode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/50 border-gray-200'
+          }`}>
+            <div className={`h-6 w-1/3 rounded mb-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+            <div className={`h-4 w-1/2 rounded mb-6 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+            
+            <div className="space-y-6">
+              {/* Input field skeleton */}
+              <div>
+                <div className={`h-4 w-1/4 rounded mb-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                <div className={`h-10 w-full rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+              </div>
+              {/* Input field skeleton */}
+              <div>
+                <div className={`h-4 w-1/4 rounded mb-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                <div className={`h-10 w-full rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+              </div>
+              {/* Textarea skeleton */}
+              <div>
+                <div className={`h-4 w-1/4 rounded mb-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                <div className={`h-24 w-full rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+              </div>
+              {/* Button skeleton */}
+              <div className="flex justify-end">
+                <div className={`h-11 w-48 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

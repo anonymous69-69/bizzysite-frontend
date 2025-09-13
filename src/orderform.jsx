@@ -193,6 +193,8 @@ const OrderForm = () => {
             total: orderTotal,
             currency: storeCurrency,
             paid: false, 
+            // CHANGE: Added status field to explicitly track order state
+            status: 'pending',
         };
 
         const orderRes = await fetch(`${API_BASE}/api/orders`, {
@@ -207,8 +209,6 @@ const OrderForm = () => {
         }
         const dbOrderId = orderData.orderId;
 
-        // START: FIX FOR 95/5 SPLIT
-        // I am now sending the 'storeId' to the backend, which is essential for Razorpay Route.
         const razorpayOrderRes = await fetch(`${API_BASE}/api/create-razorpay-order`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -216,10 +216,9 @@ const OrderForm = () => {
                 amount: orderTotal,
                 currency: storeCurrency,
                 orderId: dbOrderId, 
-                storeId: business.storeId, // This is the crucial addition
+                storeId: business.storeId, 
             }),
         });
-        // END: FIX FOR 95/5 SPLIT
         
         const razorpayOrderData = await razorpayOrderRes.json();
         if (!razorpayOrderRes.ok) {
@@ -263,10 +262,29 @@ const OrderForm = () => {
             theme: {
                 color: "#4f46e5", 
             },
+            // ---- START: FIX FOR CANCELED PAYMENTS ----
+            // This `modal.ondismiss` function is triggered when the user closes the payment window.
+            modal: {
+                ondismiss: async function() {
+                    console.log('Payment modal dismissed.');
+                    // We now make an API call to your backend to mark the pre-created order as "canceled".
+                    try {
+                        await fetch(`${API_BASE}/api/orders/${dbOrderId}/cancel`, {
+                            method: "POST", // Or PUT, depending on your API design
+                            headers: { 'Content-Type': 'application/json' },
+                        });
+                    } catch (err) {
+                        console.error("Failed to send cancellation status to backend:", err);
+                    }
+                }
+            }
+            // ---- END: FIX FOR CANCELED PAYMENTS ----
         };
         
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (response){
+          // Also mark the order as failed in the backend on explicit failure.
+          fetch(`${API_BASE}/api/orders/${dbOrderId}/fail`, { method: "POST" });
           alert(`Payment failed: ${response.error.description} (Code: ${response.error.code})`);
         });
 

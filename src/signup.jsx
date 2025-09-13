@@ -313,7 +313,12 @@ const AuthModal = ({ isLogin, setIsLogin, onClose, onSuccess, onForgotPasswordCl
             localStorage.setItem("userEmail", data.email || "");
             localStorage.setItem("userName", data.name || "");
             localStorage.setItem("userPhone", data.phone || "");
-            localStorage.setItem("userRole", "vendor");
+            localStorage.setItem("userRole", data.role || "vendor");
+
+            // Save admin token if provided by backend
+            if (data.adminToken) {
+              localStorage.setItem("adminToken", data.adminToken);
+            }
 
             // **FIXED**: Restore business creation logic for new sign-ups
             if (!isLogin) {

@@ -225,42 +225,77 @@ export default function CustomizeStore() {
 
   if (isLoading) {
     return (
-      <div
-        className={`min-h-screen flex flex-col ${
-          darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-black"
-        }`}
-      >
-        <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow space-y-6 animate-pulse">
-          <div
-            className={`h-6 rounded w-1/3 ${
-              darkMode ? "bg-gray-700" : "bg-gray-300"
-            }`}
-          ></div>
-          <div
-            className={`h-4 rounded w-1/2 ${
-              darkMode ? "bg-gray-700" : "bg-gray-300"
-            }`}
-          ></div>
-          <div
-            className={`p-4 sm:p-6 rounded-lg shadow space-y-4 ${
-              darkMode ? "bg-gray-800" : "bg-white"
-            }`}
-          >
-            <div
-              className={`h-5 rounded w-1/4 ${
-                darkMode ? "bg-gray-700" : "bg-gray-300"
-              }`}
-            ></div>
-            <div
-              className={`h-4 rounded w-3/4 ${
-                darkMode ? "bg-gray-700" : "bg-gray-300"
-              }`}
-            ></div>
-            <div
-              className={`h-4 rounded w-full ${
-                darkMode ? "bg-gray-700" : "bg-gray-300"
-              }`}
-            ></div>
+      <div className={`min-h-screen flex flex-col overflow-x-hidden ${
+        darkMode
+          ? 'bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white'
+          : 'bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black'
+      }`}>
+        <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow animate-pulse">
+          {/* Header Skeleton */}
+          <div className="mb-6 rounded-md p-3">
+            <div className="flex justify-between items-center mb-2">
+              <div className={`h-8 w-32 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+              <div className={`h-10 w-10 rounded-full ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+            </div>
+            <div className={`h-7 w-1/2 rounded mb-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+            <div className={`h-1 w-24 rounded-full mb-6 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+            <div className={`h-5 w-3/4 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+          </div>
+
+          {/* Tabs Skeleton */}
+          <div className="flex space-x-2 sm:space-x-6 px-2 py-2 mb-8">
+            <div className={`h-10 w-24 rounded-md ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+            <div className={`h-10 w-24 rounded-md ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+            <div className={`h-10 w-24 rounded-md ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+            <div className={`h-10 w-24 rounded-md ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+          </div>
+
+          {/* Main Grid Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Color Scheme Card Skeleton */}
+              <div className={`rounded-xl p-6 border ${darkMode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/50 border-gray-200'}`}>
+                <div className={`h-6 w-1/3 rounded mb-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                <div className={`h-4 w-1/2 rounded mb-6 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                <div className={`h-5 w-1/4 rounded mb-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                <div className="flex flex-wrap gap-3 mb-4">
+                  {[...Array(6)].map((_, i) => <div key={i} className={`w-10 h-10 rounded-full ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>)}
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={`w-10 h-10 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                  <div className={`h-10 flex-1 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                </div>
+              </div>
+
+              {/* Text Color Card Skeleton */}
+              <div className={`rounded-xl p-6 border ${darkMode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/50 border-gray-200'}`}>
+                <div className={`h-6 w-1/3 rounded mb-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                <div className={`h-4 w-1/2 rounded mb-6 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                <div className="flex gap-4">
+                  <div className={`w-10 h-10 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                  <div className={`w-10 h-10 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column (Preview) Skeleton */}
+            <div className="lg:sticky lg:top-6 lg:self-start">
+              <div className={`rounded-xl p-6 border ${darkMode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/50 border-gray-200'}`}>
+                <div className={`h-6 w-1/2 rounded mb-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                <div className={`h-4 w-3/4 rounded mb-6 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                <div className={`border rounded-lg ${darkMode ? 'border-gray-700' : 'border-gray-300'}`}>
+                  <div className={`h-12 w-full ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                  <div className={`p-4 ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className={`h-24 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+                      <div className={`h-24 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+                      <div className={`h-24 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
