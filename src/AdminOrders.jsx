@@ -13,10 +13,14 @@ export default function AdminOrders() {
         const fetchAllOrders = async () => {
             setIsLoading(true);
             try {
-                const adminToken = localStorage.getItem('userId'); 
+                // ---- START: FIX FOR ADMIN AUTHENTICATION ----
+                // The backend expects a specific 'adminToken' for admin routes.
+                // We now correctly retrieve this token from localStorage instead of the generic 'userId'.
+                const adminToken = localStorage.getItem('adminToken'); 
                 if (!adminToken) {
-                    throw new Error("Admin authorization required. Please log in.");
+                    throw new Error("Admin authorization required. Please log in as an admin.");
                 }
+                // ---- END: FIX FOR ADMIN AUTHENTICATION ----
 
                 const response = await fetch(`${API_BASE}/api/admin/orders`, {
                     headers: {
@@ -29,13 +33,9 @@ export default function AdminOrders() {
                     throw new Error(errorData.message || 'Failed to fetch orders.');
                 }
                 const data = await response.json();
-
-                // ---- START: FIX FOR CANCELED ORDERS ----
-                // Per your request, the admin panel should only show orders where payment is completed.
-                // We filter for orders where the `paid` flag is true.
+                
+                // Filter for paid orders on the client-side as well for consistency
                 const paidOrders = data.filter(order => order.paid === true);
-                // ---- END: FIX FOR CANCELED ORDERS ----
-
                 setOrders(paidOrders);
 
             } catch (err) {
@@ -51,7 +51,8 @@ export default function AdminOrders() {
 
     const handlePayoutStatusChange = async (orderId, newStatus) => {
         try {
-            const adminToken = localStorage.getItem('userId');
+            // Also use the correct adminToken for this action
+            const adminToken = localStorage.getItem('adminToken');
             const response = await fetch(`${API_BASE}/api/orders/${orderId}/payout-status`, {
                 method: 'PUT',
                 headers: {
@@ -167,3 +168,4 @@ export default function AdminOrders() {
         </div>
     );
 }
+
