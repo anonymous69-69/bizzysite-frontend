@@ -16,15 +16,15 @@ export default function AdminOrders() {
                 // ---- START: FIX FOR ADMIN AUTHENTICATION ----
                 // The backend expects a specific 'adminToken' for admin routes.
                 // We now correctly retrieve this token from localStorage instead of the generic 'userId'.
-                const adminToken = localStorage.getItem('adminToken'); 
-                if (!adminToken) {
+                const token = localStorage.getItem('userId'); 
+                if (!token) {
                     throw new Error("Admin authorization required. Please log in as an admin.");
                 }
                 // ---- END: FIX FOR ADMIN AUTHENTICATION ----
 
                 const response = await fetch(`${API_BASE}/api/admin/orders`, {
                     headers: {
-                        'Authorization': `Bearer ${adminToken}`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
@@ -52,12 +52,12 @@ export default function AdminOrders() {
     const handlePayoutStatusChange = async (orderId, newStatus) => {
         try {
             // Also use the correct adminToken for this action
-            const adminToken = localStorage.getItem('adminToken');
+            const token = localStorage.getItem('userId');
             const response = await fetch(`${API_BASE}/api/orders/${orderId}/payout-status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${adminToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ payoutStatus: newStatus })
             });
@@ -168,4 +168,3 @@ export default function AdminOrders() {
         </div>
     );
 }
-
