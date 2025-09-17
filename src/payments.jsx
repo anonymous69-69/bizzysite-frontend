@@ -63,25 +63,20 @@ export default function PaymentMethodForm() {
   useEffect(() => {
     const fetchPaymentSettings = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const userId = localStorage.getItem('userId');
+        // ---- FIX: Using 'userId' for authentication token, not 'token' ----
+        const token = localStorage.getItem('userId');
         
-        if (!userId) {
+        if (!token) {
           navigate('/login');
           return;
         }
 
         fetch(`https://bizzysite.onrender.com/api/user`, {
-          headers: { Authorization: `Bearer ${userId}` }
+          headers: { Authorization: `Bearer ${token}` }
         })
           .then(res => res.json())
           .then(data => { if (data?.name) setUserName(data.name); })
           .catch(err => console.error('Failed to fetch user info:', err));
-        
-        if (!token) {
-          setIsLoading(false);
-          return;
-        }
         
         const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -179,8 +174,9 @@ export default function PaymentMethodForm() {
       beneficiaryAddress: isInternationalBankEnabled ? paymentDetails.beneficiaryAddress : "",
       payPalEmail: isPayPalEnabled ? paymentDetails.payPalEmail : "",
     };
-
-    const token = localStorage.getItem('token');
+    
+    // ---- FIX: Using 'userId' for authentication token, not 'token' ----
+    const token = localStorage.getItem('userId');
     if (!token) {
       setErrorMessage('You must be logged in to save payment details.');
       setIsSaving(false);
@@ -206,14 +202,11 @@ export default function PaymentMethodForm() {
       const result = await response.json();
 
       if (response.ok) {
-        // START: UPDATE STATE AFTER SAVING
-        // This ensures the linked account ID is displayed immediately after creation.
         const newPaymentsData = result.data?.payments || {};
         setPaymentDetails(prev => ({
             ...prev,
             razorpayLinkedAccountId: newPaymentsData.razorpayLinkedAccountId || prev.razorpayLinkedAccountId,
         }));
-        // END: UPDATE STATE AFTER SAVING
         toast.success(result.message || 'Payment details saved!', { position: 'top-right' });
       } else {
         setErrorMessage(`Failed to save: ${result.message || 'Unknown error'}`);
@@ -255,7 +248,6 @@ export default function PaymentMethodForm() {
           </div>
         )}
 
-        {/* Header Section */}
         <div className="mb-6 rounded-md p-3">
           <div className="flex justify-between items-center mb-2">
             <Link to="/signup" className={`text-3xl sm:text-4xl font-extrabold text-white`}>
@@ -289,7 +281,6 @@ export default function PaymentMethodForm() {
           </p>
         </div>
 
-        {/* Navigation Bar */}
         <div className="relative">
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
             <div className="flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-md">
@@ -308,11 +299,10 @@ export default function PaymentMethodForm() {
             Payout Methods
           </h3>
           <p className={`mb-4 sm:mb-6 text-gray-400`}>
-            Configure how you want to receive payments from your sales.
+            Configure how you want to receive payments from your sales. Select one option.
           </p>
 
           <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-             {/* UPI Section */}
             <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
               <div className="mr-2">
                 <h3 className={`text-base sm:text-lg font-semibold text-white`}>🇮🇳 UPI Payment (India)</h3>
@@ -336,7 +326,6 @@ export default function PaymentMethodForm() {
               </div>
             )}
             
-            {/* Bank Transfer (India) Section */}
             <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
               <div className="mr-2">
                 <h3 className={`text-base sm:text-lg font-semibold text-white`}>🇮🇳 Bank Transfer (India)</h3>
@@ -350,7 +339,6 @@ export default function PaymentMethodForm() {
               </label>
             </div>
 
-            {/* International Bank Transfer Section */}
             <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
               <div className="mr-2">
                 <h3 className={`text-base sm:text-lg font-semibold text-white`}>
@@ -368,10 +356,8 @@ export default function PaymentMethodForm() {
               </label>
             </div>
 
-            {/* Shared Bank Details Form */}
             {(isBankEnabled || isInternationalBankEnabled) && (
                  <div className="p-4 border rounded-lg animate-slideDown bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
-                    {/* START: RAZORPAY LINKED ACCOUNT STATUS */}
                     {isBankEnabled && (
                         <div className="mb-4 p-3 rounded-lg bg-indigo-900/40 border border-indigo-700">
                             <h4 className="font-semibold text-indigo-200">Automated Payout Status</h4>
@@ -382,7 +368,6 @@ export default function PaymentMethodForm() {
                             )}
                         </div>
                     )}
-                    {/* END: RAZORPAY LINKED ACCOUNT STATUS */}
                     <h4 className={`text-sm font-semibold mb-3 text-gray-300`}>Bank Account Details</h4>
                     <div className="space-y-3">
                         <div>
@@ -427,7 +412,6 @@ export default function PaymentMethodForm() {
                  </div>
             )}
             
-            {/* START: REORDERED PAYPAL PAYOUT SECTION */}
             <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
                 <div className="mr-2 flex items-center space-x-3">
                     <PayPalIcon />
@@ -455,7 +439,6 @@ export default function PaymentMethodForm() {
                 </div>
               </div>
             )}
-            {/* END: REORDERED PAYPAL PAYOUT SECTION */}
           </div>
 
           <div className="flex justify-end">

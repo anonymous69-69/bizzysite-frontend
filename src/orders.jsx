@@ -15,7 +15,6 @@ export default function OrderManagement() {
   const menuRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
 
-
   useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -28,82 +27,76 @@ export default function OrderManagement() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
 
   useEffect(() => {
     const fetchOrders = async () => {
-        setIsLoading(true);
-        try {
-            // Fetch user name
-            const userId = localStorage.getItem('userId');
-            if (userId) {
-                fetch(`https://bizzysite.onrender.com/api/user`, {
-                    headers: {
-                    Authorization: `Bearer ${userId}`
-                    }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data?.name) setUserName(data.name);
-                })
-                .catch(err => console.error('Failed to fetch user info:', err));
+      setIsLoading(true);
+      try {
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+          fetch(`https://bizzysite.onrender.com/api/user`, {
+            headers: {
+              Authorization: `Bearer ${userId}`
             }
-
-            // Fetch orders with authentication
-            const response = await fetch("https://bizzysite.onrender.com/api/orders", {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('userId')}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch orders');
-            }
-            
-            const data = await response.json();
-            
-            // ---- START: FIX FOR CANCELED ORDERS ----
-            // We filter out orders marked as 'canceled' or 'failed' so they don't appear in the vendor dashboard.
-            const visibleOrders = data.filter(order => order.status !== 'canceled' && order.status !== 'failed');
-            // ---- END: FIX FOR CANCELED ORDERS ----
-
-            const formatted = visibleOrders.map((order, i) => {
-              const currencySymbol = new Intl.NumberFormat('en-US', { style: 'currency', currency: order.currency || 'INR' }).formatToParts(0).find(p => p.type === 'currency')?.value || '$';
-              return {
-                ...order,
-                id: order._id || `ORD-${1000 + i}`,
-                customer: order.customer?.name || "Unknown",
-                date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A",
-                status: order.paid ? 'Completed' : (order.status || "Pending"),
-                itemsCount: order.items?.length || 0,
-                total: order.total || 0,
-                itemsDetails: order.items || [],
-                currency: order.currency || 'INR',
-                currencySymbol: currencySymbol,
-                customerDetails: order.customer || {},
-              };
-            }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            
-            setOrders(formatted);
-
-        } catch (err) {
-            console.error("Failed to load orders", err);
-        } finally {
-            setIsLoading(false);
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data?.name) setUserName(data.name);
+          })
+          .catch(err => console.error('Failed to fetch user info:', err));
         }
+
+        const response = await fetch("https://bizzysite.onrender.com/api/orders", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('userId')}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch orders');
+        }
+        
+        const data = await response.json();
+        
+        const paidOrders = data.filter(order => order.paid && order.status !== 'canceled' && order.status !== 'failed');
+
+        const formatted = paidOrders.map((order, i) => {
+          const currencySymbol = new Intl.NumberFormat('en-US', { style: 'currency', currency: order.currency || 'INR' }).formatToParts(0).find(p => p.type === 'currency')?.value || '$';
+          return {
+            ...order,
+            id: order._id || `ORD-${1000 + i}`,
+            customer: order.customer?.name || "Unknown",
+            date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A",
+            status: order.status || "Pending", 
+            itemsCount: order.items?.length || 0,
+            total: order.total || 0,
+            itemsDetails: order.items || [],
+            currency: order.currency || 'INR',
+            currencySymbol: currencySymbol,
+            customerDetails: order.customer || {},
+          };
+        }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        setOrders(formatted);
+
+      } catch (err) {
+        console.error("Failed to load orders", err);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     fetchOrders();
   }, []);
 
-  const statusTabs = ['All Orders', 'Completed', 'Pending'];
+  const statusTabs = ['All Orders', 'Pending', 'Completed'];
+
   const filteredOrders = activeTab === 'All Orders'
     ? orders
     : orders.filter(order => order.status === activeTab);
 
   const today = new Date().toISOString().split('T')[0];
   const totalOrdersToday = orders.filter(order => order.createdAt && order.createdAt.startsWith(today)).length;
-
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
@@ -146,7 +139,7 @@ export default function OrderManagement() {
     <div className={`min-h-screen flex flex-col overflow-x-hidden ${darkMode ? "bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white" : "bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black"}`}>
       <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        {/* Header section styled like storefront.jsx */}
+        {/* Header section */}
         <div className="mb-6 rounded-md p-3">
           <div className="flex justify-between items-center mb-2">
             <Link 
@@ -296,7 +289,7 @@ export default function OrderManagement() {
               </h3>
               <p className={`mt-1 text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
                 {activeTab === 'All Orders'
-                  ? "You haven't received any orders yet."
+                  ? "You haven't received any paid orders yet."
                   : `You don't have any ${activeTab.toLowerCase()} orders.`}
               </p>
             </div>
@@ -314,12 +307,8 @@ export default function OrderManagement() {
                           {order.id.slice(-6)}
                         </h3>
                         <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'Pending'
-                            ? `${darkMode ? "bg-yellow-900/50 text-yellow-300" : "bg-yellow-100 text-yellow-800"}` :
-                            order.status === 'Confirmed'
-                              ? `${darkMode ? "bg-blue-900/50 text-blue-300" : "bg-blue-100 text-blue-800"}` :
-                              order.status === 'Completed'
-                                ? `${darkMode ? "bg-green-900/50 text-green-300" : "bg-green-100 text-green-800"}` :
-                                `${darkMode ? "bg-red-900/50 text-red-300" : "bg-red-100 text-red-800"}`
+                            ? `${darkMode ? "bg-yellow-900/50 text-yellow-300" : "bg-yellow-100 text-yellow-800"}`
+                            : `${darkMode ? "bg-green-900/50 text-green-300" : "bg-green-100 text-green-800"}`
                           }`}>
                           {order.status}
                         </span>
@@ -353,27 +342,28 @@ export default function OrderManagement() {
                       View Details
                     </button>
 
+                    {/* **UPDATED:** Reversible status buttons with VISIBLE gradients */}
                     {order.status === 'Pending' && (
                       <button
-                        onClick={() => handleStatusChange(order.id, 'Confirmed')}
-                        className="px-2 py-1 sm:px-3 sm:py-1 bg-indigo-600 text-white rounded-md text-xs sm:text-sm hover:bg-indigo-700"
-                      >
-                        Confirm
-                      </button>
-                    )}
-
-                    {order.status === 'Confirmed' && (
-                      <button
                         onClick={() => handleStatusChange(order.id, 'Completed')}
-                        className="px-2 py-1 sm:px-3 sm:py-1 bg-green-600 text-white rounded-md text-xs sm:text-sm hover:bg-green-700"
+                        className="px-2 py-1 sm:px-3 sm:py-1 bg-gradient-to-r from-emerald-400 to-teal-600 text-white rounded-md text-xs sm:text-sm shadow-sm hover:from-emerald-500 hover:to-teal-700 transition-all"
                       >
                         Mark as Completed
                       </button>
                     )}
 
+                    {order.status === 'Completed' && (
+                      <button
+                        onClick={() => handleStatusChange(order.id, 'Pending')}
+                        className="px-2 py-1 sm:px-3 sm:py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-md text-xs sm:text-sm shadow-sm hover:from-blue-600 hover:to-indigo-700 transition-all"
+                      >
+                        Move to Pending
+                      </button>
+                    )}
+
                     <button
                       onClick={() => setOrderToDelete(order)}
-                      className="px-2 py-1 sm:px-3 sm:py-1 bg-red-600 text-white rounded-md text-xs sm:text-sm hover:bg-red-700"
+                      className="px-2 py-1 sm:px-3 sm:py-1 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-md text-xs sm:text-sm shadow-sm hover:from-red-600 hover:to-pink-700 transition-all"
                     >
                       Delete
                     </button>
@@ -414,7 +404,6 @@ export default function OrderManagement() {
                 &times;
               </button>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <h4 className={`font-medium mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
@@ -427,7 +416,6 @@ export default function OrderManagement() {
                   <p><span>Email:</span> {selectedOrder.customerDetails.email}</p>
                 </div>
               </div>
-
               <div>
                 <h4 className={`font-medium mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                   Shipping Address
@@ -440,7 +428,6 @@ export default function OrderManagement() {
                 </div>
               </div>
             </div>
-
             <div className="mb-6">
               <h4 className={`font-medium mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                 Special Note
@@ -449,7 +436,6 @@ export default function OrderManagement() {
                 {selectedOrder.customerDetails.specialNote || 'No special instructions provided'}
               </p>
             </div>
-
             <div className={`border-t pt-4 ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
               <h4 className={`font-medium mb-2 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                 Order Summary
@@ -500,11 +486,9 @@ export default function OrderManagement() {
                 ✕
               </button>
             </div>
-
             <p className={`mb-6 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
               Are you sure you want to delete order {orderToDelete.id.slice(-6)}? This action cannot be undone.
             </p>
-
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setOrderToDelete(null)}
@@ -514,7 +498,7 @@ export default function OrderManagement() {
               </button>
               <button
                 onClick={() => handleDeleteOrder(orderToDelete.id)}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-md hover:from-red-600 hover:to-pink-700"
               >
                 Delete Order
               </button>
@@ -524,6 +508,7 @@ export default function OrderManagement() {
       )}
       </AnimatePresence>
       
+      {/* Footer */}
       <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">

@@ -13,14 +13,12 @@ export default function AdminOrders() {
         const fetchAllOrders = async () => {
             setIsLoading(true);
             try {
-                // ---- START: FIX FOR ADMIN AUTHENTICATION ----
                 // The backend expects a specific 'adminToken' for admin routes.
-                // We now correctly retrieve this token from localStorage instead of the generic 'userId'.
+                // This token should be stored upon admin login.
                 const token = localStorage.getItem('userId'); 
                 if (!token) {
                     throw new Error("Admin authorization required. Please log in as an admin.");
                 }
-                // ---- END: FIX FOR ADMIN AUTHENTICATION ----
 
                 const response = await fetch(`${API_BASE}/api/admin/orders`, {
                     headers: {
@@ -34,7 +32,7 @@ export default function AdminOrders() {
                 }
                 const data = await response.json();
                 
-                // Filter for paid orders on the client-side as well for consistency
+                // Filter for paid orders on the client-side for consistency
                 const paidOrders = data.filter(order => order.paid === true);
                 setOrders(paidOrders);
 
@@ -51,7 +49,6 @@ export default function AdminOrders() {
 
     const handlePayoutStatusChange = async (orderId, newStatus) => {
         try {
-            // Also use the correct adminToken for this action
             const token = localStorage.getItem('userId');
             const response = await fetch(`${API_BASE}/api/orders/${orderId}/payout-status`, {
                 method: 'PUT',
@@ -125,7 +122,7 @@ export default function AdminOrders() {
                             <thead>
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Order ID</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Vendor (Store ID)</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Vendor Details</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Payout Info</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Total Amount</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Vendor's 95% Share</th>
@@ -137,7 +134,12 @@ export default function AdminOrders() {
                                 {filteredOrders.map(order => (
                                     <tr key={order._id}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">{order._id.slice(-8)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">{order.storeId.slice(-8)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <div className="font-semibold">{order.vendorName || 'N/A'}</div>
+                                            <div className="text-gray-400">{order.vendorEmail || 'No Email'}</div>
+                                            <div className="text-gray-400">{order.vendorPhone || 'No Phone'}</div>
+                                            <div className="text-xs text-gray-500 font-mono mt-1">ID: {order.storeId.slice(-8)}</div>
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{renderPayoutInfo(order)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{order.total.toFixed(2)} {order.currency}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-400">{(order.total * 0.95).toFixed(2)} {order.currency}</td>
