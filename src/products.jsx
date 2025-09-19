@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
 import { useTheme } from './ThemeContext';
-import { motion, AnimatePresence } from 'framer-motion'; // Animation library import
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProductCatalog() {
   const API_BASE_URL = 'https://bizzysite.onrender.com/api';
@@ -22,7 +22,6 @@ export default function ProductCatalog() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState('');
-  const [imageUploadError, setImageUploadError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
@@ -66,7 +65,7 @@ export default function ProductCatalog() {
       setUserId(savedUserId);
       setStoreId(savedStoreId);
       
-      fetch(`https://bizzysite.onrender.com/api/user`, {
+      fetch(`${API_BASE_URL}/user`, {
         headers: { Authorization: `Bearer ${savedUserId}` }
       })
       .then(res => res.json())
@@ -87,17 +86,14 @@ export default function ProductCatalog() {
       description: '',
       images: [],
       inStock: true,
-      currency: storeCurrency
     });
     setImagePreviews([]);
-    setImageUploadError('');
     setShowProductModal(true);
   };
 
   const handleEditProduct = (product) => {
     setCurrentProduct({ ...product, price: Number(product.price) });
     setImagePreviews([...product.images]);
-    setImageUploadError('');
     setShowProductModal(true);
   };
 
@@ -105,7 +101,6 @@ export default function ProductCatalog() {
     setShowProductModal(false);
     setCurrentProduct(null);
     setImagePreviews([]);
-    setImageUploadError('');
   };
 
   const handleInputChange = (e) => {
@@ -117,37 +112,23 @@ export default function ProductCatalog() {
     const files = Array.from(e.target.files);
     if (files.length === 0 || !currentProduct) return;
 
-    setImageUploadError('');
     setIsUploading(true);
-
     try {
-      const maxImages = 5;
-      const availableSlots = maxImages - currentProduct.images.length;
-      if (files.length > availableSlots) {
-        toast.warn(`You can only add ${availableSlots} more image(s).`);
-      }
-      const filesToUpload = files.slice(0, availableSlots);
-      
-      const uploadPromises = filesToUpload.map(file => {
+      const uploadPromises = files.map(file => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", "bizzysite");
         return fetch(`https://api.cloudinary.com/v1_1/dkbhczdas/image/upload`, {
-          method: "POST",
-          body: formData,
+          method: "POST", body: formData,
         }).then(res => res.json());
       });
-
       const responses = await Promise.all(uploadPromises);
       const secureUrls = responses.map(res => res.secure_url).filter(Boolean);
       
       setCurrentProduct(prev => ({ ...prev, images: [...prev.images, ...secureUrls] }));
       setImagePreviews(prev => [...prev, ...secureUrls]);
-      if(secureUrls.length > 0) toast.success("Images uploaded!");
-
+      if (secureUrls.length > 0) toast.success("Images uploaded!");
     } catch (err) {
-      console.error('Image upload error:', err);
-      setImageUploadError('Failed to upload images.');
       toast.error('Image upload failed.');
     } finally {
       setIsUploading(false);
@@ -167,13 +148,23 @@ export default function ProductCatalog() {
     });
   };
 
+  // ## FIX: Corrected product data payload to always include the _id ##
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentProduct) return;
 
     setIsLoading(true);
     try {
-      const productData = { ...currentProduct, price: Number(currentProduct.price), currency: storeCurrency };
+      // Correctly create the product data payload, ensuring _id is preserved
+      const productData = {
+        name: currentProduct.name,
+        price: Number(currentProduct.price),
+        description: currentProduct.description,
+        images: currentProduct.images,
+        inStock: currentProduct.inStock,
+        _id: currentProduct._id, // Ensure ID is always included
+      };
+
       const isExisting = products.some(p => p._id === productData._id);
       const updatedProducts = isExisting
         ? products.map(p => (p._id === productData._id ? productData : p))
@@ -190,7 +181,6 @@ export default function ProductCatalog() {
       toast.success('Product saved successfully!');
     } catch (err) {
       console.error('Save product error:', err);
-      setError(err.response?.data?.message || 'Failed to save product.');
       toast.error(err.response?.data?.message || 'Failed to save product.');
     } finally {
       setIsLoading(false);
@@ -199,7 +189,6 @@ export default function ProductCatalog() {
   
   const confirmDeleteProduct = async () => {
     if (!productToDelete) return;
-
     setIsLoading(true);
     try {
       const updatedProducts = products.filter(p => p._id !== productToDelete._id);
@@ -211,8 +200,6 @@ export default function ProductCatalog() {
       setProducts(updatedProducts);
       toast.success('Product deleted!');
     } catch (err) {
-      console.error('Delete product error:', err);
-      setError(err.response?.data?.message || 'Failed to delete product');
       toast.error('Failed to delete product');
     } finally {
       setIsLoading(false);
@@ -230,7 +217,6 @@ export default function ProductCatalog() {
       setStoreCurrency(currencyToSave);
       toast.success("Currency saved successfully!");
     } catch (error) {
-      console.error("Failed to save currency", error);
       toast.error("Failed to save currency.");
     }
   }
@@ -330,22 +316,10 @@ export default function ProductCatalog() {
         )}
       </div>
 
-      {/* NEW: Animation wrapper for all modals */}
       <AnimatePresence>
         {showProductModal && currentProduct && (
-          <motion.div
-            key="productModal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4"
-          >
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              className={`rounded-xl shadow-lg max-w-lg w-full p-6 border overflow-y-auto max-h-[90vh] ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
-            >
+          <motion.div key="productModal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4">
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className={`rounded-xl shadow-lg max-w-lg w-full p-6 border overflow-y-auto max-h-[90vh] ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
               <div className="flex justify-between items-center mb-4">
                 <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{products.some(p => p._id === currentProduct._id) ? 'Edit Product' : 'Add New Product'}</h2>
                 <button onClick={handleCloseModal} className={`${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'} text-2xl`}>&times;</button>
@@ -365,19 +339,8 @@ export default function ProductCatalog() {
         )}
 
         {productToDelete && (
-          <motion.div
-            key="deleteModal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className={`rounded-xl shadow-lg max-w-sm w-full p-6 border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
-            >
+          <motion.div key="deleteModal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className={`rounded-xl shadow-lg max-w-sm w-full p-6 border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
               <h2 className="text-xl font-bold mb-2">Confirm Deletion</h2>
               <p className={`mb-6 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Are you sure you want to delete "{productToDelete?.name}"? This action cannot be undone.</p>
               <div className="flex justify-end space-x-2">
@@ -389,19 +352,8 @@ export default function ProductCatalog() {
         )}
 
         {showCurrencyModal && (
-          <motion.div
-            key="currencyModal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className={`p-6 rounded-xl shadow-xl max-w-sm w-full ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
-            >
+          <motion.div key="currencyModal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className={`p-6 rounded-xl shadow-xl max-w-sm w-full ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
               <h2 className="text-xl font-bold mb-2">Change Currency to {tempCurrency}?</h2>
               <p className={`mb-6 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>This will update the currency for your entire store.</p>
               <div className="flex justify-end space-x-2">
