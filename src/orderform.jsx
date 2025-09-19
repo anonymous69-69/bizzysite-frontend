@@ -308,7 +308,7 @@ const OrderForm = () => {
             Looks like you haven't added any products yet.
           </p>
           <Link
-            to={`/view/${slug}`}
+            to={`/${slug}`}
             className="inline-block mt-6 px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             Return to Store
@@ -339,7 +339,9 @@ const OrderForm = () => {
                         </div>
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank You!</h2>
                         <p className="text-gray-600 mb-6">Your order has been placed successfully.</p>
-                        <button onClick={() => { setShowSuccessModal(false); navigate(`/view/${slug}`); }} className="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold">
+                        
+                        {/* ## FIX: The redirect path is now correct (`/${slug}`) ## */}
+                        <button onClick={() => { setShowSuccessModal(false); navigate(`/${slug}`); }} className="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold">
                             Continue Shopping
                         </button>
                     </div>

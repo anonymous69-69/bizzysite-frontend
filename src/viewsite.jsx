@@ -503,25 +503,27 @@ const ViewSite = () => {
               })()}
             </span>
           </div>
-
+          
+          {/* ## FIX: Checkout button is now disabled when the cart is empty ## */}
           <button
-           onClick={() => {
-            setIsCartOpen(false);
-            navigate(`/order/${slug}`, {
-              state: {
-                cart,
-                total: cart.reduce(
-                  (total, item) =>
-                    total + parseFloat(item.price) * item.quantity,
-                  0
-                ),
-                shippingCharge: business.shippingCharge || 0,
-                currency: storeCurrency,
-              },
-            });
-          }}
-            className="w-full py-2 text-white rounded-md font-medium text-center"
+            onClick={() => {
+              setIsCartOpen(false);
+              navigate(`/order/${slug}`, {
+                state: {
+                  cart,
+                  total: cart.reduce(
+                    (total, item) =>
+                      total + parseFloat(item.price) * item.quantity,
+                    0
+                  ),
+                  shippingCharge: business.shippingCharge || 0,
+                  currency: storeCurrency,
+                },
+              });
+            }}
+            className="w-full py-2 text-white rounded-md font-medium text-center transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             style={{ backgroundColor: primaryColor }}
+            disabled={cart.length === 0}
           >
             Checkout
           </button>
