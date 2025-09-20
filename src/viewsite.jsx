@@ -67,51 +67,58 @@ const ViewSite = () => {
   const [textColor, setTextColor] = useState("white");
 
   useEffect(() => {
-    const fetchBusiness = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+   // In ViewSite.jsx - fetchBusiness function
+const fetchBusiness = async () => {
+  try {
+    setLoading(true);
+    setError(null);
 
-        // Get slug from URL path (first segment)
-        const pathSlug = window.location.pathname.split("/")[1];
-        // Use URL slug if available, otherwise use state slug
-        const finalSlug = pathSlug || slug;
+    // Get slug from URL path (first segment)
+    const pathSlug = window.location.pathname.split("/")[1];
+    // Use URL slug if available, otherwise use state slug
+    const finalSlug = pathSlug || slug;
 
-        if (!finalSlug) {
-          setError("Store slug is missing");
-          setLoading(false);
-          return;
+    if (!finalSlug) {
+      setError("Store slug is missing");
+      setLoading(false);
+      return;
+    }
+
+    console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
+
+    // ================== THE FIX: CACHE BUSTING ==================
+    // We add a unique timestamp to the URL to ensure we always get fresh data from the server,
+    // bypassing any caching layers on Render or in the browser.
+    const res = await fetch(
+      `https://bizzysite.onrender.com/api/store/slug/${slug}?timestamp=${new Date().getTime()}`,
+      {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
         }
-
-        console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
-
-        // ================== THE FIX: CACHE BUSTING ==================
-        // We add a unique timestamp to the URL to ensure we always get fresh data from the server,
-        // bypassing any caching layers on Render or in the browser.
-        const res = await fetch(
-          `https://bizzysite.onrender.com/api/store/slug/${slug}?timestamp=${new Date().getTime()}`
-        );
-        // ==========================================================
-
-        if (res.status === 404) {
-          setError("Store not found");
-          setBusiness(null);
-        } else if (!res.ok) {
-          throw new Error("Failed to fetch store data");
-        } else {
-          const data = await res.json();
-          setBusiness(data);
-          setStoreCurrency(data.defaultCurrency || "USD");
-          // Update slug in state if we used pathSlug
-          // Slug comes from URL; no need to update it in state
-        }
-      } catch (err) {
-        console.error("[ViewSite] Error loading store:", err);
-        setError(err.message || "Could not load this store");
-      } finally {
-        setLoading(false);
       }
-    };
+    );
+    // ==========================================================
+
+    if (res.status === 404) {
+      setError("Store not found");
+      setBusiness(null);
+    } else if (!res.ok) {
+      throw new Error("Failed to fetch store data");
+    } else {
+      const data = await res.json();
+      setBusiness(data);
+      setStoreCurrency(data.defaultCurrency || "USD");
+      // Update slug in state if we used pathSlug
+      // Slug comes from URL; no need to update it in state
+    }
+  } catch (err) {
+    console.error("[ViewSite] Error loading store:", err);
+    setError(err.message || "Could not load this store");
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchBusiness();
   }, [slug]);
@@ -503,27 +510,25 @@ const ViewSite = () => {
               })()}
             </span>
           </div>
-          
-          {/* ## FIX: Checkout button is now disabled when the cart is empty ## */}
+
           <button
-            onClick={() => {
-              setIsCartOpen(false);
-              navigate(`/order/${slug}`, {
-                state: {
-                  cart,
-                  total: cart.reduce(
-                    (total, item) =>
-                      total + parseFloat(item.price) * item.quantity,
-                    0
-                  ),
-                  shippingCharge: business.shippingCharge || 0,
-                  currency: storeCurrency,
-                },
-              });
-            }}
-            className="w-full py-2 text-white rounded-md font-medium text-center transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+           onClick={() => {
+            setIsCartOpen(false);
+            navigate(`/order/${slug}`, {
+              state: {
+                cart,
+                total: cart.reduce(
+                  (total, item) =>
+                    total + parseFloat(item.price) * item.quantity,
+                  0
+                ),
+                shippingCharge: business.shippingCharge || 0,
+                currency: storeCurrency,
+              },
+            });
+          }}
+            className="w-full py-2 text-white rounded-md font-medium text-center"
             style={{ backgroundColor: primaryColor }}
-            disabled={cart.length === 0}
           >
             Checkout
           </button>
