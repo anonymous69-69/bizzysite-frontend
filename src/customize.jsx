@@ -21,6 +21,7 @@ export default function CustomizeStore() {
   const [userName, setUserName] = useState("User");
   const [showMenu, setShowMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [storeSlug, setStoreSlug] = useState('');
   const navigate = useNavigate();
   const [textColor, setTextColor] = useState("white");
   const [isSaving, setIsSaving] = useState(false);
@@ -50,7 +51,8 @@ export default function CustomizeStore() {
 
     if (savedStoreId) {
       setStoreId(savedStoreId);
-      fetchCustomization(savedStoreId);
+      fetchCustomization(savedStoreId, setStoreSlug); // Pass the setter function
+
     }
 
     fetch(`https://bizzysite.onrender.com/api/user`, {
@@ -66,7 +68,7 @@ export default function CustomizeStore() {
       .finally(() => setIsLoading(false));
   }, [navigate]);
 
-  const fetchCustomization = async (storeId) => {
+  const fetchCustomization = async (storeId, setSlugCallback) => {
     const userId = localStorage.getItem("userId");
     if (!userId || !storeId) return;
 
@@ -89,6 +91,10 @@ export default function CustomizeStore() {
         setPrimaryColor(customization.primaryColor || "#3b82f6");
         setSecondaryColor(customization.secondaryColor || "#8b5cf6");
         setTextColor(customization.textColor || "white");
+        if (setSlugCallback) {
+               setSlugCallback(data.slug || '');
+                }
+        
       }
     } catch (err) {
       console.error("Failed to fetch customization:", err);
@@ -199,7 +205,7 @@ export default function CustomizeStore() {
       const response = await fetch(
         `https://bizzysite.onrender.com/api/business`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${userId}`,
@@ -215,7 +221,10 @@ export default function CustomizeStore() {
       if (!response.ok) {
         throw new Error("Failed to save customization");
       }
-
+      const result = await response.json();
+          if(result.data && result.data.slug) {
+            setStoreSlug(result.data.slug);
+          }
       toast.success("Customization saved successfully!");
       setIsSaving(false);
     } catch (error) {

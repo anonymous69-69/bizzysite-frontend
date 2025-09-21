@@ -3,8 +3,28 @@ import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
-import { useTheme } from './ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ++ START: FIX FOR MISSING ThemeContext ++
+// Simple theme hook to replace the missing context dependency.
+// It checks the user's system preference for dark mode.
+const useTheme = () => {
+    const [isDarkMode, setIsDarkMode] = useState(
+      () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+  
+    useEffect(() => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => setIsDarkMode(mediaQuery.matches);
+  
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
+  
+    return { darkMode: isDarkMode };
+};
+// ++ END: FIX FOR MISSING ThemeContext ++
+
 
 export default function ProductCatalog() {
   const API_BASE_URL = 'https://bizzysite.onrender.com/api';
@@ -23,6 +43,7 @@ export default function ProductCatalog() {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [storeSlug, setStoreSlug] = useState('');
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
@@ -33,11 +54,15 @@ export default function ProductCatalog() {
     setError(null);
     try {
       const response = await axios.get(`${API_BASE_URL}/business`, {
-        headers: { 'Authorization': `Bearer ${currentUserId}` }
+        headers: { 
+            'Authorization': `Bearer ${currentUserId}`,
+            'x-store-id': currentStoreId 
+        }
       });
       const businessData = response.data;
       setProducts(businessData?.products || []);
       setStoreCurrency(businessData?.defaultCurrency || 'USD');
+      setStoreSlug(businessData?.slug || '');
     } catch (err) {
       console.error('Fetch products error:', err);
       setError(err.response?.data?.message || 'Failed to load products');
@@ -45,7 +70,7 @@ export default function ProductCatalog() {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, API_BASE_URL]);
+  }, [navigate]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -61,7 +86,7 @@ export default function ProductCatalog() {
     const savedUserId = localStorage.getItem('userId');
     const savedStoreId = localStorage.getItem('storeId');
 
-    if (savedUserId) {
+    if (savedUserId && savedStoreId) {
       setUserId(savedUserId);
       setStoreId(savedStoreId);
       
@@ -117,7 +142,7 @@ export default function ProductCatalog() {
       const uploadPromises = files.map(file => {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", "bizzysite");
+        formData.append("upload_preset", "bizzysite"); // Your Cloudinary upload preset
         return fetch(`https://api.cloudinary.com/v1_1/dkbhczdas/image/upload`, {
           method: "POST", body: formData,
         }).then(res => res.json());
@@ -148,44 +173,71 @@ export default function ProductCatalog() {
     });
   };
 
-  // ## FIX: Corrected product data payload to always include the _id ##
+  // =================================================================
+  // START: IMPORTANT FIX - REPLACED `handleSubmit` FUNCTION
+  // This new version updates the state from the server's response.
+  // =================================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentProduct) return;
 
     setIsLoading(true);
+    console.log("--- Starting Product Save ---");
+
     try {
-      // Correctly create the product data payload, ensuring _id is preserved
-      const productData = {
-        name: currentProduct.name,
-        price: Number(currentProduct.price),
-        description: currentProduct.description,
-        images: currentProduct.images,
-        inStock: currentProduct.inStock,
-        _id: currentProduct._id, // Ensure ID is always included
-      };
+        const productData = {
+            name: currentProduct.name,
+            price: Number(currentProduct.price),
+            description: currentProduct.description,
+            images: currentProduct.images,
+            inStock: currentProduct.inStock,
+            _id: currentProduct._id,
+        };
 
-      const isExisting = products.some(p => p._id === productData._id);
-      const updatedProducts = isExisting
-        ? products.map(p => (p._id === productData._id ? productData : p))
-        : [...products, productData];
+        const isExisting = products.some(p => p._id === productData._id);
+        const updatedProductsPayload = isExisting
+            ? products.map(p => (p._id === productData._id ? productData : p))
+            : [...products, productData];
 
-      await axios.put(`${API_BASE_URL}/business`, {
-        type: 'products', data: updatedProducts
-      }, {
-        headers: { 'Authorization': `Bearer ${userId}`, 'x-store-id': storeId }
-      });
+        if (!userId || !storeId) {
+            toast.error("Could not save. User or Store ID is missing.");
+            setIsLoading(false);
+            return;
+        }
 
-      setProducts(updatedProducts);
-      handleCloseModal();
-      toast.success('Product saved successfully!');
+        // The API call itself
+        const response = await axios.put(`${API_BASE_URL}/business`, {
+            type: 'products',
+            data: updatedProductsPayload
+        }, {
+            headers: { 'Authorization': `Bearer ${userId}`, 'x-store-id': storeId }
+        });
+
+        // --- START: NEW AND IMPROVED PART ---
+        // Use the definitive data from the server's response to update the state
+        if (response.data && response.data.data && response.data.data.products) {
+            console.log("--- Product Save SUCCESS ---");
+            // This is the single source of truth!
+            setProducts(response.data.data.products); 
+            setStoreSlug(response.data.data.slug || '');
+            handleCloseModal();
+            toast.success('Product saved successfully!');
+        } else {
+            throw new Error("Server response was missing product data.");
+        }
+        // --- END: NEW AND IMPROVED PART ---
+        
     } catch (err) {
-      console.error('Save product error:', err);
-      toast.error(err.response?.data?.message || 'Failed to save product.');
+        console.error('--- Product Save FAILED ---', err);
+        const errorMessage = err.response?.data?.message || err.message || 'An unknown error occurred.';
+        toast.error(`Save failed: ${errorMessage}`);
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
   };
+  // =================================================================
+  // END: IMPORTANT FIX
+  // =================================================================
   
   const confirmDeleteProduct = async () => {
     if (!productToDelete) return;
@@ -373,3 +425,4 @@ export default function ProductCatalog() {
     </div>
   );
 }
+
