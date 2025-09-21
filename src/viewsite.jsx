@@ -85,8 +85,13 @@ const ViewSite = () => {
         }
 
         console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
+
+        // Get the API URL from the environment variable
+        const API_BASE_URL = process.env.REACT_APP_API_URL;
+        
+        // Construct the URL dynamically
         const res = await fetch(
-          `https://bizzysite.onrender.com/api/store/slug/${slug}?timestamp=${new Date().getTime()}`
+          `${API_BASE_URL}/api/store/slug/${slug}?timestamp=${new Date().getTime()}`
         );
         // ==========================================================
 
