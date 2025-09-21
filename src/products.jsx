@@ -3,28 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
+import { useTheme } from './ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// ++ START: FIX FOR MISSING ThemeContext ++
-// Simple theme hook to replace the missing context dependency.
-// It checks the user's system preference for dark mode.
-const useTheme = () => {
-    const [isDarkMode, setIsDarkMode] = useState(
-      () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    );
-  
-    useEffect(() => {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = () => setIsDarkMode(mediaQuery.matches);
-  
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
-    }, []);
-  
-    return { darkMode: isDarkMode };
-};
-// ++ END: FIX FOR MISSING ThemeContext ++
-
 
 export default function ProductCatalog() {
   const API_BASE_URL = 'https://bizzysite.onrender.com/api';
@@ -43,7 +23,6 @@ export default function ProductCatalog() {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [storeSlug, setStoreSlug] = useState('');
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
@@ -54,15 +33,11 @@ export default function ProductCatalog() {
     setError(null);
     try {
       const response = await axios.get(`${API_BASE_URL}/business`, {
-        headers: { 
-            'Authorization': `Bearer ${currentUserId}`,
-            'x-store-id': currentStoreId 
-        }
+        headers: { 'Authorization': `Bearer ${currentUserId}` }
       });
       const businessData = response.data;
       setProducts(businessData?.products || []);
       setStoreCurrency(businessData?.defaultCurrency || 'USD');
-      setStoreSlug(businessData?.slug || '');
     } catch (err) {
       console.error('Fetch products error:', err);
       setError(err.response?.data?.message || 'Failed to load products');
@@ -70,7 +45,7 @@ export default function ProductCatalog() {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate]);
+  }, [navigate, API_BASE_URL]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -86,7 +61,7 @@ export default function ProductCatalog() {
     const savedUserId = localStorage.getItem('userId');
     const savedStoreId = localStorage.getItem('storeId');
 
-    if (savedUserId && savedStoreId) {
+    if (savedUserId) {
       setUserId(savedUserId);
       setStoreId(savedStoreId);
       
@@ -142,7 +117,7 @@ export default function ProductCatalog() {
       const uploadPromises = files.map(file => {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", "bizzysite"); // Your Cloudinary upload preset
+        formData.append("upload_preset", "bizzysite");
         return fetch(`https://api.cloudinary.com/v1_1/dkbhczdas/image/upload`, {
           method: "POST", body: formData,
         }).then(res => res.json());
@@ -173,71 +148,42 @@ export default function ProductCatalog() {
     });
   };
 
-  // =================================================================
-  // START: IMPORTANT FIX - REPLACED `handleSubmit` FUNCTION
-  // This new version updates the state from the server's response.
-  // =================================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentProduct) return;
 
     setIsLoading(true);
-    console.log("--- Starting Product Save ---");
-
     try {
-        const productData = {
-            name: currentProduct.name,
-            price: Number(currentProduct.price),
-            description: currentProduct.description,
-            images: currentProduct.images,
-            inStock: currentProduct.inStock,
-            _id: currentProduct._id,
-        };
+      const productData = {
+        _id: currentProduct._id,
+        name: currentProduct.name,
+        price: Number(currentProduct.price),
+        description: currentProduct.description,
+        images: currentProduct.images,
+        inStock: currentProduct.inStock,
+      };
 
-        const isExisting = products.some(p => p._id === productData._id);
-        const updatedProductsPayload = isExisting
-            ? products.map(p => (p._id === productData._id ? productData : p))
-            : [...products, productData];
+      const isExisting = products.some(p => p._id === productData._id);
+      const updatedProducts = isExisting
+        ? products.map(p => (p._id === productData._id ? productData : p))
+        : [...products, productData];
 
-        if (!userId || !storeId) {
-            toast.error("Could not save. User or Store ID is missing.");
-            setIsLoading(false);
-            return;
-        }
+      await axios.put(`${API_BASE_URL}/business`, {
+        type: 'products', data: updatedProducts
+      }, {
+        headers: { 'Authorization': `Bearer ${userId}`, 'x-store-id': storeId }
+      });
 
-        // The API call itself
-        const response = await axios.put(`${API_BASE_URL}/business`, {
-            type: 'products',
-            data: updatedProductsPayload
-        }, {
-            headers: { 'Authorization': `Bearer ${userId}`, 'x-store-id': storeId }
-        });
-
-        // --- START: NEW AND IMPROVED PART ---
-        // Use the definitive data from the server's response to update the state
-        if (response.data && response.data.data && response.data.data.products) {
-            console.log("--- Product Save SUCCESS ---");
-            // This is the single source of truth!
-            setProducts(response.data.data.products); 
-            setStoreSlug(response.data.data.slug || '');
-            handleCloseModal();
-            toast.success('Product saved successfully!');
-        } else {
-            throw new Error("Server response was missing product data.");
-        }
-        // --- END: NEW AND IMPROVED PART ---
-        
+      setProducts(updatedProducts);
+      handleCloseModal();
+      toast.success('Product saved successfully!');
     } catch (err) {
-        console.error('--- Product Save FAILED ---', err);
-        const errorMessage = err.response?.data?.message || err.message || 'An unknown error occurred.';
-        toast.error(`Save failed: ${errorMessage}`);
+      console.error('Save product error:', err);
+      toast.error(err.response?.data?.message || 'Failed to save product.');
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
-  // =================================================================
-  // END: IMPORTANT FIX
-  // =================================================================
   
   const confirmDeleteProduct = async () => {
     if (!productToDelete) return;
@@ -278,7 +224,6 @@ export default function ProductCatalog() {
       <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
         
-        {/* Header section */}
         <div className="mb-6 rounded-md p-3">
           <div className="flex justify-between items-center mb-2">
             <Link to="/signup" className={`text-3xl sm:text-4xl font-extrabold ${darkMode ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent' : 'text-gray-900'}`}>
@@ -309,7 +254,6 @@ export default function ProductCatalog() {
           </p>
         </div>
 
-        {/* Navigation tabs */}
         <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
           <div className="flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
             {[ { name: 'Setup', icon: '📊', path: '/storefront' }, { name: 'Products', icon: '📦', path: '/products' }, { name: 'Orders', icon: '🛒', path: '/orders' }, { name: 'Customize', icon: '🎨', path: '/customize' }, { name: 'Preview', icon: '🌐', path: '/navview' }, { name: 'Payments', icon: '💳', path: '/payment' } ].map((tab) => (
@@ -321,7 +265,6 @@ export default function ProductCatalog() {
           </div>
         </div>
 
-        {/* Product catalog header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
           <div>
             <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Product Catalog</h1>
@@ -329,7 +272,36 @@ export default function ProductCatalog() {
           </div>
           <div className="flex items-center gap-3">
             <select value={storeCurrency} onChange={(e) => { setTempCurrency(e.target.value); setShowCurrencyModal(true); }} className={`px-3 py-2 border rounded text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}>
-              <option value="INR">INR (₹)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option><option value="AED">AED (د.إ)</option>
+              <option value="INR">INR (₹)</option>
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="AED">AED (د.إ)</option>
+              <option value="AUD">AUD (A$)</option>
+              <option value="CAD">CAD (C$)</option>
+              <option value="SGD">SGD (S$)</option>
+              <option value="HKD">HKD (HK$)</option>
+              <option value="JPY">JPY (¥)</option>
+              <option value="CNY">CNY (¥)</option>
+              <option value="CHF">CHF (CHF)</option>
+              <option value="SEK">SEK (kr)</option>
+              <option value="NOK">NOK (kr)</option>
+              <option value="DKK">DKK (kr)</option>
+              <option value="NZD">NZD (NZ$)</option>
+              <option value="ZAR">ZAR (R)</option>
+              <option value="SAR">SAR (﷼)</option>
+              <option value="QAR">QAR (﷼)</option>
+              <option value="BHD">BHD (BD)</option>
+              <option value="KWD">KWD (KD)</option>
+              <option value="OMR">OMR (﷼)</option>
+              <option value="THB">THB (฿)</option>
+              <option value="MYR">MYR (RM)</option>
+              <option value="IDR">IDR (Rp)</option>
+              <option value="PHP">PHP (₱)</option>
+              <option value="TRY">TRY (₺)</option>
+              <option value="PLN">PLN (zł)</option>
+              <option value="RUB">RUB (₽)</option>
+              <option value="BRL">BRL (R$)</option>
             </select>
             <button onClick={handleAddProductClick} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center text-sm w-fit">
               <span className="text-xl mr-1">+</span> Add Product
@@ -337,7 +309,6 @@ export default function ProductCatalog() {
           </div>
         </div>
 
-        {/* Content Area */}
         {isLoading ? ( <p>Loading products...</p> ) : 
          error ? ( <p className="text-red-500">{error}</p> ) : 
          products.length === 0 ? (
@@ -377,10 +348,10 @@ export default function ProductCatalog() {
                 <button onClick={handleCloseModal} className={`${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'} text-2xl`}>&times;</button>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Name</label><input type="text" name="name" value={currentProduct.name} onChange={handleInputChange} required className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600' : 'border-gray-300'}`}/></div>
-                <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Description</label><textarea name="description" value={currentProduct.description} onChange={handleInputChange} className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600' : 'border-gray-300'}`}/></div>
-                <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Price</label><div className="flex"><span className={`p-2 border rounded-l ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>{new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value}</span><input type="number" name="price" value={currentProduct.price} onChange={handleInputChange} required className={`w-full p-2 border border-l-0 rounded-r ${darkMode ? 'bg-gray-700 border-gray-600' : 'border-gray-300'}`}/></div></div>
-                <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Images</label><input type="file" accept="image/*" multiple onChange={handleImageUpload} className={`w-full text-sm ${darkMode ? 'text-gray-300' : ''} file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold ${darkMode ? 'file:bg-indigo-900 file:text-indigo-200' : 'file:bg-indigo-50 file:text-indigo-700'}`}/></div>
+                <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Name</label><input type="text" name="name" value={currentProduct.name} onChange={handleInputChange} required className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div>
+                <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Description</label><textarea name="description" value={currentProduct.description} onChange={handleInputChange} className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div>
+                <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Price</label><div className="flex"><span className={`p-2 border rounded-l ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>{new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value || '$'}</span><input type="number" name="price" value={currentProduct.price} onChange={handleInputChange} required className={`w-full p-2 border border-l-0 rounded-r ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div></div>
+                <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Images (up to 5)</label><input type="file" accept="image/*" multiple onChange={handleImageUpload} className={`w-full text-sm ${darkMode ? 'text-gray-300' : ''} file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold ${darkMode ? 'file:bg-indigo-900 file:text-indigo-200' : 'file:bg-indigo-50 file:text-indigo-700'}`}/></div>
                 {isUploading && <p className="text-sm text-gray-400">Uploading...</p>}
                 {imagePreviews.length > 0 && <div className="mt-2 grid grid-cols-3 sm:grid-cols-5 gap-2">{imagePreviews.map((p, i) => <div key={i} className="relative"><img src={p} alt="preview" className="h-24 w-full object-cover rounded"/><button type="button" onClick={() => handleRemoveImage(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">&times;</button></div>)}</div>}
                 <div className="flex items-center"><input type="checkbox" name="inStock" checked={currentProduct.inStock} onChange={() => setCurrentProduct(p => ({...p, inStock: !p.inStock}))} className="h-4 w-4 text-indigo-600 rounded"/><span className={`ml-2 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>In Stock</span></div>
@@ -425,4 +396,3 @@ export default function ProductCatalog() {
     </div>
   );
 }
-

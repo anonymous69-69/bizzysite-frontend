@@ -53,7 +53,6 @@ const ViewSite = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [storeSlug, setStoreSlug] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [cart, setCart] = useState([]);
@@ -86,12 +85,11 @@ const ViewSite = () => {
 
         console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
 
-        // Get the API URL from the environment variable
-        const API_BASE_URL = process.env.REACT_APP_API_URL;
-        
-        // Construct the URL dynamically
+        // ================== THE FIX: CACHE BUSTING ==================
+        // We add a unique timestamp to the URL to ensure we always get fresh data from the server,
+        // bypassing any caching layers on Render or in the browser.
         const res = await fetch(
-          `${API_BASE_URL}/api/store/slug/${slug}?timestamp=${new Date().getTime()}`
+          `https://bizzysite.onrender.com/api/store/slug/${slug}?timestamp=${new Date().getTime()}`
         );
         // ==========================================================
 
