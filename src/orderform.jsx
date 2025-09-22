@@ -45,7 +45,9 @@ const OrderForm = () => {
   
   const [business, setBusiness] = useState(null);
   const [storeCurrency, setStoreCurrency] = useState("INR");
-  const [razorpayKey, setRazorpayKey] = useState(""); // State for Razorpay Key
+  const [razorpayKey, setRazorpayKey] = useState("");
+  // ✅ NEW: State to hold the detected payment gateway
+  const [paymentGateway, setPaymentGateway] = useState("razorpay");
 
   const {
     cart = [],
@@ -73,12 +75,28 @@ const OrderForm = () => {
 
   // Order summary calculations
   const shippingCharge = !isNaN(parseFloat(sc)) ? parseFloat(sc) : 0;
-  const platformFee = !isNaN(total) ? total * 0.05 : 0; // Changed from 0.03 to 0.05
+  const platformFee = !isNaN(total) ? total * 0.05 : 0;
   const orderTotal = !isNaN(total + shippingCharge + platformFee)
     ? total + shippingCharge + platformFee
     : 0;
   
   const API_BASE = "https://bizzysite.onrender.com";
+
+  // ✅ NEW: Effect to detect user's country
+  useEffect(() => {
+    const detectCountry = async () => {
+        try {
+            const res = await fetch(`${API_BASE}/api/detect-country`);
+            const data = await res.json();
+            if (data.paymentGateway) {
+                setPaymentGateway(data.paymentGateway); // Sets to 'razorpay' or 'paypal'
+            }
+        } catch (err) {
+            console.error("Could not detect country, defaulting to Razorpay.", err);
+        }
+    };
+    detectCountry();
+  }, [API_BASE]);
 
   // Effect to load Razorpay script and fetch API Key
   useEffect(() => {
@@ -121,7 +139,6 @@ const OrderForm = () => {
       if (storedSlug) {
         navigate(`/order/${storedSlug}`);
       } else {
-        // Using a more user-friendly notification than alert
         console.error("Store slug is missing.");
         navigate("/");
       }
@@ -193,7 +210,6 @@ const OrderForm = () => {
             total: orderTotal,
             currency: storeCurrency,
             paid: false, 
-            // CHANGE: Added status field to explicitly track order state
             status: 'pending',
         };
 
@@ -225,6 +241,7 @@ const OrderForm = () => {
             throw new Error(razorpayOrderData.error || "Failed to create Razorpay order");
         }
 
+        // ✅ FIX: Dynamically set payment methods based on country
         const options = {
             key: razorpayKey,
             amount: razorpayOrderData.amount,
@@ -234,10 +251,10 @@ const OrderForm = () => {
             order_id: razorpayOrderData.id,
             method: {
               card: true,
-              netbanking: true,
-              upi: true,
-              wallet: true,
-              paypal: true, // ✅ Enable PayPal for international users
+              upi: paymentGateway === 'razorpay',
+              netbanking: paymentGateway === 'razorpay',
+              wallet: paymentGateway === 'razorpay',
+              paypal: paymentGateway === 'paypal',
             },
             handler: async function (response) {
                 const verificationPayload = {
@@ -269,15 +286,12 @@ const OrderForm = () => {
             theme: {
                 color: "#4f46e5", 
             },
-            // ---- START: FIX FOR CANCELED PAYMENTS ----
-            // This `modal.ondismiss` function is triggered when the user closes the payment window.
             modal: {
                 ondismiss: async function() {
                     console.log('Payment modal dismissed.');
-                    // We now make an API call to your backend to mark the pre-created order as "canceled".
                     try {
                         await fetch(`${API_BASE}/api/orders/${dbOrderId}/cancel`, {
-                            method: "POST", // Or PUT, depending on your API design
+                            method: "POST",
                             headers: { 'Content-Type': 'application/json' },
                         });
                     } catch (err) {
@@ -285,12 +299,10 @@ const OrderForm = () => {
                     }
                 }
             }
-            // ---- END: FIX FOR CANCELED PAYMENTS ----
         };
         
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (response){
-          // Also mark the order as failed in the backend on explicit failure.
           fetch(`${API_BASE}/api/orders/${dbOrderId}/fail`, { method: "POST" });
           alert(`Payment failed: ${response.error.description} (Code: ${response.error.code})`);
         });
@@ -347,7 +359,6 @@ const OrderForm = () => {
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank You!</h2>
                         <p className="text-gray-600 mb-6">Your order has been placed successfully.</p>
                         
-                        {/* ## FIX: The redirect path is now correct (`/${slug}`) ## */}
                         <button onClick={() => { setShowSuccessModal(false); navigate(`/${slug}`); }} className="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold">
                             Continue Shopping
                         </button>
