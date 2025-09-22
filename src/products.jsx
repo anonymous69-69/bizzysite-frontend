@@ -214,9 +214,9 @@ export default function ProductCatalog() {
         headers: { Authorization: `Bearer ${userId}`, "x-store-id": storeId }
       });
       setStoreCurrency(currencyToSave);
-      toast.success("Currency saved successfully!");
+      toast.success("Currency saved successfully!", { id: "currency-save", duration: 2000 });
     } catch (error) {
-      toast.error("Failed to save currency.");
+      toast.error("Failed to save currency.", { id: "currency-save-error", duration: 2000 });
     }
   }
 
