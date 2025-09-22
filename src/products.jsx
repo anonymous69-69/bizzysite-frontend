@@ -26,15 +26,16 @@ export default function ProductCatalog() {
   const [userName, setUserName] = useState('User');
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
+  // For custom currency dropdown
+  const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+  const [searchCurrency, setSearchCurrency] = useState("");
 
   const fetchProducts = useCallback(async (currentStoreId, currentUserId) => {
     if (!currentStoreId || !currentUserId) return;
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE_URL}/business`, {
-        headers: { 'Authorization': `Bearer ${currentUserId}` }
-      });
+      const response = await axios.get(`${API_BASE_URL}/store/${currentStoreId}`);
       const businessData = response.data;
       setProducts(businessData?.products || []);
       setStoreCurrency(businessData?.defaultCurrency || 'USD');
@@ -204,21 +205,92 @@ export default function ProductCatalog() {
       setProductToDelete(null);
     }
   };
+async function handleCurrencySave(currencyToSave) {
+  // DEBUG 1: Log the currency being saved
+  console.log(`[DEBUG] Attempting to save currency: ${currencyToSave}`);
+ const payload = {
+    type: "settings",
+    data: { defaultCurrency: currencyToSave }
+  };
 
-  async function handleCurrencySave(currencyToSave) {
-    try {
-      await axios.put(`${API_BASE_URL}/business`, {
-        type: "settings", data: { defaultCurrency: currencyToSave }
-      }, {
-        headers: { Authorization: `Bearer ${userId}`, "x-store-id": storeId }
-      });
-      setStoreCurrency(currencyToSave);
-      toast.success("Currency saved successfully!");
-    } catch (error) {
-      toast.error("Failed to save currency.");
-    }
+  // DEBUG 2: Log the exact data being sent to the server
+  console.log('[DEBUG] Sending this payload to server:', payload);
+
+  try {
+    const response = await axios.put(`${API_BASE_URL}/business`, payload, {
+      headers: { Authorization: `Bearer ${userId}`, "x-store-id": storeId }
+    });
+
+    // DEBUG 3: Log the server's successful response
+    console.log('[DEBUG] ✅ Server responded successfully:', response.data);
+
+    setStoreCurrency(currencyToSave);
+    toast.success("Currency saved successfully!");
+  } catch (error) {
+    // DEBUG 4: Log any error from the server
+    console.error('[DEBUG] ❌ Server returned an error:', error.response?.data || error.message);
+    toast.error("Failed to save currency.");
   }
+}
 
+  // Razorpay-supported currencies (about 100)
+  const supportedCurrencies = [
+    "AED","ALL","AMD","ANG","AOA","ARS","AUD","AWG","AZN",
+    "BAM","BBD","BDT","BGN","BMD","BND","BOB","BRL","BSD","BWP","BZD",
+    "CAD","CHF","CLP","CNY","COP","CRC","CUP","CZK",
+    "DKK","DOP","DZD",
+    "EGP","ETB","EUR",
+    "FJD","GBP","GHS","GMD","GTQ","GYD",
+    "HKD","HRK","HUF",
+    "IDR","ILS","INR","ISK",
+    "JMD","JOD","JPY",
+    "KES","KHR","KWD","KYD","KZT",
+    "LAK","LBP","LKR","LRD","LTL",
+    "MAD","MDL","MGA","MKD","MMK","MNT","MOP","MUR","MVR","MWK","MXN","MYR",
+    "NAD","NGN","NIO","NOK","NPR","NZD",
+    "OMR",
+    "PEN","PGK","PHP","PKR","PLN","PYG",
+    "QAR",
+    "RON","RSD","RUB","RWF",
+    "SAR","SCR","SEK","SGD","SLL","SOS","SRD","STD","SVC","SZL",
+    "THB","TND","TOP","TRY","TTD","TWD","TZS",
+    "UAH","UGX","USD","UYU","UZS",
+    "VND","VUV",
+    "WST",
+    "XAF","XCD","XOF","XPF",
+    "YER",
+    "ZAR","ZMW"
+  ];
+  // Currency code to flag emoji mapping
+  const currencyFlags = {
+    AED: "🇦🇪", ALL: "🇦🇱", AMD: "🇦🇲", ANG: "🇳🇱", AOA: "🇦🇴", ARS: "🇦🇷", AUD: "🇦🇺", AWG: "🇦🇼", AZN: "🇦🇿",
+    BAM: "🇧🇦", BBD: "🇧🇧", BDT: "🇧🇩", BGN: "🇧🇬", BMD: "🇧🇲", BND: "🇧🇳", BOB: "🇧🇴", BRL: "🇧🇷", BSD: "🇧🇸", BWP: "🇧🇼", BZD: "🇧🇿",
+    CAD: "🇨🇦", CHF: "🇨🇭", CLP: "🇨🇱", CNY: "🇨🇳", COP: "🇨🇴", CRC: "🇨🇷", CUP: "🇨🇺", CZK: "🇨🇿",
+    DKK: "🇩🇰", DOP: "🇩🇴", DZD: "🇩🇿",
+    EGP: "🇪🇬", ETB: "🇪🇹", EUR: "🇪🇺",
+    FJD: "🇫🇯", GBP: "🇬🇧", GHS: "🇬🇭", GMD: "🇬🇲", GTQ: "🇬🇹", GYD: "🇬🇾",
+    HKD: "🇭🇰", HRK: "🇭🇷", HUF: "🇭🇺",
+    IDR: "🇮🇩", ILS: "🇮🇱", INR: "🇮🇳", ISK: "🇮🇸",
+    JMD: "🇯🇲", JOD: "🇯🇴", JPY: "🇯🇵",
+    KES: "🇰🇪", KHR: "🇰🇭", KWD: "🇰🇼", KYD: "🇰🇾", KZT: "🇰🇿",
+    LAK: "🇱🇦", LBP: "🇱🇧", LKR: "🇱🇰", LRD: "🇱🇷", LTL: "🇱🇹",
+    MAD: "🇲🇦", MDL: "🇲🇩", MGA: "🇲🇬", MKD: "🇲🇰", MMK: "🇲🇲", MNT: "🇲🇳", MOP: "🇲🇴", MUR: "🇲🇺", MVR: "🇲🇻", MWK: "🇲🇼", MXN: "🇲🇽", MYR: "🇲🇾",
+    NAD: "🇳🇦", NGN: "🇳🇬", NIO: "🇳🇮", NOK: "🇳🇴", NPR: "🇳🇵", NZD: "🇳🇿",
+    OMR: "🇴🇲",
+    PEN: "🇵🇪", PGK: "🇵🇬", PHP: "🇵🇭", PKR: "🇵🇰", PLN: "🇵🇱", PYG: "🇵🇾",
+    QAR: "🇶🇦",
+    RON: "🇷🇴", RSD: "🇷🇸", RUB: "🇷🇺", RWF: "🇷🇼",
+    SAR: "🇸🇦", SCR: "🇸🇨", SEK: "🇸🇪", SGD: "🇸🇬", SLL: "🇸🇱", SOS: "🇸🇴", SRD: "🇸🇷", STD: "🇸🇹", SVC: "🇸🇻", SZL: "🇸🇿",
+    THB: "🇹🇭", TND: "🇹🇳", TOP: "🇹🇴", TRY: "🇹🇷", TTD: "🇹🇹", TWD: "🇹🇼", TZS: "🇹🇿",
+    UAH: "🇺🇦", UGX: "🇺🇬", USD: "🇺🇸", UYU: "🇺🇾", UZS: "🇺🇿",
+    VND: "🇻🇳", VUV: "🇻🇺",
+    WST: "🇼🇸",
+    XAF: "🌍", XCD: "🌍", XOF: "🌍", XPF: "🌍",
+    YER: "🇾🇪",
+    ZAR: "🇿🇦", ZMW: "🇿🇲"
+  };
+  // Use a safe currency for formatting (fallback to USD if not supported)
+  const safeCurrency = supportedCurrencies.includes(storeCurrency) ? storeCurrency : "USD";
   return (
     <div className={`min-h-screen flex flex-col overflow-x-hidden ${darkMode ? 'bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white' : 'bg-gradient-to-br from-indigo-100 to-white text-black'}`}>
       <Toaster position="top-right" />
@@ -271,38 +343,50 @@ export default function ProductCatalog() {
             <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Manage your products and inventory</p>
           </div>
           <div className="flex items-center gap-3">
-            <select value={storeCurrency} onChange={(e) => { setTempCurrency(e.target.value); setShowCurrencyModal(true); }} className={`px-3 py-2 border rounded text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}>
-              <option value="INR">INR (₹)</option>
-              <option value="USD">USD ($)</option>
-              <option value="EUR">EUR (€)</option>
-              <option value="GBP">GBP (£)</option>
-              <option value="AED">AED (د.إ)</option>
-              <option value="AUD">AUD (A$)</option>
-              <option value="CAD">CAD (C$)</option>
-              <option value="SGD">SGD (S$)</option>
-              <option value="HKD">HKD (HK$)</option>
-              <option value="JPY">JPY (¥)</option>
-              <option value="CNY">CNY (¥)</option>
-              <option value="CHF">CHF (CHF)</option>
-              <option value="SEK">SEK (kr)</option>
-              <option value="NOK">NOK (kr)</option>
-              <option value="DKK">DKK (kr)</option>
-              <option value="NZD">NZD (NZ$)</option>
-              <option value="ZAR">ZAR (R)</option>
-              <option value="SAR">SAR (﷼)</option>
-              <option value="QAR">QAR (﷼)</option>
-              <option value="BHD">BHD (BD)</option>
-              <option value="KWD">KWD (KD)</option>
-              <option value="OMR">OMR (﷼)</option>
-              <option value="THB">THB (฿)</option>
-              <option value="MYR">MYR (RM)</option>
-              <option value="IDR">IDR (Rp)</option>
-              <option value="PHP">PHP (₱)</option>
-              <option value="TRY">TRY (₺)</option>
-              <option value="PLN">PLN (zł)</option>
-              <option value="RUB">RUB (₽)</option>
-              <option value="BRL">BRL (R$)</option>
-            </select>
+            {/* Custom Currency Selector */}
+            <div className="relative w-44">
+              <button
+                onClick={() => setIsCurrencyOpen(!isCurrencyOpen)}
+                className="w-full flex items-center justify-between border rounded-md px-3 py-2 bg-white dark:bg-gray-700 shadow-sm hover:shadow-md transition"
+              >
+                <span className="flex items-center gap-2">
+                  <span className="text-lg">{currencyFlags[storeCurrency] || "🌐"}</span>
+                  <span className={`${darkMode ? "text-white" : "text-gray-800"} text-sm font-medium`}>{storeCurrency}</span>
+                </span>
+                <span className="text-gray-400">▼</span>
+              </button>
+              {isCurrencyOpen && (
+                <div className="absolute mt-1 w-full bg-white dark:bg-gray-800 border rounded-md shadow-lg z-20 max-h-60 overflow-y-auto">
+                  <div className="p-2">
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchCurrency}
+                      onChange={(e) => setSearchCurrency(e.target.value)}
+                      className={`w-full px-2 py-1 border rounded text-sm ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "border-gray-300"}`}
+                    />
+                  </div>
+                  <ul className="max-h-48 overflow-y-auto">
+                    {supportedCurrencies
+                      .filter(code => code.toLowerCase().includes(searchCurrency.toLowerCase()))
+                      .map(code => (
+                        <li
+                          key={code}
+                          onClick={() => {
+                            setTempCurrency(code);
+                            setShowCurrencyModal(true);
+                            setIsCurrencyOpen(false);
+                          }}
+                          className={`px-3 py-2 cursor-pointer flex items-center gap-2 hover:bg-indigo-100 dark:hover:bg-gray-700 ${darkMode ? "text-white" : "text-gray-800"}`}
+                        >
+                          <span>{currencyFlags[code] || "🌐"}</span>
+                          <span>{code}</span>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              )}
+            </div>
             <button onClick={handleAddProductClick} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center text-sm w-fit">
               <span className="text-xl mr-1">+</span> Add Product
             </button>
@@ -325,7 +409,7 @@ export default function ProductCatalog() {
                 <div className="p-4">
                   <h3 className={`text-lg font-semibold ${darkMode ? 'text-indigo-200' : 'text-gray-800'}`}>{product.name}</h3>
                   <div className="mt-3 flex justify-between items-center">
-                    <p className={`font-bold ${darkMode ? 'text-indigo-300' : 'text-gray-800'}`}>{new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(product.price)}</p>
+                    <p className={`font-bold ${darkMode ? 'text-indigo-300' : 'text-gray-800'}`}>{new Intl.NumberFormat('en-US', { style: 'currency', currency: safeCurrency }).format(product.price)}</p>
                     <span className={`px-2 py-1 text-xs rounded-full ${product.inStock ? (darkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800') : (darkMode ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800')}`}>{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
                   </div>
                   <div className="mt-4 flex justify-between">
@@ -350,7 +434,7 @@ export default function ProductCatalog() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Name</label><input type="text" name="name" value={currentProduct.name} onChange={handleInputChange} required className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div>
                 <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Description</label><textarea name="description" value={currentProduct.description} onChange={handleInputChange} className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div>
-                <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Price</label><div className="flex"><span className={`p-2 border rounded-l ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>{new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value || '$'}</span><input type="number" name="price" value={currentProduct.price} onChange={handleInputChange} required className={`w-full p-2 border border-l-0 rounded-r ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div></div>
+                <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Price</label><div className="flex"><span className={`p-2 border rounded-l ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>{new Intl.NumberFormat('en-US', { style: 'currency', currency: safeCurrency }).formatToParts(0).find(p => p.type === 'currency')?.value || '$'}</span><input type="number" name="price" value={currentProduct.price} onChange={handleInputChange} required className={`w-full p-2 border border-l-0 rounded-r ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div></div>
                 <div><label className={`block mb-1 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Images (up to 5)</label><input type="file" accept="image/*" multiple onChange={handleImageUpload} className={`w-full text-sm ${darkMode ? 'text-gray-300' : ''} file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold ${darkMode ? 'file:bg-indigo-900 file:text-indigo-200' : 'file:bg-indigo-50 file:text-indigo-700'}`}/></div>
                 {isUploading && <p className="text-sm text-gray-400">Uploading...</p>}
                 {imagePreviews.length > 0 && <div className="mt-2 grid grid-cols-3 sm:grid-cols-5 gap-2">{imagePreviews.map((p, i) => <div key={i} className="relative"><img src={p} alt="preview" className="h-24 w-full object-cover rounded"/><button type="button" onClick={() => handleRemoveImage(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">&times;</button></div>)}</div>}

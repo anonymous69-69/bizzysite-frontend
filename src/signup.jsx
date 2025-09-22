@@ -361,7 +361,9 @@ const AuthModal = ({ isLogin, setIsLogin, onClose, onSuccess, onForgotPasswordCl
                         headers: { "Content-Type": "application/json", Authorization: `Bearer ${userId}` },
                         body: JSON.stringify({
                             type: "business",
-                            data: { name: name || "My Store", email: email, phone: "", address: "", shippingCharge: 0 },
+                            // CHANGED: The business name is now initialized as an empty string ""
+                            // This forces the new user to set their business name on the next page.
+                            data: { name: "", email: email, phone: "", address: "", shippingCharge: 0 },
                         }),
                     });
                     const businessData = await businessRes.json();
