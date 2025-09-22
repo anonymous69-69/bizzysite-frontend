@@ -232,6 +232,13 @@ const OrderForm = () => {
             name: business.name || "BizzySite Store",
             description: `Payment for Order #${dbOrderId}`,
             order_id: razorpayOrderData.id,
+            method: {
+              card: true,
+              netbanking: true,
+              upi: true,
+              wallet: true,
+              paypal: true, // ✅ Enable PayPal for international users
+            },
             handler: async function (response) {
                 const verificationPayload = {
                     razorpay_order_id: response.razorpay_order_id,
