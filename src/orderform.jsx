@@ -301,6 +301,8 @@ const OrderForm = () => {
             }
         };
         
+        console.log("DEBUG: Country detection result is:", paymentGateway);
+        console.log("DEBUG: Sending these methods to Razorpay:", options.method);
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (response){
           fetch(`${API_BASE}/api/orders/${dbOrderId}/fail`, { method: "POST" });
