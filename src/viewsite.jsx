@@ -864,7 +864,7 @@ const fetchBusiness = async () => {
               </h4>
               <ul className="space-y-2 text-gray-300 text-sm sm:text-base">
                 <li>Email: your-store@bizzysite.shop</li>
-                <li>Phone: +91 7086758292</li>
+                
               </ul>
             </div>
           </div>

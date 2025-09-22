@@ -20,10 +20,7 @@ import NavView from './navview';
 import Profile from './profile';
 import ResetPassword from './resetpassword';
 import Settings from './settings';
-// START: NEW COMPONENT IMPORT
-// I've added the import for your new AdminOrders page.
 import AdminOrders from './AdminOrders';
-// END: NEW COMPONENT IMPORT
 
 
 /**
@@ -39,7 +36,34 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        <Toaster position="top-right" reverseOrder={false} />
+        {/* SOLUTION: The <Toaster /> component is placed here at the top level.
+          I've added detailed `toastOptions` to centralize the styling and behavior
+          for all notifications throughout your app. This is the best practice.
+        */}
+        <Toaster 
+          position="top-right" 
+          reverseOrder={false} 
+          toastOptions={{
+            // Define default styles
+            style: {
+              background: '#363636',
+              color: '#fff',
+              zIndex: 1,
+            },
+            duration: 5000,
+            // Default options for specific types
+            success: {
+              duration: 3000,
+              theme: {
+                primary: 'green',
+                secondary: 'black',
+              },
+            },
+            error: {
+              duration: 4000,
+            },
+          }}
+        />
 
         <Routes>
           {/* --- Public Routes --- */}
@@ -69,13 +93,11 @@ function App() {
           <Route path="/customize" element={<PrivateRoute><Customize /></PrivateRoute>} />
           <Route path="/navview" element={<PrivateRoute><NavView /></PrivateRoute>} />
           
-          {/* START: NEW ADMIN ROUTE */}
-          {/* I've added the new route for your admin page. */}
+          {/* --- Admin Route --- */}
           <Route path="/admin/orders" element={<PrivateRoute><AdminOrders /></PrivateRoute>} />
-          {/* END: NEW ADMIN ROUTE */}
 
           {/* Catch-all route for any page that doesn't exist */}
-          <Route path="*" element={<div>404 Not Found</div>} />
+          <Route path="*" element={<div className="flex items-center justify-center h-screen">404 Not Found</div>} />
         </Routes>
       </Router>
     </ThemeProvider>

@@ -3,43 +3,6 @@ import { useTheme } from './ThemeContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
-// Helper: showToast function (with dismiss button)
-const showToast = (type, message, options = {}) => {
-  const config = { duration: 4000, ...options };
-
-  if (type === "success") {
-    toast.success(
-      (t) => (
-        <div className="flex items-center justify-between">
-          <span>{message}</span>
-          <button
-            className="ml-3 text-sm text-gray-300 hover:text-white"
-            onClick={() => toast.dismiss(t.id)}
-          >
-            ✕
-          </button>
-        </div>
-      ),
-      config
-    );
-  } else {
-    toast.error(
-      (t) => (
-        <div className="flex items-center justify-between">
-          <span>{message}</span>
-          <button
-            className="ml-3 text-sm text-gray-300 hover:text-white"
-            onClick={() => toast.dismiss(t.id)}
-          >
-            ✕
-          </button>
-        </div>
-      ),
-      config
-    );
-  }
-};
-
 export default function BusinessDashboard() {
   const theme = useTheme() || {};
   const { darkMode } = theme;
@@ -95,7 +58,6 @@ export default function BusinessDashboard() {
       fetchBusinessInfo(savedStoreId);
     } else {
       console.warn("No storeId found in localStorage");
-
     }
   }, [navigate]);
 
@@ -145,11 +107,10 @@ export default function BusinessDashboard() {
       }));
     } catch (err) {
       console.error('Failed to fetch business info:', err);
-      showToast("error", "Failed to load store information");
+      toast.error("Failed to load store information");
     }
   };
 
-  // Define handleChange function to fix the undefined error
   const handleChange = (e) => {
     const { name, value } = e.target;
     setBusinessInfo(prev => ({
@@ -160,6 +121,8 @@ export default function BusinessDashboard() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+
+    const toastId = toast.loading("Saving business information...");
   
     try {
       setLoading(true);
@@ -167,6 +130,7 @@ export default function BusinessDashboard() {
       const userId = localStorage.getItem('userId');
       if (!userId) {
         navigate('/login');
+        toast.error("You are not logged in. Redirecting...", { id: toastId });
         return;
       }
       
@@ -216,7 +180,6 @@ export default function BusinessDashboard() {
         if (newSlug) {
           setStoreSlug(newSlug);
           localStorage.setItem('storeSlug', newSlug);
-          // Dispatch event with actual slug value
           window.dispatchEvent(new CustomEvent('storeSlugUpdated', {
             detail: { slug: newSlug }
           }));
@@ -226,13 +189,17 @@ export default function BusinessDashboard() {
         if (updated.phone) localStorage.setItem('businessPhone', updated.phone);
       }
   
-      showToast("success", "Business information saved successfully!");
+      toast.success("Business information saved successfully!", { id: toastId });
     } catch (err) {
       setError(`Save failed: ${err.message}`);
-      showToast("error", `Save failed: ${err.message}`);
+      toast.error(`Save failed: ${err.message}`, { id: toastId });
     } finally {
       setLoading(false);
     }
+  };
+  
+  const handleDisabledLinkClick = () => {
+    toast.error("Please enter and save your business name to continue.");
   };
 
   if (isLoading) {
@@ -302,10 +269,6 @@ export default function BusinessDashboard() {
         ? 'bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white'
         : 'bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black'
     }`}>
-      <Toaster
-        position="top-right"
-        toastOptions={{ duration: 4000 }}
-      />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 flex-grow w-full">
         {error && (
           <div className={`border rounded mb-6 px-4 py-3 ${darkMode ? 'bg-red-900 border-red-700 text-red-100' : 'bg-red-100 border-red-400 text-red-700'}`}>
@@ -386,38 +349,44 @@ export default function BusinessDashboard() {
           <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
             <div className="flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
               {[
-                { name: 'Setup', icon: '📊' },
-                { name: 'Products', icon: '📦' },
-                { name: 'Orders', icon: '🛒' },
-                { name: 'Customize', icon: '🎨' },
-                { name: 'Preview', icon: '🌐' },
-                { name: 'Payments', icon: '💳' }
-              ].map((tab) => (
-                <Link
-                  key={tab.name}
-                  to={
-                    tab.name === 'Products' ? '/products' :
-                    tab.name === 'Orders' ? '/orders' :
-                    tab.name === 'Customize' ? '/customize' :
-                    tab.name === 'Setup' ? '/storefront' :
-                    tab.name === 'Preview' ? '/navview' :
-                    tab.name === 'Payments' ? '/payment' : '#'
-                  }
-                  onClick={() => setActiveTab(tab.name)}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
-                    activeTab === tab.name
-                      ? darkMode
-                        ? 'bg-indigo-800 text-white'
-                        : 'bg-purple-100 text-indigo-700'
-                      : darkMode
-                        ? 'text-gray-300 hover:text-indigo-300'
-                        : 'text-gray-700 hover:text-indigo-700'
-                  }`}
-                >
-                  <span className="text-lg">{tab.icon}</span>
-                  <span>{tab.name}</span>
-                </Link>
-              ))}
+                { name: 'Setup', icon: '📊', path: '/storefront' },
+                { name: 'Products', icon: '📦', path: '/products' },
+                { name: 'Orders', icon: '🛒', path: '/orders' },
+                { name: 'Customize', icon: '🎨', path: '/customize' },
+                { name: 'Preview', icon: '🌐', path: '/navview' },
+                { name: 'Payments', icon: '💳', path: '/payment' }
+              ].map((tab) => {
+                const isDisabled = !businessInfo.name && tab.name !== 'Setup';
+
+                if (isDisabled) {
+                  return (
+                    <button
+                      key={tab.name}
+                      onClick={handleDisabledLinkClick}
+                      className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base opacity-50 cursor-not-allowed text-gray-400`}
+                    >
+                      <span className="text-lg">{tab.icon}</span>
+                      <span>{tab.name}</span>
+                    </button>
+                  );
+                }
+                
+                return (
+                  <Link
+                    key={tab.name}
+                    to={tab.path}
+                    onClick={() => setActiveTab(tab.name)}
+                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
+                      activeTab === tab.name
+                        ? darkMode ? 'bg-indigo-800 text-white' : 'bg-purple-100 text-indigo-700'
+                        : darkMode ? 'text-gray-300 hover:text-indigo-300' : 'text-gray-700 hover:text-indigo-700'
+                    }`}
+                  >
+                    <span className="text-lg">{tab.icon}</span>
+                    <span>{tab.name}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -557,9 +526,9 @@ export default function BusinessDashboard() {
                 type="number"
                 id="shippingCharge"
                 name="shippingCharge"
-                value={businessInfo.shippingCharge || ""}
+                value={businessInfo.shippingCharge ?? ''}
                 onChange={handleChange}
-                placeholder="Enter flat shipping charge"
+                placeholder="Enter flat shipping charge (e.g., 0 for free shipping)"
                 className={`w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
                   darkMode
                     ? "bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
@@ -606,7 +575,7 @@ export default function BusinessDashboard() {
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(storeId);
-                  alert('Store ID copied to clipboard!');
+                  toast.success('Store ID copied to clipboard!');
                 }}
                 className={`ml-2 px-3 py-1 text-sm rounded-md hover:bg-opacity-80 ${
                   darkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-800'
@@ -646,7 +615,7 @@ export default function BusinessDashboard() {
           <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${
             darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'
           }`}>
-            <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
+            <p>© {new Date().getFullYear()} BizzySite. Made with ❤️ for small businesses.</p>
           </div>
         </div>
       </footer>
