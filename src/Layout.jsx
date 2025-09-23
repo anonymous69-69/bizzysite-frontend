@@ -17,7 +17,7 @@ export default function Layout() {
     const userId = localStorage.getItem('userId');
     if (!userId) {
       toast.error("You are not logged in. Redirecting...");
-      navigate('/login');
+      navigate('/signup');
       return;
     }
   
@@ -111,8 +111,8 @@ export default function Layout() {
               <button
                 onClick={() => { 
                   setShowMenu(false); 
-                  localStorage.clear(); // Clear all user data on logout
-                  navigate('/login'); 
+                  localStorage.removeItem('userId'); // Clear all user data on logout
+                  navigate('/signup'); 
                   toast.success("Logged out successfully!");
                 }}
                 className={`block w-full text-left px-4 py-2 text-sm font-medium transition-colors ${darkMode ? 'text-red-400 hover:bg-red-900/50' : 'text-red-600 hover:bg-red-50'}`}
