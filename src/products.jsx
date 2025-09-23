@@ -32,7 +32,17 @@ export default function ProductCatalog() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE_URL}/store/${currentStoreId}`);
+      // ================== THE FIX: CACHE BUSTING ==================
+      // Add a unique timestamp to the URL to bypass browser and server caches.
+      // Also, add headers to explicitly prevent caching of this request.
+      const response = await axios.get(`${API_BASE_URL}/store/${currentStoreId}?timestamp=${new Date().getTime()}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      // ==========================================================
+
       const businessData = response.data;
       setProducts(businessData?.products || []);
       setStoreCurrency(businessData?.defaultCurrency || 'USD');
@@ -329,4 +339,3 @@ export default function ProductCatalog() {
     </>
   );
 }
-
