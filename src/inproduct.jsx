@@ -6,21 +6,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 const ProductPageSkeleton = () => (
     <div className="container mx-auto px-4 py-8 animate-pulse">
         <div className="max-w-4xl mx-auto">
-            <div className="h-6 w-1/3 bg-gray-300 dark:bg-gray-700 rounded mb-8"></div>
+            <div className="h-6 w-1/3 bg-gray-200 rounded mb-8"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <div className="w-full h-96 bg-gray-300 dark:bg-gray-700 rounded-lg"></div>
+                    <div className="w-full h-96 bg-gray-200 rounded-lg"></div>
                     <div className="flex gap-2 mt-4">
-                        <div className="w-16 h-16 bg-gray-300 dark:bg-gray-700 rounded"></div>
-                        <div className="w-16 h-16 bg-gray-300 dark:bg-gray-700 rounded"></div>
-                        <div className="w-16 h-16 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                        <div className="w-16 h-16 bg-gray-200 rounded"></div>
+                        <div className="w-16 h-16 bg-gray-200 rounded"></div>
+                        <div className="w-16 h-16 bg-gray-200 rounded"></div>
                     </div>
                 </div>
                 <div className="space-y-4">
-                    <div className="h-8 w-3/4 bg-gray-300 dark:bg-gray-700 rounded"></div>
-                    <div className="h-6 w-1/4 bg-gray-300 dark:bg-gray-700 rounded"></div>
-                    <div className="h-20 w-full bg-gray-300 dark:bg-gray-700 rounded"></div>
-                    <div className="h-12 w-1/2 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                    <div className="h-8 w-3/4 bg-gray-200 rounded"></div>
+                    <div className="h-6 w-1/4 bg-gray-200 rounded"></div>
+                    <div className="h-20 w-full bg-gray-200 rounded"></div>
+                    <div className="h-12 w-1/2 bg-gray-200 rounded"></div>
                 </div>
             </div>
         </div>
@@ -38,8 +38,6 @@ const InProduct = () => {
     
     // State for UI components, consistent with viewsite.jsx
     const [isCartOpen, setIsCartOpen] = useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
     
     // State for the image gallery
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -140,20 +138,30 @@ const InProduct = () => {
             return '$'; // Fallback
         }
     };
+
+    // Image navigation functions
+    const nextImage = () => {
+        if (!product || !product.images) return;
+        setCurrentImageIndex(prevIndex => (prevIndex + 1) % product.images.length);
+    };
+
+    const prevImage = () => {
+        if (!product || !product.images) return;
+        setCurrentImageIndex(prevIndex => (prevIndex - 1 + product.images.length) % product.images.length);
+    };
     
     if (loading) return <ProductPageSkeleton />;
     if (error) return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md max-w-md">
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+            <div className="text-center p-6 bg-white rounded-lg shadow-md max-w-md">
                 <h3 className="text-lg font-medium text-red-600">Error Loading Product</h3>
-                <p className="mt-2 text-gray-600 dark:text-gray-300">{error}</p>
+                <p className="mt-2 text-gray-600">{error}</p>
                 <button onClick={() => navigate(`/${slug}`)} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Back to Store</button>
             </div>
         </div>
     );
     if (!product || !business) return null; // Should be handled by loading/error states
 
-    // --- FIX: Applying dynamic colors and currency from fetched business data. ---
     const theme = business.customize || {};
     const primaryColor = theme.primaryColor || '#3b82f6';
     const secondaryColor = theme.secondaryColor || '#8b5cf6';
@@ -164,7 +172,7 @@ const InProduct = () => {
     const cartItem = cart.find(item => item._id === product._id);
 
     return (
-        <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+        <div className="min-h-screen flex flex-col bg-white text-gray-800">
              {/* Header */}
             <header className="sticky top-0 z-20 p-4 shadow-md text-white" style={{ backgroundColor: primaryColor, color: textColor }}>
                 <div className="container mx-auto flex justify-between items-center">
@@ -187,8 +195,8 @@ const InProduct = () => {
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             className="fixed inset-0 bg-black/60 z-30" onClick={() => setIsCartOpen(false)} />
                         <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-800 shadow-lg z-40 flex flex-col">
-                            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-lg z-40 flex flex-col">
+                            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                                 <h3 className="text-lg font-semibold">Your Cart ({totalItems})</h3>
                                 <button onClick={() => setIsCartOpen(false)} className="text-2xl">&times;</button>
                             </div>
@@ -202,7 +210,7 @@ const InProduct = () => {
                                                 <img src={item.images?.[0] || 'https://placehold.co/100x100/e2e8f0/475569?text=Image'} alt={item.name} className="w-16 h-16 object-cover rounded"/>
                                                 <div className="flex-grow">
                                                     <h4 className="font-medium">{item.name}</h4>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400">{getCurrencySymbol(storeCurrency)}{item.price.toFixed(2)}</p>
+                                                    <p className="text-sm text-gray-600">{getCurrencySymbol(storeCurrency)}{item.price.toFixed(2)}</p>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <button onClick={() => updateQuantity(item._id, item.quantity - 1)} className="w-6 h-6 border rounded">-</button>
@@ -214,7 +222,7 @@ const InProduct = () => {
                                     </ul>
                                 )}
                             </div>
-                             <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                             <div className="p-4 border-t border-gray-200">
                                 <div className="flex justify-between font-semibold mb-4">
                                     <span>Total:</span>
                                     <span>{getCurrencySymbol(storeCurrency)}{cart.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)}</span>
@@ -233,27 +241,39 @@ const InProduct = () => {
                 )}
             </AnimatePresence>
             
-            <main className="flex-grow container mx-auto px-4 py-8">
+            <main className="flex-grow container mx-auto px-4 py-6">
                 <div className="max-w-5xl mx-auto">
-                    <button onClick={() => navigate(`/${slug}`)} className="flex items-center gap-2 mb-6 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                    <button onClick={() => navigate(`/${slug}`)} className="flex items-center gap-2 mb-6 text-gray-600 hover:text-indigo-600 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                         Back to Products
                     </button>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Image Gallery */}
                         <div className="flex flex-col gap-4">
-                             <AnimatePresence mode="wait">
-                                <motion.img
-                                    key={currentImageIndex}
-                                    src={product.images?.[currentImageIndex] || 'https://placehold.co/600x600/e2e8f0/475569?text=No+Image'}
-                                    alt={product.name}
-                                    className="w-full h-auto aspect-square object-cover rounded-lg shadow-lg"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                />
-                            </AnimatePresence>
+                             <div className="relative">
+                                <AnimatePresence mode="wait">
+                                    <motion.img
+                                        key={currentImageIndex}
+                                        src={product.images?.[currentImageIndex] || 'https://placehold.co/600x600/e2e8f0/475569?text=No+Image'}
+                                        alt={product.name}
+                                        className="w-full h-auto aspect-square object-cover rounded-lg shadow-lg"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                    />
+                                </AnimatePresence>
+                                {product.images && product.images.length > 1 && (
+                                    <>
+                                        <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 p-2 rounded-full shadow-md transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                        </button>
+                                        <button onClick={nextImage} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 p-2 rounded-full shadow-md transition">
+                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                        </button>
+                                    </>
+                                )}
+                             </div>
                             {product.images && product.images.length > 1 && (
                                 <div className="flex justify-center gap-2">
                                     {product.images.map((img, index) => (
@@ -272,11 +292,11 @@ const InProduct = () => {
                             <p className="text-2xl lg:text-3xl font-semibold mb-4" style={{ color: primaryColor }}>
                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: storeCurrency }).format(product.price)}
                             </p>
-                            <div className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 mb-6">
+                            <div className="prose max-w-none text-gray-600 mb-4">
                                 <p>{product.description || 'No description provided.'}</p>
                             </div>
 
-                            <div className="mt-auto pt-6">
+                            <div className="mt-auto pt-4">
                                 {!product.inStock && <p className="text-red-500 font-semibold mb-4">Out of Stock</p>}
                                 
                                 {product.inStock ? (
