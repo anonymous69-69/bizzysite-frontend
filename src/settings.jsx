@@ -1,483 +1,203 @@
-// settings.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from './ThemeContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- Reusable UI Components ---
+
+const SettingsCard = ({ title, description, children, darkMode }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    className={`rounded-xl shadow-lg p-6 ${darkMode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/60 border-gray-200'} backdrop-blur-md border`}
+  >
+    <h3 className={`text-xl font-semibold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
+    <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-6 text-sm`}>{description}</p>
+    <div className="space-y-6">{children}</div>
+  </motion.div>
+);
+
+const Toggle = ({ checked, onChange }) => (
+  <button
+    onClick={onChange}
+    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+      checked ? 'bg-indigo-500' : 'bg-gray-600'
+    }`}
+  >
+    <motion.span
+      layout
+      transition={{ type: 'spring', stiffness: 700, damping: 30 }}
+      className={`inline-block h-4 w-4 transform rounded-full bg-white ${
+        checked ? 'translate-x-6' : 'translate-x-1'
+      }`}
+    />
+  </button>
+);
+
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('Settings');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [showMenu, setShowMenu] = useState(false);
-
-  // Modal states for delete account
+  const { darkMode, setDarkMode } = useTheme();
+  
+  // States
+  const [activeSection, setActiveSection] = useState('appearance');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Settings states
-  const { darkMode, setDarkMode } = useTheme();
-  const [notifications, setNotifications] = useState({
-    orders: true,
-    promotions: true,
-    reminders: true
-  });
-  const [currency, setCurrency] = useState('INR');
-  const [language, setLanguage] = useState('en');
-  const [passwordForm, setPasswordForm] = useState({
-    current: '',
-    new: '',
-    confirm: ''
-  });
-
-  const handleNotificationChange = (type) => {
-    setNotifications(prev => ({
-      ...prev,
-      [type]: !prev[type]
-    }));
-  };
-
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    
-    if (passwordForm.new !== passwordForm.confirm) {
-      setError('New passwords do not match');
-      return;
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      navigate('/login');
     }
-    
+  }, [navigate]);
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
     try {
-      setLoading(true);
-      setError('');
       const userId = localStorage.getItem('userId');
-      
-      // This would call your backend API in a real implementation
-      // await axios.put('/api/user/password', { 
-      //   current: passwordForm.current,
-      //   new: passwordForm.new
-      // }, {
-      //   headers: { Authorization: `Bearer ${userId}` }
-      // });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success('Password changed successfully!');
-      setPasswordForm({ current: '', new: '', confirm: '' });
-    } catch (err) {
-      console.error('Password change error:', err);
-      setError(err.response?.data?.message || 'Failed to change password');
-      toast.error('Failed to change password');
+      await axios.delete('https://bizzysite.onrender.com/api/user', {
+        headers: { Authorization: `Bearer ${userId}` }
+      });
+      toast.success('Account deleted successfully');
+      localStorage.clear();
+      navigate('/signup');
+    } catch (error) {
+      toast.error('Failed to delete account');
     } finally {
-      setLoading(false);
+      setIsDeleting(false);
+      setShowDeleteModal(false);
     }
   };
 
-  const handleSavePreferences = () => {
-    localStorage.setItem('currency', currency);
-    localStorage.setItem('language', language);
-    toast.success('Preferences saved!');
+  const settingsSections = {
+    appearance: {
+      title: 'Appearance',
+      description: 'Customize the look and feel of your dashboard.',
+      icon: '🎨',
+      content: (
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Dark Mode</h4>
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Switch between light and dark themes.</p>
+          </div>
+          <Toggle checked={darkMode} onChange={() => setDarkMode(!darkMode)} />
+        </div>
+      ),
+    },
+    security: {
+      title: 'Password & Security',
+      description: 'Manage your password and account security.',
+      icon: '🔒',
+      content: <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Password management form coming soon.</p>,
+    },
+    notifications: {
+      title: 'Notifications',
+      description: 'Choose how you want to be notified.',
+      icon: '🔔',
+      content: <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Notification settings coming soon.</p>,
+    },
+    account: {
+      title: 'Account Management',
+      description: 'Manage your account and data.',
+      icon: '👤',
+      content: (
+        <div className={`pt-4 ${darkMode ? 'border-white/10' : 'border-gray-200'} border-t`}>
+          <h4 className="font-medium text-red-500 dark:text-red-400">Delete Account</h4>
+          <p className={`text-sm my-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Permanently delete your account and all associated data. This action cannot be undone.</p>
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Delete My Account
+          </button>
+        </div>
+      ),
+    },
   };
-
-  const handleLogout = () => {
-    localStorage.removeItem('userId');
-    localStorage.removeItem('storeId');
-    navigate('/login');
-    toast.success('Logged out successfully');
-  };
-
+  
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} flex flex-col`}>
+    <>
       <Toaster position="top-right" />
-      <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center space-x-4">
-            <Link to="/signup" className={`text-2xl sm:text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} hover:text-indigo-600 transition-colors`}>
-              BizzySite
-            </Link>
-          </div>
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="focus:outline-none"
-            >
-              <img
-                src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff&bold=true"
-                alt="Profile"
-                className="w-10 h-10 rounded-full"
-              />
-            </button>
-            {showMenu && (
-              <div className={`absolute right-0 mt-2 w-40 rounded-md shadow-lg z-10 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                <Link
-                  to="/profile"
-                  className={`block px-4 py-2 text-sm ${darkMode ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                >
-                  Profile
-                </Link>
-                <Link
-                  to="/settings"
-                  className={`block px-4 py-2 text-sm ${darkMode ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                >
-                  Settings
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-        <h2 className={`text-lg sm:text-xl mb-6 sm:mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-          Manage your account preferences
-        </h2>
-
-        <div className="relative">
-          <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className={`flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
-              {[
-                { name: 'Setup', icon: '📊', path: '/storefront' },
-                { name: 'Products', icon: '📦', path: '/products' },
-                { name: 'Orders', icon: '🛒', path: '/orders' },
-                { name: 'Customize', icon: '🎨', path: '/customize' },
-                { name: 'Preview', icon: '🌐', path: '/navview' },
-                { name: 'Payments', icon: '💳', path: '/payment' },
-                { name: 'Settings', icon: '⚙️', path: '/settings' }
-              ].map((tab) => (
-                <Link
-                  to={tab.path}
-                  key={tab.name}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
-                    activeTab === tab.name
-                      ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'
-                      : `${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-indigo-600'}`
-                  }`}
-                  onClick={() => setActiveTab(tab.name)}
-                >
-                  <span className="text-lg">{tab.icon}</span>
-                  <span>{tab.name}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Appearance Settings */}
-          <div className={`rounded-lg shadow p-4 sm:p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className={`text-lg sm:text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              Appearance
-            </h3>
-            
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className={`font-medium mb-1 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                    Dark Mode
-                  </h4>
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Switch between light and dark themes
-                  </p>
-                </div>
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className={`flex items-center gap-2 px-3 py-1 rounded-full transition-colors ${
-                    darkMode ? 'bg-indigo-600 text-white' : 'bg-gray-300 text-gray-800'
-                  }`}
-                  aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-                >
-                  {darkMode ? (
-                    <>
-                      <span className="text-sm">🌙 Dark</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-sm">☀️ Light</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              <div>
-                <label
-                  className={`block font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
-                >
-                  Currency
-                </label>
-                <p className={`${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Indian Rupee (₹)</p>
-              </div>
-
-              <div>
-                <label
-                  className={`block font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
-                >
-                  Language
-                </label>
-                <p className={`${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>English</p>
-              </div>
-
-              {/* Save Preferences button removed since dropdowns are static */}
-            </div>
-          </div>
-
-          {/* Password Settings */}
-          <div className={`rounded-lg shadow p-4 sm:p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className={`text-lg sm:text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              Password & Security
-            </h3>
-            
-            <form onSubmit={handleChangePassword}>
-              {error && (
-                <div className={`mb-4 px-4 py-3 rounded ${
-                  darkMode ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-700'
-                }`}>
-                  <strong>Error:</strong> {error}
-                </div>
-              )}
-
-              <div className="mb-4">
-                <label 
-                  htmlFor="currentPassword" 
-                  className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}
-                >
-                  Current Password
-                </label>
-                <input
-                  type="password"
-                  id="currentPassword"
-                  name="current"
-                  value={passwordForm.current}
-                  onChange={handlePasswordChange}
-                  className={`w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    darkMode 
-                      ? 'bg-gray-700 text-white border-gray-600' 
-                      : 'bg-white text-gray-700 border-gray-300'
-                  }`}
-                  placeholder="Enter current password"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label 
-                  htmlFor="newPassword" 
-                  className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}
-                >
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  name="new"
-                  value={passwordForm.new}
-                  onChange={handlePasswordChange}
-                  className={`w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    darkMode 
-                      ? 'bg-gray-700 text-white border-gray-600' 
-                      : 'bg-white text-gray-700 border-gray-300'
-                  }`}
-                  placeholder="Enter new password"
-                />
-              </div>
-
-              <div className="mb-6">
-                <label 
-                  htmlFor="confirmPassword" 
-                  className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}
-                >
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirm"
-                  value={passwordForm.confirm}
-                  onChange={handlePasswordChange}
-                  className={`w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    darkMode 
-                      ? 'bg-gray-700 text-white border-gray-600' 
-                      : 'bg-white text-gray-700 border-gray-300'
-                  }`}
-                  placeholder="Confirm new password"
-                />
-              </div>
-
-              <div className="flex justify-between">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-                >
-                  {loading ? 'Changing...' : 'Change Password'}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Notification Settings */}
-          <div className={`rounded-lg shadow p-4 sm:p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className={`text-lg sm:text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              Notifications
-            </h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                    Order Notifications
-                  </h4>
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Get notified about new orders
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleNotificationChange('orders')}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    notifications.orders ? 'bg-indigo-600' : 'bg-gray-300'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      notifications.orders ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                    Promotional Offers
-                  </h4>
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Receive marketing promotions
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleNotificationChange('promotions')}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    notifications.promotions ? 'bg-indigo-600' : 'bg-gray-300'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      notifications.promotions ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-            </div>
-          </div>
-
-          {/* Account Management */}
-          <div className={`rounded-lg shadow p-4 sm:p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className={`text-lg sm:text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              Account Management
-            </h3>
-            
-            <div className="space-y-6">
-              <div className="pt-4 border-t border-gray-300 dark:border-gray-700">
-                <h4 className={`font-medium mb-2 ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
-                  Delete Account
-                </h4>
-                <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Permanently delete your account and all store data
-                </p>
-                <button
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                  onClick={() => setShowDeleteModal(true)}
-                >
-                  Delete My Account
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      
+      <div>
+          <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Settings</h1>
+          <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>Manage your account and preferences.</p>
       </div>
 
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-          <div className="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-xl font-semibold mb-4">Delete Account</h2>
-            <p className="mb-6 text-sm">
-              Are you sure you want to permanently delete your account? This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={async () => {
-                  setIsDeleting(true);
-                  try {
-                    const userId = localStorage.getItem('userId');
-                    if (!userId) {
-                      toast.error('User ID not found');
-                      return;
-                    }
+      <div className="flex flex-col lg:flex-row gap-8 mt-8">
+          {/* Side Navigation */}
+          <aside className="lg:w-1/4">
+              <nav className="space-y-2">
+                  {Object.keys(settingsSections).map(key => (
+                      <button key={key} onClick={() => setActiveSection(key)}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                              activeSection === key 
+                                ? (darkMode ? 'bg-white/10 text-white' : 'bg-indigo-100 text-indigo-700') 
+                                : (darkMode ? 'text-gray-400 hover:bg-white/5 hover:text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900')
+                          }`}
+                      >
+                          <span className="text-xl">{settingsSections[key].icon}</span>
+                          <span className="font-medium">{settingsSections[key].title}</span>
+                      </button>
+                  ))}
+              </nav>
+          </aside>
 
-                    await axios.delete('https://bizzysite.onrender.com/api/user', {
-                      headers: { Authorization: `Bearer ${userId}` }
-                    });
-
-                    toast.success('Account deleted successfully');
-                    localStorage.clear();
-                    navigate('/signup');
-                  } catch (error) {
-                    console.error('Delete account error:', error);
-                    toast.error('Failed to delete account');
-                  } finally {
-                    setIsDeleting(false);
-                    setShowDeleteModal(false);
-                  }
-                }}
-                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-800 text-white'}`}>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <div>
-              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
-              <p className="mb-4 text-sm sm:text-base">
-                Empowering small businesses to succeed online with simple, powerful tools.
+          {/* Settings Content */}
+          <main className="flex-1">
+              <AnimatePresence mode="wait">
+                  <motion.div
+                      key={activeSection}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                  >
+                      <SettingsCard
+                          title={settingsSections[activeSection].title}
+                          description={settingsSections[activeSection].description}
+                          darkMode={darkMode}
+                      >
+                          {settingsSections[activeSection].content}
+                      </SettingsCard>
+                  </motion.div>
+              </AnimatePresence>
+          </main>
+      </div>
+      
+      {/* Delete Account Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+              className={`p-6 rounded-lg shadow-xl max-w-md w-full ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'} border`}
+            >
+              <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
+              <p className={`mb-6 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                Are you sure? All of your store data will be lost. This action cannot be undone.
               </p>
-            </div>
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4"></h4>
-              <ul className="space-y-1 sm:space-y-2 text-sm sm:text-base">
-               
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
-              <ul className="space-y-1 sm:space-y-2 text-sm sm:text-base">
-                <li> Email: your-store@bizzysite.shop</li>
-                <li></li>
-                
-              </ul>
-            </div>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className={`px-4 py-2 rounded font-medium transition-colors ${darkMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-gray-200 hover:bg-gray-300'}`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 font-medium disabled:opacity-50"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Account'}
+                </button>
+              </div>
+            </motion.div>
           </div>
-          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'}`}>
-            <p>© 2024 BizzySite. Made with ❤️ for small businesses.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

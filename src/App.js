@@ -21,6 +21,7 @@ import Profile from './profile';
 import ResetPassword from './resetpassword';
 import Settings from './settings';
 import AdminOrders from './AdminOrders';
+import Layout from './Layout'; // Import the new Layout component
 
 
 /**
@@ -36,9 +37,8 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        {/* SOLUTION: The <Toaster /> component is placed here at the top level.
-          I've added detailed `toastOptions` to centralize the styling and behavior
-          for all notifications throughout your app. This is the best practice.
+        {/* The <Toaster /> component is placed here at the top level
+          for global notifications throughout your app.
         */}
         <Toaster 
           position="top-right" 
@@ -48,7 +48,7 @@ function App() {
             style: {
               background: '#363636',
               color: '#fff',
-              zIndex: 1,
+              zIndex: 9999, // Ensure it's on top
             },
             duration: 5000,
             // Default options for specific types
@@ -83,21 +83,23 @@ function App() {
           <Route path="/preview" element={<ViewSite />} />
 
 
-          {/* --- Private Routes --- */}
-          <Route path="/storefront" element={<PrivateRoute><Storefront /></PrivateRoute>} />
-          <Route path="/products" element={<PrivateRoute><Products /></PrivateRoute>} />
-          <Route path="/orders" element={<PrivateRoute><Orders /></PrivateRoute>} />
-          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-          <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
-          <Route path="/payment" element={<PrivateRoute><Payment /></PrivateRoute>} />
-          <Route path="/customize" element={<PrivateRoute><Customize /></PrivateRoute>} />
-          <Route path="/navview" element={<PrivateRoute><NavView /></PrivateRoute>} />
-          
-          {/* --- Admin Route --- */}
-          <Route path="/admin/orders" element={<PrivateRoute><AdminOrders /></PrivateRoute>} />
+          {/* --- Private Routes Wrapped by Layout --- */}
+          <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
+            <Route path="/storefront" element={<Storefront />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route path="/customize" element={<Customize />} />
+            <Route path="/navview" element={<NavView />} />
+            
+            {/* --- Admin Route (also uses the layout) --- */}
+            <Route path="/admin/orders" element={<AdminOrders />} />
+          </Route>
 
           {/* Catch-all route for any page that doesn't exist */}
-          <Route path="*" element={<div className="flex items-center justify-center h-screen">404 Not Found</div>} />
+          <Route path="*" element={<div className="flex items-center justify-center h-screen text-xl font-semibold">404: Page Not Found</div>} />
         </Routes>
       </Router>
     </ThemeProvider>

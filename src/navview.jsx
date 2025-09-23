@@ -1,316 +1,179 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useTheme } from './ThemeContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function NavView() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('Preview');
-  const [storeId, setStoreId] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const { darkMode } = useTheme();
-  const [userName, setUserName] = useState('User');
-  const [showMenu, setShowMenu] = useState(false);
+
+  const [storeId, setStoreId] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [storeSlug, setStoreSlug] = useState('');
-  const menuRef = useRef(null);
+  const [buttonsReady, setButtonsReady] = useState(false);
 
   useEffect(() => {
     const fetchStoreData = async () => {
+      setLoading(true);
       try {
         const userId = localStorage.getItem('userId');
         const localStoreId = localStorage.getItem('storeId');
 
         if (!userId) {
-          setLoading(false);
+          navigate('/login');
           return;
         }
-
-        // Fetch user info
-        const userRes = await fetch(`https://bizzysite.onrender.com/api/user`, {
-          headers: { Authorization: `Bearer ${userId}` }
-        });
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          if (userData?.name) setUserName(userData.name);
+        
+        if (!localStoreId) {
+            toast.error("Please set up your store first!");
+            navigate('/storefront');
+            return;
         }
 
-        // Fetch store data
-        if (localStoreId) {
-          setStoreId(localStoreId);
-          const storeRes = await fetch(`https://bizzysite.onrender.com/api/business`, {
-            headers: {
-              'Authorization': `Bearer ${userId}`,
-              'x-store-id': localStoreId
-            }
-          });
-          
-          if (storeRes.ok) {
-            const storeData = await storeRes.json();
-            const slug = storeData.slug || storeData.business?.name?.toLowerCase().replace(/\s+/g, '-');
-            if (slug) {
-              setStoreSlug(slug);
-              localStorage.setItem('storeSlug', slug);
-            }
+        setStoreId(localStoreId);
+        const storeRes = await fetch(`https://bizzysite.onrender.com/api/business`, {
+          headers: {
+            'Authorization': `Bearer ${userId}`,
+            'x-store-id': localStoreId
           }
+        });
+        
+        if (storeRes.ok) {
+          const storeData = await storeRes.json();
+          const slug = storeData.slug || storeData.business?.name?.toLowerCase().replace(/\s+/g, '-');
+          if (slug) {
+            setStoreSlug(slug);
+            localStorage.setItem('storeSlug', slug);
+            setButtonsReady(true);
+          } else {
+            // Handle case where business name/slug is not set
+            toast.error("Please set your business name in the Setup tab first.");
+            setButtonsReady(true); // Still show buttons, but they will be disabled
+          }
+        } else {
+            throw new Error("Failed to fetch store data");
         }
       } catch (err) {
         console.error('Error fetching store data:', err);
         setError('Failed to load store information');
+        toast.error('Failed to load store information.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchStoreData();
+  }, [navigate]);
 
-    // Listen for storeSlugUpdated event for real-time slug updates
-    const handleSlugUpdate = (e) => {
-      if (e.detail?.slug) {
-        setStoreSlug(e.detail.slug);
-        localStorage.setItem('storeSlug', e.detail.slug);
-      }
-    };
-    window.addEventListener('storeSlugUpdated', handleSlugUpdate);
-    return () => {
-      window.removeEventListener('storeSlugUpdated', handleSlugUpdate);
-    };
-  }, []);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowMenu(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   const handleCopyLink = () => {
-    const slugToUse = storeSlug || localStorage.getItem('storeSlug');
-    if (!slugToUse) {
-      toast.error('Please set up your business name first');
+    if (!storeSlug) {
+      toast.error('Your store needs a name to create a shareable link.');
       return;
     }
 
-    const link = `https://bizzysite.shop/${slugToUse}`;
+    const link = `https://bizzysite.shop/${storeSlug}`;
     navigator.clipboard.writeText(link)
-      .then(() => toast.success('Store link copied to clipboard'))
-      .catch(() => toast.error('Failed to copy link'));
+      .then(() => toast.success('Store link copied to clipboard!'))
+      .catch(() => toast.error('Failed to copy link.'));
   };
 
   const handleViewSite = () => {
-    const slugToUse = storeSlug || localStorage.getItem('storeSlug');
-    if (!slugToUse) {
-      toast.error('Please set up your business name first');
+    if (!storeSlug) {
+      toast.error('Your store needs a name before it can be viewed.');
       return;
     }
-
-    const baseURL =
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:3000"
-        : "https://bizzysite.shop";
-
-    window.open(`${baseURL}/${slugToUse}`, "_blank");
+    window.open(`https://bizzysite.shop/${storeSlug}`, "_blank");
   };
 
   return (
-    <div className={`min-h-screen flex flex-col overflow-x-hidden ${
-      darkMode
-        ? 'bg-gradient-to-br from-gray-900 via-indigo-900 via-purple-900 to-black text-white'
-        : 'bg-gradient-to-br from-indigo-100 via-pink-100 via-purple-200 to-white text-black'
-    }`}>
-      <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        <div className="mb-6 rounded-md p-3">
-          <div className="flex justify-between items-center mb-2">
-            <Link 
-              to="/signup" 
-              className={`text-3xl sm:text-4xl font-extrabold ${
-                darkMode
-                  ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent'
-                  : 'text-gray-900'
-              }`}
-            >
-              BizzySite
-            </Link>
-            <div className="flex items-center space-x-4">
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setShowMenu(!showMenu)}
-                  className="focus:outline-none"
-                >
-                  <img
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=4f46e5&color=fff&bold=true`}
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full"
-                  />
-                </button>
-                <div
-                  className={`absolute right-0 mt-2 w-44 rounded-md shadow-lg z-50 bg-gray-800 text-white border border-gray-700 transform transition-all duration-300 ease-out origin-top-right ${
-                    showMenu ? 'opacity-100 translate-y-0 scale-100 visible' : 'opacity-0 -translate-y-2 scale-95 invisible'
-                  }`}
-                >
-                  <span className="block px-4 py-2 text-sm font-medium pointer-events-none opacity-50">Profile</span>
-                  <div className="border-t border-gray-700"></div>
-                  <Link to="/settings" className="block px-4 py-2 text-sm font-medium hover:bg-gray-700 hover:text-indigo-300">Settings</Link>
-                </div>
+    <>
+      {error && (
+        <div className={`border rounded mb-6 px-4 py-3 ${darkMode ? 'bg-red-900/20 border-red-700 text-red-200' : 'bg-red-100 border-red-400 text-red-700'}`}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
+
+      <div className={`rounded-xl shadow-lg p-4 sm:p-6 backdrop-blur-md border ${darkMode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/50 border-gray-200'}`}>
+        <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+          Preview & Share
+        </h3>
+        <p className={`mb-6 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          Here's the link to your live storefront. Share it with your customers!
+        </p>
+
+        {loading || !buttonsReady ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
+            {[1, 2].map((i) => (
+              <div key={i} className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                <div className={`h-6 w-3/4 mb-3 rounded ${darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}></div>
+                <div className={`h-4 w-full mb-6 rounded ${darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}></div>
+                <div className={`h-10 w-28 rounded-md ${darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}></div>
               </div>
-            </div>
+            ))}
           </div>
-          <h2 className={`text-xl sm:text-2xl font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-            {(() => {
-              const hour = new Date().getHours();
-              if (hour >= 5 && hour < 12) return <>🌞 Good Morning, {userName}!</>;
-              if (hour >= 12 && hour < 18) return <>🌤️ Good Afternoon, {userName}!</>;
-              if (hour >= 18 && hour < 22) return <>🌙 Good Evening, {userName}!</>;
-              return <>🌌 Good Night, {userName}!</>;
-            })()} 🚀
-          </h2>
-          <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full mb-6"></div>
-          <p className="mb-6 sm:mb-8 text-base sm:text-lg text-gray-900 dark:text-gray-400 max-w-2xl">
-            Preview and share your online store
-          </p>
-        </div>
-
-        <div className="relative">
-          <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className="flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-md backdrop-blur-md bg-opacity-70">
-              {[
-                { name: 'Setup', icon: '📊', path: '/storefront' },
-                { name: 'Products', icon: '📦', path: '/products' },
-                { name: 'Orders', icon: '🛒', path: '/orders' },
-                { name: 'Customize', icon: '🎨', path: '/customize' },
-                { name: 'Preview', icon: '🌐', path: '/navview' },
-                { name: 'Payments', icon: '💳', path: '/payment' }
-              ].map((tab) => (
-                <Link
-                  to={tab.path}
-                  key={tab.name}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base ${
-                    activeTab === tab.name
-                      ? 'bg-indigo-800 text-white'
-                      : 'text-white hover:text-indigo-300'
-                  }`}
-                  onClick={() => setActiveTab(tab.name)}
-                >
-                  <span className="text-lg">{tab.icon}</span>
-                  <span>{tab.name}</span>
-                </Link>
-              ))}
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+              <h4 className={`font-semibold text-lg mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                Preview Your Website
+              </h4>
+              <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                See exactly how your store looks to customers right now.
+              </p>
+              <button
+                onClick={handleViewSite}
+                className={`transition-transform duration-300 ease-in-out hover:scale-105 px-5 py-2 rounded-md font-semibold ${!storeSlug
+                  ? 'bg-gray-500 text-white/70 cursor-not-allowed'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                }`}
+                disabled={!storeSlug}
+              >
+                View Site
+              </button>
             </div>
-          </div>
-        </div>
 
-        {error && (
-          <div className={`border rounded mb-6 px-4 py-3 ${darkMode ? 'bg-red-900 border-red-700 text-red-100' : 'bg-red-100 border-red-400 text-red-700'}`}>
-            <strong>Error:</strong> {error}
-            <button
-              className={`ml-4 text-sm underline ${darkMode ? 'text-red-200' : 'text-red-800'}`}
-              onClick={() => setError('')}
-            >
-              Dismiss
-            </button>
+            <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+              <h4 className={`font-semibold text-lg mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                Share Your Store Link
+              </h4>
+              <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Copy your unique store link to share on social media or with anyone.
+              </p>
+              <button
+                onClick={handleCopyLink}
+                className={`transition-transform duration-300 ease-in-out hover:scale-105 px-5 py-2 rounded-md font-semibold ${!storeSlug
+                  ? 'border border-gray-500 text-gray-500 cursor-not-allowed'
+                  : darkMode
+                    ? 'bg-gray-600 text-gray-200 hover:bg-gray-500'
+                    : 'border border-indigo-300 text-indigo-600 bg-white hover:bg-indigo-50'
+                }`}
+                disabled={!storeSlug}
+              >
+                Copy Link
+              </button>
+              {storeSlug && (
+                <p className={`mt-3 text-xs break-words ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Your URL: <strong>https://bizzysite.shop/{storeSlug}</strong>
+                </p>
+              )}
+            </div>
           </div>
         )}
-
-        <div className={`rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-          <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-            Website Preview Options
-          </h3>
-          <p className={`mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Preview and share your store with customers
-          </p>
-
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[1, 2].map((i) => (
-                <div key={i} className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-                  <div className={`h-4 w-1/2 mb-3 rounded ${darkMode ? 'bg-gray-600' : 'bg-gray-300'} animate-pulse`}></div>
-                  <div className={`h-3 w-3/4 mb-4 rounded ${darkMode ? 'bg-gray-600' : 'bg-gray-300'} animate-pulse`}></div>
-                  <div className={`h-9 w-24 rounded ${darkMode ? 'bg-gray-600' : 'bg-gray-300'} animate-pulse`}></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                <h4 className={`font-medium mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                  Preview Your Website
-                </h4>
-                <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  See how your store looks to customers
-                </p>
-                <button
-                  onClick={handleViewSite}
-                  className={`px-4 py-2 rounded-md transition-colors ${!storeSlug
-                    ? 'bg-gray-500 cursor-not-allowed'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  }`}
-                  disabled={!storeSlug}
-                >
-                  View Site
-                </button>
-              </div>
-
-              <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                <h4 className={`font-medium mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                  Share Your Store Link
-                </h4>
-                <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Copy your store link to share with customers
-                </p>
-                <button
-                  onClick={handleCopyLink}
-                  className={`px-4 py-2 rounded-md ${!storeSlug
-                    ? 'border border-gray-500 text-gray-500 cursor-not-allowed'
-                    : darkMode
-                      ? 'bg-indigo-900 text-indigo-200 hover:bg-indigo-800'
-                      : 'border border-indigo-300 text-indigo-600 bg-white hover:bg-indigo-50'
-                  }`}
-                  disabled={!storeSlug}
-                >
-                  Copy Link
-                </button>
-                {storeSlug && (
-                  <p className={`mt-3 text-xs break-words ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Your store URL: https://bizzysite.shop/{storeSlug}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
       </div>
 
-      <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'}`}>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <div>
-              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
-              <p className="text-gray-300 mb-4 text-sm sm:text-base">
-                Empowering small businesses to succeed online with simple, powerful tools.
-              </p>
-            </div>
-            <div>
-           
-            </div>
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h4>
-              <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-              <li>Email: your-store@bizzysite.shop</li>
-              <li></li>
-              </ul>
-            </div>
-          </div>
-          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'}`}>
-            <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
+      <style>
+        {`
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+          }
+        `}
+      </style>
+    </>
   );
 }

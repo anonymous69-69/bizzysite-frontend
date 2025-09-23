@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
 
-// PayPal Icon Component (official brand SVG, simplified)
+// PayPal Icon Component
 const PayPalIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-6 w-6">
     <path
@@ -17,11 +17,11 @@ const PayPalIcon = () => (
   </svg>
 );
 
-
 export default function PaymentMethodForm() {
   const navigate = useNavigate();
-  const darkMode = true;
-  
+  // Assuming a dark mode default as the context is unavailable here.
+  const darkMode = true; 
+
   const [paymentDetails, setPaymentDetails] = useState({
     upiId: '',
     accountHolderName: '',
@@ -31,8 +31,8 @@ export default function PaymentMethodForm() {
     swiftBic: '',
     bankAddress: '',
     beneficiaryAddress: '',
-    payPalEmail: '', 
-    razorpayLinkedAccountId: '', // To display status to the user
+    payPalEmail: '',
+    razorpayLinkedAccountId: '',
   });
 
   const [isUPIEnabled, setIsUPIEnabled] = useState(false);
@@ -43,49 +43,24 @@ export default function PaymentMethodForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [showMenu, setShowMenu] = useState(false);
-  const [userName, setUserName] = useState('User');
-
-  const menuRef = useRef(null);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowMenu(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   useEffect(() => {
     const fetchPaymentSettings = async () => {
       try {
-        // ---- FIX: Using 'userId' for authentication token, not 'token' ----
         const token = localStorage.getItem('userId');
-        
         if (!token) {
           navigate('/login');
           return;
         }
 
-        fetch(`https://bizzysite.onrender.com/api/user`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-          .then(res => res.json())
-          .then(data => { if (data?.name) setUserName(data.name); })
-          .catch(err => console.error('Failed to fetch user info:', err));
-        
         const response = await fetch(`https://bizzysite.onrender.com/api/business`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           const paymentsData = data.payments || {};
-          
+
           setPaymentDetails({
             upiId: paymentsData.upiId || '',
             accountHolderName: paymentsData.accountHolderName || '',
@@ -98,7 +73,7 @@ export default function PaymentMethodForm() {
             payPalEmail: paymentsData.payPalEmail || '',
             razorpayLinkedAccountId: paymentsData.razorpayLinkedAccountId || '',
           });
-          
+
           setIsUPIEnabled(paymentsData.upiEnabled || false);
           setIsBankEnabled(paymentsData.bankEnabled || false);
           setIsInternationalBankEnabled(paymentsData.internationalBankEnabled || false);
@@ -106,6 +81,7 @@ export default function PaymentMethodForm() {
         }
       } catch (error) {
         console.error('Error fetching payment settings:', error);
+        toast.error("Failed to load payment settings.");
       } finally {
         setIsLoading(false);
       }
@@ -118,40 +94,14 @@ export default function PaymentMethodForm() {
     setPaymentDetails(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleToggleChange = (field) => {
-    if (field === 'upiEnabled') {
-      const newState = !isUPIEnabled;
-      setIsUPIEnabled(newState);
-      if (newState) {
-        setIsBankEnabled(false);
-        setIsInternationalBankEnabled(false);
-        setIsPayPalEnabled(false);
-      }
-    } else if (field === 'bankEnabled') {
-      const newState = !isBankEnabled;
-      setIsBankEnabled(newState);
-      if (newState) {
-        setIsUPIEnabled(false);
-        setIsInternationalBankEnabled(false);
-        setIsPayPalEnabled(false);
-      }
-    } else if (field === 'internationalBankEnabled') {
-      const newState = !isInternationalBankEnabled;
-      setIsInternationalBankEnabled(newState);
-      if (newState) {
-        setIsUPIEnabled(false);
-        setIsBankEnabled(false);
-        setIsPayPalEnabled(false);
-      }
-    } else if (field === 'payPalEnabled') {
-      const newState = !isPayPalEnabled;
-      setIsPayPalEnabled(newState);
-      if(newState) {
-        setIsUPIEnabled(false);
-        setIsBankEnabled(false);
-        setIsInternationalBankEnabled(false);
-      }
-    }
+  const handleToggleChange = (setter) => {
+      // Disable all others when one is enabled
+      setIsUPIEnabled(false);
+      setIsBankEnabled(false);
+      setIsInternationalBankEnabled(false);
+      setIsPayPalEnabled(false);
+      // Toggle the selected one
+      setter(prev => !prev);
   };
 
   const handleSavePayments = async (e) => {
@@ -174,8 +124,7 @@ export default function PaymentMethodForm() {
       beneficiaryAddress: isInternationalBankEnabled ? paymentDetails.beneficiaryAddress : "",
       payPalEmail: isPayPalEnabled ? paymentDetails.payPalEmail : "",
     };
-    
-    // ---- FIX: Using 'userId' for authentication token, not 'token' ----
+
     const token = localStorage.getItem('userId');
     if (!token) {
       setErrorMessage('You must be logged in to save payment details.');
@@ -193,21 +142,15 @@ export default function PaymentMethodForm() {
         body: JSON.stringify({ type: 'payments', data: payload }),
       });
 
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text();
-        throw new Error(`Server returned ${response.status}: ${text.substring(0, 100)}`);
-      }
-
       const result = await response.json();
 
       if (response.ok) {
         const newPaymentsData = result.data?.payments || {};
         setPaymentDetails(prev => ({
-            ...prev,
-            razorpayLinkedAccountId: newPaymentsData.razorpayLinkedAccountId || prev.razorpayLinkedAccountId,
+          ...prev,
+          razorpayLinkedAccountId: newPaymentsData.razorpayLinkedAccountId || prev.razorpayLinkedAccountId,
         }));
-        toast.success(result.message || 'Payment details saved!', { position: 'top-right' });
+        toast.success(result.message || 'Payment details saved!');
       } else {
         setErrorMessage(`Failed to save: ${result.message || 'Unknown error'}`);
         toast.error(`Failed to save: ${result.message || 'Unknown error'}`);
@@ -219,258 +162,176 @@ export default function PaymentMethodForm() {
       setIsSaving(false);
     }
   };
-  
+
   if (isLoading) {
     return (
-      <div className={`min-h-screen flex flex-col bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white`}>
-        <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow space-y-6 animate-pulse">
-          <div className={`h-6 rounded w-1/3 bg-gray-700`}></div>
-          <div className={`h-4 rounded w-1/2 bg-gray-700`}></div>
-          <div className={`p-4 sm:p-6 rounded-lg shadow space-y-4 bg-gray-800/40`}>
-            <div className={`h-5 rounded w-1/4 bg-gray-700`}></div>
-          </div>
+      <div className="w-full space-y-6 animate-pulse">
+        <div className={`h-8 rounded w-1/3 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+        <div className={`h-5 rounded w-1/2 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+        <div className={`p-6 rounded-lg shadow-lg space-y-4 ${darkMode ? 'bg-gray-800/40' : 'bg-white/60'}`}>
+          <div className={`h-6 rounded w-1/4 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+          <div className={`h-12 rounded w-full ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+          <div className={`h-12 rounded w-full ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
         </div>
       </div>
     );
   }
 
+  const inputClasses = darkMode
+    ? "w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-600 bg-gray-900/70 text-white placeholder-gray-500"
+    : "w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300 bg-white text-gray-800";
+  
+  const labelClasses = darkMode ? "block text-sm font-medium mb-1 text-gray-300" : "block text-sm font-medium mb-1 text-gray-700";
+
   return (
-    <div className={`min-h-screen flex flex-col overflow-x-hidden bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white`}>
-      <Toaster />
-      <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        {errorMessage && (
-          <div className={`mb-6 p-4 bg-red-900/60 border-l-4 border-red-500`}>
-            <div className="flex">
-              <div className="ml-3">
-                <p className={`text-sm text-red-200`}>{errorMessage}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="mb-6 rounded-md p-3">
-          <div className="flex justify-between items-center mb-2">
-            <Link to="/signup" className={`text-3xl sm:text-4xl font-extrabold text-white`}>
-              BizzySite
-            </Link>
-            <div className="flex items-center space-x-4">
-              <div className="relative" ref={menuRef}>
-                <button onClick={() => setShowMenu(!showMenu)} className="focus:outline-none">
-                  <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=4f46e5&color=fff&bold=true`} alt="Profile" className="w-10 h-10 rounded-full"/>
-                </button>
-                <div className={`absolute right-0 mt-2 w-44 rounded-md shadow-lg z-50 bg-gray-800/90 text-white border border-gray-700 backdrop-blur-md transform transition-all duration-300 ease-out origin-top-right ${showMenu ? "opacity-100 translate-y-0 scale-100 visible" : "opacity-0 -translate-y-2 scale-95 invisible"}`}>
-                  <span className="block px-4 py-2 text-sm font-medium hover:bg-gray-700 hover:text-indigo-300 pointer-events-none opacity-50">Profile</span>
-                  <div className="border-t border-gray-700"></div>
-                  <Link to="/settings" className="block px-4 py-2 text-sm font-medium hover:bg-gray-700 hover:text-indigo-300">Settings</Link>
-                </div>
-              </div>
-            </div>
-          </div>
-          <h2 className={`text-xl sm:text-2xl font-semibold mb-2 text-white`}>
-            {(() => {
-              const hour = new Date().getHours();
-              if (hour >= 5 && hour < 12) return <>🌞 Good Morning, {userName}!</>;
-              if (hour >= 12 && hour < 18) return <>🌤️ Good Afternoon, {userName}!</>;
-              if (hour >= 18 && hour < 22) return <>🌙 Good Evening, {userName}!</>;
-              return <>🌌 Good Night, {userName}!</>;
-            })()} 💳
-          </h2>
-          <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full mb-6"></div>
-          <p className="mb-6 sm:mb-8 text-base sm:text-lg text-gray-300 max-w-2xl">
-            Manage your payments securely and effortlessly.
-          </p>
+    <>
+      <Toaster position="top-right" reverseOrder={false} />
+      {errorMessage && (
+        <div className={`mb-6 p-4 rounded-md ${darkMode ? 'bg-red-900/60 border-red-500 text-red-200' : 'bg-red-100 border-red-400 text-red-700'}`}>
+            <p className="text-sm">{errorMessage}</p>
         </div>
+      )}
 
-        <div className="relative">
-          <div className="flex overflow-x-auto pb-2 mb-6 sm:mb-8 scrollbar-hide">
-            <div className="flex space-x-2 sm:space-x-6 px-2 py-2 rounded-lg min-w-max bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-md">
-              {[{ name: "Setup", icon: "📊", path: "/storefront" }, { name: "Products", icon: "📦", path: "/products" }, { name: "Orders", icon: "🛒", path: "/orders" }, { name: "Customize", icon: "🎨", path: "/customize" }, { name: "Preview", icon: "🌐", path: "/navview" }, { name: "Payments", icon: "💳", path: "/payment" }].map((tab) => (
-                <Link to={tab.path} key={tab.name} className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md text-sm sm:text-base ${window.location.pathname === tab.path ? "bg-white/20 text-white" : "text-white/80 hover:text-white"}`}>
-                  <span className="text-lg">{tab.icon}</span>
-                  <span>{tab.name}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
+      <div className={`rounded-lg shadow-2xl p-4 sm:p-8 backdrop-blur-lg ${darkMode ? 'bg-gray-800/40 border border-gray-700' : 'bg-white/60 border'}`}>
+        <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+          Payout Methods
+        </h3>
+        <p className={`mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          Configure how you want to receive payments. Only one method can be active at a time.
+        </p>
 
-        <div className="rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 bg-gray-800/40 backdrop-blur-md border border-gray-700">
-          <h3 className={`text-lg font-semibold mb-3 sm:mb-4 text-white`}>
-            Payout Methods
-          </h3>
-          <p className={`mb-4 sm:mb-6 text-gray-400`}>
-            Configure how you want to receive payments from your sales. Select one option.
-          </p>
-
-          <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
-              <div className="mr-2">
-                <h3 className={`text-base sm:text-lg font-semibold text-white`}>🇮🇳 UPI Payment (India)</h3>
-                <p className={`text-xs sm:text-sm text-gray-400`}>Receive payouts via UPI</p>
-              </div>
-              <label className="inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only" checked={isUPIEnabled} onChange={() => handleToggleChange('upiEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isUPIEnabled ? 'bg-indigo-600' : 'bg-gray-700'}`}>
-                  <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isUPIEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
+        <div className="space-y-4">
+            {/* UPI */}
+            <div className={`p-4 border rounded-lg transition-all duration-300 ${darkMode ? 'border-gray-700 bg-black/20' : 'border-gray-200 bg-gray-50/50'}`}>
+                <div className="flex items-center justify-between">
+                    <div className="mr-2">
+                        <h3 className={`text-base font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🇮🇳 UPI Payment (India)</h3>
+                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Receive payouts via UPI</p>
+                    </div>
+                    <label className="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" checked={isUPIEnabled} onChange={() => handleToggleChange(setIsUPIEnabled)}/>
+                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                    </label>
                 </div>
-              </label>
-            </div>
-            {isUPIEnabled && (
-              <div className="p-4 border rounded-lg animate-slideDown bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
-                <div className="space-y-3">
-                  <div>
-                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>UPI ID *</label>
-                    <input type="text" name="upiId" value={paymentDetails.upiId} onChange={handleInputChange} placeholder="yourname@okhdfc" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required/>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
-              <div className="mr-2">
-                <h3 className={`text-base sm:text-lg font-semibold text-white`}>🇮🇳 Bank Transfer (India)</h3>
-                <p className={`text-xs sm:text-sm text-gray-400`}>Direct Indian bank account transfer for automated 95/5 splits.</p>
-              </div>
-              <label className="inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only" checked={isBankEnabled} onChange={() => handleToggleChange('bankEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isBankEnabled ? 'bg-indigo-600' : 'bg-gray-700'}`}>
-                  <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isBankEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
-                </div>
-              </label>
+                {isUPIEnabled && (
+                    <div className="mt-4 pt-4 border-t border-gray-700 animate-slideDown">
+                        <label className={labelClasses}>UPI ID *</label>
+                        <input type="text" name="upiId" value={paymentDetails.upiId} onChange={handleInputChange} placeholder="yourname@okhdfc" className={inputClasses} required/>
+                    </div>
+                )}
             </div>
 
-            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
-              <div className="mr-2">
-                <h3 className={`text-base sm:text-lg font-semibold text-white`}>
-                  🌍 International Bank Transfer
-                </h3>
-                <p className={`text-xs sm:text-sm text-gray-400`}>
-                  Receive payouts to a non-Indian bank account.
-                </p>
-              </div>
-              <label className="inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only" checked={isInternationalBankEnabled} onChange={() => handleToggleChange('internationalBankEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isInternationalBankEnabled ? 'bg-indigo-600' : 'bg-gray-700'}`}>
-                  <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isInternationalBankEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
+            {/* Indian Bank Transfer */}
+            <div className={`p-4 border rounded-lg transition-all duration-300 ${darkMode ? 'border-gray-700 bg-black/20' : 'border-gray-200 bg-gray-50/50'}`}>
+                <div className="flex items-center justify-between">
+                    <div className="mr-2">
+                        <h3 className={`text-base font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🇮🇳 Bank Transfer (India)</h3>
+                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Direct Indian bank account transfer.</p>
+                    </div>
+                     <label className="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" checked={isBankEnabled} onChange={() => handleToggleChange(setIsBankEnabled)}/>
+                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                    </label>
                 </div>
-              </label>
-            </div>
-
-            {(isBankEnabled || isInternationalBankEnabled) && (
-                 <div className="p-4 border rounded-lg animate-slideDown bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
-                    {isBankEnabled && (
-                        <div className="mb-4 p-3 rounded-lg bg-indigo-900/40 border border-indigo-700">
-                            <h4 className="font-semibold text-indigo-200">Automated Payout Status</h4>
+                {isBankEnabled && (
+                    <div className="mt-4 pt-4 border-t border-gray-700 animate-slideDown space-y-4">
+                        <div className={`p-3 rounded-lg ${darkMode ? 'bg-indigo-900/40 border-indigo-700' : 'bg-indigo-50 border-indigo-200'} border`}>
+                            <h4 className={`font-semibold ${darkMode ? 'text-indigo-200' : 'text-indigo-800'}`}>Automated Payout Status</h4>
                             {paymentDetails.razorpayLinkedAccountId ? (
-                                <p className="text-sm text-green-300">✓ Your account is linked with Razorpay and ready for automated 95/5 payouts.</p>
+                                <p className={`text-sm ${darkMode ? 'text-green-300' : 'text-green-600'}`}>✓ Your account is linked and ready for automated payouts.</p>
                             ) : (
-                                <p className="text-sm text-yellow-300">! Please fill and save your bank details below to enable automated payouts.</p>
+                                <p className={`text-sm ${darkMode ? 'text-yellow-300' : 'text-yellow-600'}`}>! Please save your bank details to enable automated payouts.</p>
                             )}
                         </div>
-                    )}
-                    <h4 className={`text-sm font-semibold mb-3 text-gray-300`}>Bank Account Details</h4>
-                    <div className="space-y-3">
                         <div>
-                            <label className={`block text-sm font-medium mb-1 text-gray-300`}>Account Holder Name *</label>
-                            <input type="text" name="accountHolderName" value={paymentDetails.accountHolderName} onChange={handleInputChange} placeholder="Full Name as on Bank Account" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required/>
+                            <label className={labelClasses}>Account Holder Name *</label>
+                            <input type="text" name="accountHolderName" value={paymentDetails.accountHolderName} onChange={handleInputChange} placeholder="Full Name" className={inputClasses} required/>
                         </div>
-                        
-                        {isBankEnabled && (
-                            <>
-                                <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>Account Number *</label>
-                                    <input type="text" name="accountNumber" value={paymentDetails.accountNumber} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-md border-gray-700 bg-gray-900 text-white`} required/>
-                                </div>
-                                <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>IFSC Code *</label>
-                                    <input type="text" name="ifscCode" value={paymentDetails.ifscCode} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-md border-gray-700 bg-gray-900 text-white`} required/>
-                                </div>
-                            </>
-                        )}
-
-                        {isInternationalBankEnabled && (
-                            <>
-                                <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>IBAN *</label>
-                                    <input type="text" name="iban" value={paymentDetails.iban} onChange={handleInputChange} placeholder="International Bank Account Number" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required/>
-                                </div>
-                                <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>SWIFT / BIC Code *</label>
-                                    <input type="text" name="swiftBic" value={paymentDetails.swiftBic} onChange={handleInputChange} placeholder="e.g., CITIUS33" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required/>
-                                </div>
-                                <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>Beneficiary Address *</label>
-                                    <textarea name="beneficiaryAddress" value={paymentDetails.beneficiaryAddress} onChange={handleInputChange} placeholder="Your full address (Street, City, Country)" rows={2} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required />
-                                </div>
-                                <div>
-                                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>Bank's Address *</label>
-                                    <textarea name="bankAddress" value={paymentDetails.bankAddress} onChange={handleInputChange} placeholder="Your bank's full address (Street, City, Country)" rows={2} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required />
-                                </div>
-                            </>
-                        )}
+                        <div>
+                            <label className={labelClasses}>Account Number *</label>
+                            <input type="text" name="accountNumber" value={paymentDetails.accountNumber} onChange={handleInputChange} className={inputClasses} required/>
+                        </div>
+                        <div>
+                            <label className={labelClasses}>IFSC Code *</label>
+                            <input type="text" name="ifscCode" value={paymentDetails.ifscCode} onChange={handleInputChange} className={inputClasses} required/>
+                        </div>
                     </div>
-                 </div>
-            )}
-            
-            <div className="flex items-center justify-between p-3 sm:p-4 border rounded-lg bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
-                <div className="mr-2 flex items-center space-x-3">
-                    <PayPalIcon />
-                    <div>
-                        <h3 className={`text-base sm:text-lg font-semibold text-white`}>
-                        PayPal Payout
-                        </h3>
-                        <p className={`text-xs sm:text-sm text-gray-400`}>Receive payouts via PayPal (International)</p>
-                    </div>
-                </div>
-              <label className="inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only" checked={isPayPalEnabled} onChange={() => handleToggleChange('payPalEnabled')}/>
-                <div className={`relative inline-flex items-center h-5 rounded-full w-10 transition-colors ${isPayPalEnabled ? 'bg-indigo-600' : 'bg-gray-700'}`}>
-                  <span className={`inline-block w-4 h-4 transform transition rounded-full bg-white ${isPayPalEnabled ? 'translate-x-5' : 'translate-x-1'}`}/>
-                </div>
-              </label>
+                )}
             </div>
-            {isPayPalEnabled && (
-              <div className="p-4 border rounded-lg animate-slideDown bg-gray-800/40 backdrop-blur-md border-gray-700 shadow-lg">
-                <div className="space-y-3">
-                  <div>
-                    <label className={`block text-sm font-medium mb-1 text-gray-300`}>PayPal Email Address *</label>
-                    <input type="email" name="payPalEmail" value={paymentDetails.payPalEmail} onChange={handleInputChange} placeholder="your.email@example.com" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-700 bg-gray-900 text-white`} required/>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
 
-          <div className="flex justify-end">
-            <button onClick={handleSavePayments} disabled={isSaving} className={`w-full mt-6 mb-6 px-4 py-2 rounded-md text-sm sm:text-base font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white transition-all duration-200 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 ${isSaving ? "opacity-60 cursor-not-allowed" : ""}`}>
-              {isSaving ? "Saving..." : "Save Payout Settings"}
-            </button>
-          </div>
+            {/* International Bank Transfer */}
+            <div className={`p-4 border rounded-lg transition-all duration-300 ${darkMode ? 'border-gray-700 bg-black/20' : 'border-gray-200 bg-gray-50/50'}`}>
+                <div className="flex items-center justify-between">
+                    <div className="mr-2">
+                        <h3 className={`text-base font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🌍 International Bank Transfer</h3>
+                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Payouts to a non-Indian bank account.</p>
+                    </div>
+                    <label className="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" checked={isInternationalBankEnabled} onChange={() => handleToggleChange(setIsInternationalBankEnabled)}/>
+                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                    </label>
+                </div>
+                {isInternationalBankEnabled && (
+                    <div className="mt-4 pt-4 border-t border-gray-700 animate-slideDown space-y-4">
+                        <div>
+                            <label className={labelClasses}>Account Holder Name *</label>
+                            <input type="text" name="accountHolderName" value={paymentDetails.accountHolderName} onChange={handleInputChange} placeholder="Full Name" className={inputClasses} required/>
+                        </div>
+                        <div>
+                            <label className={labelClasses}>IBAN *</label>
+                            <input type="text" name="iban" value={paymentDetails.iban} onChange={handleInputChange} placeholder="International Bank Account Number" className={inputClasses} required/>
+                        </div>
+                        <div>
+                            <label className={labelClasses}>SWIFT / BIC Code *</label>
+                            <input type="text" name="swiftBic" value={paymentDetails.swiftBic} onChange={handleInputChange} placeholder="e.g., CITIUS33" className={inputClasses} required/>
+                        </div>
+                        <div>
+                            <label className={labelClasses}>Beneficiary Address *</label>
+                            <textarea name="beneficiaryAddress" value={paymentDetails.beneficiaryAddress} onChange={handleInputChange} placeholder="Your full address (Street, City, Country)" rows={2} className={inputClasses} required />
+                        </div>
+                        <div>
+                            <label className={labelClasses}>Bank's Address *</label>
+                            <textarea name="bankAddress" value={paymentDetails.bankAddress} onChange={handleInputChange} placeholder="Your bank's full address" rows={2} className={inputClasses} required />
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* PayPal */}
+            <div className={`p-4 border rounded-lg transition-all duration-300 ${darkMode ? 'border-gray-700 bg-black/20' : 'border-gray-200 bg-gray-50/50'}`}>
+                <div className="flex items-center justify-between">
+                    <div className="mr-2 flex items-center space-x-3">
+                        <PayPalIcon />
+                        <div>
+                            <h3 className={`text-base font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>PayPal Payout</h3>
+                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Receive payouts via PayPal (International)</p>
+                        </div>
+                    </div>
+                    <label className="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" checked={isPayPalEnabled} onChange={() => handleToggleChange(setIsPayPalEnabled)}/>
+                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                    </label>
+                </div>
+                {isPayPalEnabled && (
+                    <div className="mt-4 pt-4 border-t border-gray-700 animate-slideDown">
+                        <label className={labelClasses}>PayPal Email Address *</label>
+                        <input type="email" name="payPalEmail" value={paymentDetails.payPalEmail} onChange={handleInputChange} placeholder="your.email@example.com" className={inputClasses} required/>
+                    </div>
+                )}
+            </div>
+        </div>
+
+        <div className="flex justify-end mt-8">
+          <button 
+            onClick={handleSavePayments} 
+            disabled={isSaving} 
+            className={`px-6 py-3 rounded-lg font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-300 ease-in-out hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100`}
+          >
+            {isSaving ? "Saving..." : "Save Payout Settings"}
+          </button>
         </div>
       </div>
-       <footer className={`py-8 sm:py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'}`}>
-        <div className="max-w-7xl mx-auto"> 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <div>
-              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">BizzySite</h3>
-              <p className="text-gray-300 mb-4 text-sm sm:text-base">
-                Empowering small businesses to succeed online with simple, powerful tools.
-              </p>
-            </div>
-            <div></div>
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Resources</h4>
-              <ul className="space-y-1 sm:space-y-2 text-gray-300 text-sm sm:text-base">
-                <li>Email: your-store@bizzysite.shop</li>
-                <li>Phone: +91 7086758292</li>
-              </ul>
-            </div>
-          </div>
-          <div className={`border-t mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm sm:text-base ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-700 text-gray-400'}`}>
-            <p>© 2025 BizzySite. Made with ❤️ for small businesses.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }
+

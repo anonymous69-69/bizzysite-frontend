@@ -1,8 +1,22 @@
 import { Link, useParams } from "react-router-dom";
-import React, { useState, useEffect, useRef } from "react"; // Import useRef
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-// Icon components (no changes needed here)
+// A simple loading spinner component to show while fetching data
+const LoadingSpinner = () => (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="flex flex-col items-center">
+            <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p className="mt-4 text-gray-600">Loading Checkout...</p>
+        </div>
+    </div>
+);
+
+
+// Icon components (no changes)
 const UserIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -25,7 +39,6 @@ const LocationIcon = () => (
     </svg>
 );
 
-// ✅ NEW: Sorted and structured country list
 const countries = [
   { code: 'DZ', name: 'Algeria' }, { code: 'AR', name: 'Argentina' }, { code: 'AU', name: 'Australia' },
   { code: 'AT', name: 'Austria' }, { code: 'BH', name: 'Bahrain' }, { code: 'BD', name: 'Bangladesh' },
@@ -58,11 +71,10 @@ const countries = [
   { code: 'TR', name: 'Turkey' }, { code: 'UG', name: 'Uganda' }, { code: 'UA', name: 'Ukraine' },
   { code: 'AE', name: 'United Arab Emirates' }, { code: 'GB', name: 'United Kingdom' }, { code: 'US', name: 'United States' },
   { code: 'UY', name: 'Uruguay' }, { code: 'VE', name: 'Venezuela' }, { code: 'VN', name: 'Vietnam' }
-].sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
+].sort((a, b) => a.name.localeCompare(b.name));
 
 
 const OrderForm = () => {
-  // Helper to get currency symbol from currency code
   function getCurrencySymbol(currencyCode) {
     try {
       const parts = new Intl.NumberFormat('en-US', {
@@ -78,16 +90,16 @@ const OrderForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  
+  // ✅ NEW: Loading state for fetching business data
+  const [isLoading, setIsLoading] = useState(true);
   const [business, setBusiness] = useState(null);
   const [storeCurrency, setStoreCurrency] = useState("INR");
   const [razorpayKey, setRazorpayKey] = useState("");
-  const [paymentGateway, setPaymentGateway] = useState("razorpay");
 
   const {
     cart = [],
     total: passedTotal = 0,
-    shippingCharge: sc = 0
+    shippingCharge: sc // We will use the fetched shipping charge later
   } = location.state || {};
 
   const total = passedTotal;
@@ -105,37 +117,14 @@ const OrderForm = () => {
     specialNote: "",
   });
 
-  // ✅ NEW: State for the custom country dropdown
   const [countrySearch, setCountrySearch] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null); // To detect clicks outside the dropdown
+  const dropdownRef = useRef(null);
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Order summary calculations
-  const shippingCharge = !isNaN(parseFloat(sc)) ? parseFloat(sc) : 0;
-  const platformFee = !isNaN(total) ? total * 0.05 : 0;
-  const orderTotal = !isNaN(total + shippingCharge + platformFee)
-    ? total + shippingCharge + platformFee
-    : 0;
   
   const API_BASE = "https://bizzysite.onrender.com";
-
-  useEffect(() => {
-    const detectCountry = async () => {
-        try {
-            const res = await fetch(`${API_BASE}/api/detect-country`);
-            const data = await res.json();
-            if (data.paymentGateway) {
-                setPaymentGateway(data.paymentGateway);
-            }
-        } catch (err) {
-            console.error("Could not detect country, defaulting to Razorpay.", err);
-        }
-    };
-    detectCountry();
-  }, [API_BASE]);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -182,28 +171,35 @@ const OrderForm = () => {
     }
   }, [slug, navigate]);
 
+  // ✅ MODIFIED: This effect now controls the main loading state
   useEffect(() => {
     const fetchBusiness = async () => {
+      if (!slug) {
+        setIsLoading(false);
+        return;
+      };
+      
+      setIsLoading(true);
       try {
-        const res = await fetch(
-          `${API_BASE}/api/store/slug/${slug}`
-        );
+        const res = await fetch(`${API_BASE}/api/store/slug/${slug}`);
         if (res.ok) {
           const data = await res.json();
           setBusiness(data);
-          setStoreCurrency(data.defaultCurrency || "INR");
+          setStoreCurrency(data.defaultCurrency?.toUpperCase() || "INR");
+        } else {
+          // Handle case where business is not found
+          console.error("Business not found");
+          navigate("/"); // or to a 404 page
         }
       } catch (err) {
         console.error("Failed to fetch business info:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
+    fetchBusiness();
+  }, [slug, API_BASE, navigate]);
 
-    if (slug) {
-      fetchBusiness();
-    }
-  }, [slug, API_BASE]);
-
-  // ✅ NEW: Effect to handle clicks outside the dropdown to close it
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -222,145 +218,160 @@ const OrderForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!slug || !business?.storeId) {
-        alert("Store information is missing. Cannot proceed.");
-        return;
-    }
-    if (!razorpayKey) {
-        alert("Payment gateway is not configured correctly. Please try again later.");
-        return;
-    }
+  // Recalculate totals now that we have business data
+  const shippingCharge = business?.shippingCharge || 0;
+  const platformFee = !isNaN(total) ? total * 0.05 : 0;
+  const orderTotal = total + shippingCharge + platformFee;
 
-    setIsSubmitting(true);
+// Replace the existing handleSubmit function with this one
 
-    try {
-        const { fullName, ...customerData } = formData;
-        
-        const sanitizedCart = cart.map(item => ({
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-        }));
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!slug || !business?.storeId) {
+      alert("Store information is missing. Cannot proceed.");
+      return;
+  }
+  if (!razorpayKey) {
+      alert("Payment gateway is not configured correctly. Please try again later.");
+      return;
+  }
 
-        const orderPayload = {
-            storeId: business.storeId,
-            customer: {
-              name: fullName, 
-              ...customerData
-            },
-            items: sanitizedCart, 
-            subtotal: total,
-            shipping: shippingCharge,
-            platformFee: platformFee,
-            total: orderTotal,
-            currency: storeCurrency,
-            paid: false, 
-            status: 'pending',
-        };
+  setIsSubmitting(true);
 
-        const orderRes = await fetch(`${API_BASE}/api/orders`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(orderPayload),
-        });
+  try {
+      const { fullName, ...customerData } = formData;
+      
+      const sanitizedCart = cart.map(item => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+      }));
 
-        const orderData = await orderRes.json();
-        if (!orderRes.ok) {
-            throw new Error(orderData.message || "Failed to create order");
-        }
-        const dbOrderId = orderData.orderId;
+      const orderPayload = {
+          storeId: business.storeId,
+          customer: {
+            name: fullName, 
+            ...customerData
+          },
+          items: sanitizedCart, 
+          subtotal: total,
+          shipping: shippingCharge,
+          platformFee: platformFee,
+          total: orderTotal,
+          currency: storeCurrency,
+          paid: false, 
+          status: 'pending',
+      };
 
-        const razorpayOrderRes = await fetch(`${API_BASE}/api/create-razorpay-order`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                amount: orderTotal,
-                currency: storeCurrency,
-                orderId: dbOrderId, 
-                storeId: business.storeId, 
-            }),
-        });
-        
-        const razorpayOrderData = await razorpayOrderRes.json();
-        if (!razorpayOrderRes.ok) {
-            throw new Error(razorpayOrderData.error || "Failed to create Razorpay order");
-        }
+      const orderRes = await fetch(`${API_BASE}/api/orders`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderPayload),
+      });
 
-        const options = {
-            key: razorpayKey,
-            amount: razorpayOrderData.amount,
-            currency: razorpayOrderData.currency,
-            name: business.name || "BizzySite Store",
-            description: `Payment for Order #${dbOrderId}`,
-            order_id: razorpayOrderData.id,
-            method: {
-              card: true,
-              upi: paymentGateway === 'razorpay',
-              netbanking: paymentGateway === 'razorpay',
-              wallet: paymentGateway === 'razorpay',
-              paypal: paymentGateway === 'paypal',
-            },
-            handler: async function (response) {
-                const verificationPayload = {
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_signature: response.razorpay_signature,
-                    db_order_id: dbOrderId,
-                };
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+          throw new Error(orderData.message || "Failed to create order");
+      }
+      const dbOrderId = orderData.orderId;
 
-                const verifyRes = await fetch(`${API_BASE}/api/verify-razorpay-payment`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(verificationPayload),
-                });
-                
-                const verifyData = await verifyRes.json();
+      const razorpayOrderRes = await fetch(`${API_BASE}/api/create-razorpay-order`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              amount: orderTotal,
+              currency: storeCurrency,
+              orderId: dbOrderId, 
+              storeId: business.storeId, 
+          }),
+      });
+      
+      const razorpayOrderData = await razorpayOrderRes.json();
+      if (!razorpayOrderRes.ok) {
+          throw new Error(razorpayOrderData.error || "Failed to create Razorpay order");
+      }
 
-                if (verifyData.success) {
-                    setShowSuccessModal(true);
-                } else {
-                    alert(`Payment verification failed: ${verifyData.message}. Please contact support.`);
-                }
-            },
-            prefill: {
-                name: formData.fullName,
-                email: formData.email,
-                contact: formData.phone,
-            },
-            theme: {
-                color: "#4f46e5", 
-            },
-            modal: {
-                ondismiss: async function() {
-                    console.log('Payment modal dismissed.');
-                    try {
-                        await fetch(`${API_BASE}/api/orders/${dbOrderId}/cancel`, {
-                            method: "POST",
-                            headers: { 'Content-Type': 'application/json' },
-                        });
-                    } catch (err) {
-                        console.error("Failed to send cancellation status to backend:", err);
-                    }
-                }
-            }
-        };
+      const isIndianCurrency = storeCurrency === 'INR';
 
-        const rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', function (response){
-          fetch(`${API_BASE}/api/orders/${dbOrderId}/fail`, { method: "POST" });
-          alert(`Payment failed: ${response.error.description} (Code: ${response.error.code})`);
-        });
+      const options = {
+          key: razorpayKey,
+          amount: razorpayOrderData.amount,
+          currency: razorpayOrderData.currency,
+          // ✅ FIXED: Safely access the business name
+          name: business?.business?.name || "BizzySite Store",
+          description: `Payment for Order #${dbOrderId}`,
+          order_id: razorpayOrderData.id,
+          method: {
+            card: true,
+            upi: isIndianCurrency,
+            netbanking: isIndianCurrency,
+            wallet: isIndianCurrency,
+            paypal: !isIndianCurrency,
+          },
+          handler: async function (response) {
+              const verificationPayload = {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  db_order_id: dbOrderId,
+              };
 
-        rzp.open();
+              const verifyRes = await fetch(`${API_BASE}/api/verify-razorpay-payment`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(verificationPayload),
+              });
+              
+              const verifyData = await verifyRes.json();
 
-    } catch (err) {
-        alert(`An error occurred: ${err.message}`);
-    } finally {
-        setIsSubmitting(false);
-    }
+              if (verifyData.success) {
+                  setShowSuccessModal(true);
+              } else {
+                  alert(`Payment verification failed: ${verifyData.message}. Please contact support.`);
+              }
+          },
+          prefill: {
+              name: formData.fullName,
+              email: formData.email,
+              contact: formData.phone,
+          },
+          theme: {
+              color: "#4f46e5", 
+          },
+          modal: {
+              ondismiss: async function() {
+                  console.log('Payment modal dismissed.');
+                  try {
+                      await fetch(`${API_BASE}/api/orders/${dbOrderId}/cancel`, {
+                          method: "POST",
+                          headers: { 'Content-Type': 'application/json' },
+                      });
+                  } catch (err) {
+                      console.error("Failed to send cancellation status to backend:", err);
+                  }
+              }
+          }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response){
+        fetch(`${API_BASE}/api/orders/${dbOrderId}/fail`, { method: "POST" });
+        alert(`Payment failed: ${response.error.description} (Code: ${response.error.code})`);
+      });
+
+      rzp.open();
+
+  } catch (err) {
+      alert(`An error occurred: ${err.message}`);
+  } finally {
+      setIsSubmitting(false);
+  }
 };
+
+  // ✅ MODIFIED: Show loader while fetching business data
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   if (!cart || cart.length === 0 || !location.state) {
     return (
@@ -383,7 +394,6 @@ const OrderForm = () => {
     );
   }
 
-  // ✅ NEW: Filter countries based on search
   const filteredCountries = countries.filter(country =>
     country.name.toLowerCase().includes(countrySearch.toLowerCase())
   );
@@ -418,7 +428,7 @@ const OrderForm = () => {
                 )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-                    <div className="lg:col-span-7">
+                    <div className="lg-col-span-7">
                         <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-8">
                             <div>
                                 <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-4">Contact Information</h2>
@@ -450,7 +460,6 @@ const OrderForm = () => {
                                         <textarea id="address" name="address" value={formData.address} onChange={handleChange} required rows={3} className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {/* ✅ NEW: Searchable Country Dropdown */}
                                         <div className="relative" ref={dropdownRef}>
                                             <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">Country *</label>
                                             <input
@@ -463,7 +472,7 @@ const OrderForm = () => {
                                                 value={countrySearch}
                                                 onChange={(e) => {
                                                     setCountrySearch(e.target.value);
-                                                    setFormData(prev => ({ ...prev, country: '' })); // Clear full country value if user is typing
+                                                    setFormData(prev => ({ ...prev, country: '' }));
                                                     setIsDropdownOpen(true);
                                                 }}
                                                 onFocus={() => setIsDropdownOpen(true)}
@@ -477,7 +486,7 @@ const OrderForm = () => {
                                                                 className="px-4 py-2 hover:bg-indigo-100 cursor-pointer"
                                                                 onClick={() => {
                                                                     setFormData(prev => ({ ...prev, country: country.code }));
-                                                                    setCountrySearch(country.name); // Show full name in input
+                                                                    setCountrySearch(country.name);
                                                                     setIsDropdownOpen(false);
                                                                 }}
                                                             >
@@ -509,7 +518,6 @@ const OrderForm = () => {
                             </div>
                         </form>
                     </div>
-                    {/* Order Summary Section (no changes needed here) */}
                     <div className="lg:col-span-5">
                         <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg sticky top-8">
                             <h2 className="text-xl font-semibold mb-6 text-gray-800 border-b pb-4">Order Summary</h2>
@@ -537,7 +545,7 @@ const OrderForm = () => {
                                 <div className="flex justify-between text-gray-600">
                                     <span>Shipping</span>
                                     <span className="font-medium">{`${getCurrencySymbol(storeCurrency)}${shippingCharge.toFixed(2)}`}</span>
-                                </div>
+                                 </div>
                                 <div className="flex justify-between text-gray-600">
                                     <span>Platform Fee (5%)</span>
                                     <span className="font-medium">{`${getCurrencySymbol(storeCurrency)}${platformFee.toFixed(2)}`}</span>
