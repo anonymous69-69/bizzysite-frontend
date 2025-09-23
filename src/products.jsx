@@ -32,16 +32,19 @@ export default function ProductCatalog() {
     setIsLoading(true);
     setError(null);
     try {
-      // ================== THE FIX: CACHE BUSTING ==================
-      // Add a unique timestamp to the URL to bypass browser and server caches.
-      // Also, add headers to explicitly prevent caching of this request.
-      const response = await axios.get(`${API_BASE_URL}/store/${currentStoreId}?timestamp=${new Date().getTime()}`, {
+      // ================== THE FIX: FETCH FROM THE AUTHENTICATED ENDPOINT ==================
+      // Instead of the public `/api/store/:storeId` endpoint, we now use the authenticated `/api/business` endpoint.
+      // This ensures we get the latest data directly from the database, bypassing any potential caching layers
+      // on public routes that might serve stale information.
+      const response = await axios.get(`${API_BASE_URL}/business`, {
         headers: {
+          'Authorization': `Bearer ${currentUserId}`,
+          'x-store-id': currentStoreId,
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache'
         }
       });
-      // ==========================================================
+      // ====================================================================================
 
       const businessData = response.data;
       setProducts(businessData?.products || []);
@@ -53,7 +56,7 @@ export default function ProductCatalog() {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, API_BASE_URL]);
+  }, [navigate]);
 
   useEffect(() => {
     const savedUserId = localStorage.getItem('userId');
