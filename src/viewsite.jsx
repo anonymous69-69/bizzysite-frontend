@@ -86,19 +86,20 @@ const fetchBusiness = async () => {
 
     console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
 
-    // ================== THE FIX: CACHE BUSTING ==================
-    // We add a unique timestamp to the URL to ensure we always get fresh data from the server,
-    // bypassing any caching layers on Render or in the browser.
+    // ================== THE FIX: MORE AGGRESSIVE CACHE BUSTING ==================
+    // We add cache: 'no-store' to explicitly tell the fetch API not to use its cache.
+    // This, combined with the timestamp and server headers, ensures fresh data.
     const res = await fetch(
       `https://bizzysite.onrender.com/api/store/slug/${slug}?timestamp=${new Date().getTime()}`,
       {
+        cache: 'no-store', // <-- CRITICAL ADDITION
         headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Cache-Control': 'no-cache',
           'Pragma': 'no-cache'
         }
       }
     );
-    // ==========================================================
+    // ===========================================================================
 
     if (res.status === 404) {
       setError("Store not found");
@@ -601,7 +602,7 @@ const fetchBusiness = async () => {
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
                 fill="none"
-                viewBox="0 0 24 24"
+                viewBox="0 0 24"
                 stroke="currentColor"
               >
                 <path
@@ -629,7 +630,7 @@ const fetchBusiness = async () => {
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
               fill="none"
-              viewBox="0 0 24 24"
+              viewBox="0 0 24"
               stroke="currentColor"
               strokeWidth={2}
             >
@@ -684,7 +685,7 @@ const fetchBusiness = async () => {
               <svg
                 className="mx-auto h-12 w-12 text-gray-400"
                 fill="none"
-                viewBox="0 0 24 24"
+                viewBox="0 0 24"
                 stroke="currentColor"
               >
                 <path
@@ -879,3 +880,4 @@ const fetchBusiness = async () => {
 };
 
 export default ViewSite;
+
