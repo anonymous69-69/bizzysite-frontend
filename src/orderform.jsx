@@ -428,7 +428,7 @@ const handleSubmit = async (e) => {
                 )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-                    <div className="lg-col-span-7">
+                    <div className="lg:col-span-7">
                         <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-8">
                             <div>
                                 <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-4">Contact Information</h2>

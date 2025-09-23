@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { useTheme } from './ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProductCatalog() {
   const API_BASE_URL = 'https://bizzysite.onrender.com/api';
-  const { darkMode } = useTheme();
+  // Removed useTheme and using local state for darkMode
+  const [darkMode, setDarkMode] = useState(true);
   const navigate = useNavigate();
   
   const [products, setProducts] = useState([]);
@@ -203,7 +203,8 @@ export default function ProductCatalog() {
   }
 
   const supportedCurrencies = ["AED","ALL","AMD","ANG","AOA","ARS","AUD","AWG","AZN","BAM","BBD","BDT","BGN","BMD","BND","BOB","BRL","BSD","BWP","BZD","CAD","CHF","CLP","CNY","COP","CRC","CUP","CZK","DKK","DOP","DZD","EGP","ETB","EUR","FJD","GBP","GHS","GMD","GTQ","GYD","HKD","HRK","HUF","IDR","ILS","INR","ISK","JMD","JOD","JPY","KES","KHR","KWD","KYD","KZT","LAK","LBP","LKR","LRD","LTL","MAD","MDL","MGA","MKD","MMK","MNT","MOP","MUR","MVR","MWK","MXN","MYR","NAD","NGN","NIO","NOK","NPR","NZD","OMR","PEN","PGK","PHP","PKR","PLN","PYG","QAR","RON","RSD","RUB","RWF","SAR","SCR","SEK","SGD","SLL","SOS","SRD","STD","SVC","SZL","THB","TND","TOP","TRY","TTD","TWD","TZS","UAH","UGX","USD","UYU","UZS","VND","VUV","WST","XAF","XCD","XOF","XPF","YER","ZAR","ZMW"];
-  const currencyFlags = { USD: "🇺🇸", INR: "🇮🇳", EUR: "🇪🇺", GBP: "🇬🇧", JPY: "🇯🇵", AUD: "🇦🇺", CAD: "🇨🇦", CHF: "🇨🇭", CNY: "🇨🇳", AED: "🇦🇪" /* Add more as needed */ };
+  const currencyFlags = { USD: "🇺🇸", INR: "🇮🇳", EUR: "🇪🇺", GBP: "🇬🇧", JPY: "🇯🇵", AUD: "🇦🇺", CAD: "🇨🇦", CHF: "🇨🇭", CNY: "🇨🇳", AED: "🇦🇪" };
+  const currencySymbols = { USD: "$", INR: "₹", EUR: "€", GBP: "£", JPY: "¥", AUD: "$", CAD: "$", CHF: "Fr", CNY: "¥", AED: "د.إ" };
   const safeCurrency = supportedCurrencies.includes(storeCurrency) ? storeCurrency : "USD";
   
   return (
@@ -288,7 +289,7 @@ export default function ProductCatalog() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div><label className={`block mb-1 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Name</label><input type="text" name="name" value={currentProduct.name} onChange={handleInputChange} required className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div>
                 <div><label className={`block mb-1 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Description</label><textarea name="description" value={currentProduct.description} onChange={handleInputChange} rows="3" className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div>
-                <div><label className={`block mb-1 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Price</label><div className="flex"><span className={`p-2 border rounded-l font-semibold ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>{currencyFlags[safeCurrency] || '$'}</span><input type="number" name="price" value={currentProduct.price} onChange={handleInputChange} required className={`w-full p-2 border border-l-0 rounded-r ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div></div>
+                <div><label className={`block mb-1 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Price</label><div className="flex"><span className={`p-2 border rounded-l font-semibold ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>{currencySymbols[safeCurrency] || safeCurrency}</span><input type="number" name="price" value={currentProduct.price} onChange={handleInputChange} required className={`w-full p-2 border border-l-0 rounded-r ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}/></div></div>
                 <div><label className={`block mb-1 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Images</label><input type="file" accept="image/*" multiple onChange={handleImageUpload} className={`w-full text-sm ${darkMode ? 'text-gray-300' : ''} file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold ${darkMode ? 'file:bg-indigo-900 file:text-indigo-200 hover:file:bg-indigo-800' : 'file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100'}`}/></div>
                 {isUploading && <p className="text-sm text-indigo-400">Uploading images...</p>}
                 {imagePreviews.length > 0 && <div className="mt-2 grid grid-cols-3 sm:grid-cols-5 gap-2">{imagePreviews.map((p, i) => <div key={i} className="relative"><img src={p} alt="preview" className="h-24 w-full object-cover rounded"/><button type="button" onClick={() => handleRemoveImage(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">&times;</button></div>)}</div>}
@@ -328,3 +329,4 @@ export default function ProductCatalog() {
     </>
   );
 }
+
