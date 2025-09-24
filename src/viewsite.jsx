@@ -90,13 +90,7 @@ const fetchBusiness = async () => {
     // We add a unique timestamp to the URL to ensure we always get fresh data from the server,
     // bypassing any caching layers on Render or in the browser.
     const res = await fetch(
-      `https://bizzysite.onrender.com/api/store/slug/${slug}?timestamp=${new Date().getTime()}`,
-      {
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache'
-        }
-      }
+      `https://bizzysite.onrender.com/api/store/slug/${slug}`
     );
     // ==========================================================
 
