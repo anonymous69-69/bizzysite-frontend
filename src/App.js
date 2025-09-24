@@ -67,7 +67,7 @@ function App() {
 
         <Routes>
           {/* --- Public Routes --- */}
-          <Route path="/" element={<WaitlistPage />} />
+          <Route path="/" element={<Signup />} />
           <Route path="/admin-login" element={<Signup />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/site/:storeId" element={<ViewSite />} />
