@@ -355,33 +355,19 @@ const AuthModal = ({ isLogin, setIsLogin, onClose, onSuccess, onForgotPasswordCl
             }
 
             if (!isLogin) {
-                try {
-                    const businessRes = await fetch("https://bizzysite.onrender.com/api/business", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${userId}` },
-                        body: JSON.stringify({
-                            type: "business",
-                            // CHANGED: The business name is now initialized as an empty string ""
-                            // This forces the new user to set their business name on the next page.
-                            data: { name: "", email: email, phone: "", address: "", shippingCharge: 0 },
-                        }),
-                    });
-                    const businessData = await businessRes.json();
-                    if (!businessRes.ok) { throw new Error(businessData.message || "Failed to create store"); }
-                    
-                    const storeId = businessData.storeId;
-                    if (storeId) { localStorage.setItem("storeId", storeId); } 
-                    else { throw new Error("Store ID not received from server"); }
-
-                    await fetch("https://bizzysite.onrender.com/api/send-welcome-email", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ email, name }),
-                    });
-                } catch (error) {
-                    console.error("Post-signup business creation failed:", error);
-                }
-            }
+              try {
+                  // ✅ REMOVED: The business creation is already handled by the server's signup endpoint
+                  // ✅ We only need to send the welcome email here
+                  
+                  await fetch("https://bizzysite.onrender.com/api/send-welcome-email", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ email, name }),
+                  });
+              } catch (error) {
+                  console.error("Post-signup welcome email failed:", error);
+              }
+          }
             onSuccess();
         } catch (error) {
             console.error("Auth error:", error);

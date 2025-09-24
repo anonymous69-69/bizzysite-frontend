@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTheme } from './ThemeContext';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { useAppNav } from './AppNavContext';
 
 export default function Storefront() {
   const { darkMode } = useTheme();
   const navigate = useNavigate();
+  const { setNavLocked, registerErrorHandler } = useAppNav();
   
   const [businessInfo, setBusinessInfo] = useState({
     name: '',
@@ -18,6 +20,8 @@ export default function Storefront() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [nameInputError, setNameInputError] = useState('');
+  const nameInputRef = useRef(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
@@ -25,10 +29,20 @@ export default function Storefront() {
   }, []);
 
   useEffect(() => {
+    registerErrorHandler(() => {
+      setNameInputError('Please fill this to go to other section 😔');
+      nameInputRef.current?.focus();
+    });
+    return () => registerErrorHandler(null);
+  }, [registerErrorHandler]);
+
+  useEffect(() => {
     const savedStoreId = localStorage.getItem('storeId');
     if (savedStoreId) {
       setStoreId(savedStoreId);
       fetchBusinessInfo(savedStoreId);
+    } else {
+      setNavLocked(true);
     }
   }, []);
 
@@ -61,6 +75,12 @@ export default function Storefront() {
         address: business.address || '',
         shippingCharge: business.shippingCharge !== undefined ? String(business.shippingCharge) : ''
       }));
+
+      if (business.name) {
+        setNavLocked(false);
+      } else {
+        setNavLocked(true);
+      }
     } catch (err) {
       console.error('Failed to fetch business info:', err);
       toast.error("Failed to load store information");
@@ -69,6 +89,9 @@ export default function Storefront() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'name' && value.trim() !== '') {
+      setNameInputError('');
+    }
     setBusinessInfo(prev => ({
       ...prev,
       [name]: value
@@ -77,11 +100,20 @@ export default function Storefront() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+  
+    if (!businessInfo.name.trim()) {
+      setNameInputError('Please provide a business name to proceed. 😔');
+      setNavLocked(true);
+      nameInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     const toastId = toast.loading("Saving business information...");
   
     try {
       setLoading(true);
       setError('');
+      setNameInputError('');
       const userId = localStorage.getItem('userId');
       if (!userId) {
         toast.error("You are not logged in. Redirecting...", { id: toastId });
@@ -115,6 +147,7 @@ export default function Storefront() {
       }
       
       toast.success("Business information saved successfully!", { id: toastId });
+      setNavLocked(false);
 
     } catch (err) {
       setError(`Save failed: ${err.message}`);
@@ -180,6 +213,7 @@ export default function Storefront() {
               Business Name <span className="text-red-500">*</span>
             </label>
             <input
+              ref={nameInputRef}
               type="text"
               id="name"
               name="name"
@@ -191,8 +225,10 @@ export default function Storefront() {
                   ? "bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
                   : "bg-white border border-gray-300 text-gray-900 placeholder-gray-500"
               }`}
-              required
             />
+            {nameInputError && (
+              <p className="text-red-500 text-sm mt-2">{nameInputError}</p>
+            )}
           </div>
 
           <div>

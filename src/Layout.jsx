@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import { useTheme } from "./ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from 'react-hot-toast';
+import { useAppNav } from "./AppNavContext";
 
 export default function Layout() {
   const { darkMode } = useTheme();
@@ -11,6 +12,7 @@ export default function Layout() {
   const menuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { isNavLocked, triggerError } = useAppNav();
 
   // Fetch user info from API
   useEffect(() => {
@@ -61,6 +63,17 @@ export default function Layout() {
     if (hour >= 12 && hour < 18) return `Good Afternoon, ${userName}!`;
     if (hour >= 18 && hour < 22) return `Good Evening, ${userName}!`;
     return `Good Night, ${userName}!`;
+  };
+  
+  const handleNavClick = (e, path) => {
+    // The "Setup" tab should always be clickable
+    if (path === '/storefront') return;
+    
+    if (isNavLocked) {
+      e.preventDefault();       // Stop the link from navigating
+      triggerError();           // Show the error message on the Storefront page
+      navigate('/storefront');  // Force navigation to the page with the error
+    }
   };
 
   return (
@@ -138,12 +151,15 @@ export default function Layout() {
               <NavLink
                 key={tab.name}
                 to={tab.path}
-                className={({ isActive }) =>
-                  `relative flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base transition-colors ` +
-                  (isActive
-                    ? `text-indigo-700 dark:text-white`
-                    : `text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white`)
-                }
+                onClick={(e) => handleNavClick(e, tab.path)}
+                className={({ isActive }) => {
+                  const baseClasses = `relative flex items-center gap-2 px-3 sm:px-4 py-2 font-medium rounded-md focus:outline-none text-sm sm:text-base transition-colors`;
+                  const activeClasses = `text-indigo-700 dark:text-white`;
+                  const inactiveClasses = `text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white`;
+                  const disabledClasses = (isNavLocked && tab.path !== '/storefront') ? 'opacity-50 cursor-not-allowed' : '';
+                  
+                  return `${baseClasses} ${isActive ? activeClasses : inactiveClasses} ${disabledClasses}`;
+                }}
                 end
               >
                 {({ isActive }) => (
