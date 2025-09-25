@@ -216,9 +216,47 @@ export default function ProductCatalog() {
   }
 
   const supportedCurrencies = ["AED","ALL","AMD","ANG","AOA","ARS","AUD","AWG","AZN","BAM","BBD","BDT","BGN","BMD","BND","BOB","BRL","BSD","BWP","BZD","CAD","CHF","CLP","CNY","COP","CRC","CUP","CZK","DKK","DOP","DZD","EGP","ETB","EUR","FJD","GBP","GHS","GMD","GTQ","GYD","HKD","HRK","HUF","IDR","ILS","INR","ISK","JMD","JOD","JPY","KES","KHR","KWD","KYD","KZT","LAK","LBP","LKR","LRD","LTL","MAD","MDL","MGA","MKD","MMK","MNT","MOP","MUR","MVR","MWK","MXN","MYR","NAD","NGN","NIO","NOK","NPR","NZD","OMR","PEN","PGK","PHP","PKR","PLN","PYG","QAR","RON","RSD","RUB","RWF","SAR","SCR","SEK","SGD","SLL","SOS","SRD","STD","SVC","SZL","THB","TND","TOP","TRY","TTD","TWD","TZS","UAH","UGX","USD","UYU","UZS","VND","VUV","WST","XAF","XCD","XOF","XPF","YER","ZAR","ZMW"];
-  const currencyFlags = { USD: "🇺🇸", INR: "🇮🇳", EUR: "🇪🇺", GBP: "🇬🇧", JPY: "🇯🇵", AUD: "🇦🇺", CAD: "🇨🇦", CHF: "🇨🇭", CNY: "🇨🇳", AED: "🇦🇪" };
-  const currencySymbols = { USD: "$", INR: "₹", EUR: "€", GBP: "£", JPY: "¥", AUD: "$", CAD: "$", CHF: "Fr", CNY: "¥", AED: "د.إ" };
-  const safeCurrency = supportedCurrencies.includes(storeCurrency) ? storeCurrency : "USD";
+  const currencyFlags = {
+    AED: "🇦🇪", ALL: "🇦🇱", AMD: "🇦🇲", ANG: "🇨🇼", AOA: "🇦🇴", ARS: "🇦🇷", AUD: "🇦🇺",
+    AWG: "🇦🇼", AZN: "🇦🇿", BAM: "🇧🇦", BBD: "🇧🇧", BDT: "🇧🇩", BGN: "🇧🇬", BMD: "🇧🇲",
+    BND: "🇧🇳", BOB: "🇧🇴", BRL: "🇧🇷", BSD: "🇧🇸", BWP: "🇧🇼", BZD: "🇧🇿", CAD: "🇨🇦",
+    CHF: "🇨🇭", CLP: "🇨🇱", CNY: "🇨🇳", COP: "🇨🇴", CRC: "🇨🇷", CUP: "🇨🇺", CZK: "🇨🇿",
+    DKK: "🇩🇰", DOP: "🇩🇴", DZD: "🇩🇿", EGP: "🇪🇬", ETB: "🇪🇹", EUR: "🇪🇺", FJD: "🇫🇯",
+    GBP: "🇬🇧", GHS: "🇬🇭", GMD: "🇬🇲", GTQ: "🇬🇹", GYD: "🇬🇾", HKD: "🇭🇰", HRK: "🇭🇷",
+    HUF: "🇭🇺", IDR: "🇮🇩", ILS: "🇮🇱", INR: "🇮🇳", ISK: "🇮🇸", JMD: "🇯🇲", JOD: "🇯🇴",
+    JPY: "🇯🇵", KES: "🇰🇪", KHR: "🇰🇭", KWD: "🇰🇼", KYD: "🇰🇾", KZT: "🇰🇿", LAK: "🇱🇦",
+    LBP: "🇱🇧", LKR: "🇱🇰", LRD: "🇱🇷", LTL: "🇱🇹", MAD: "🇲🇦", MDL: "🇲🇩", MGA: "🇲🇬",
+    MKD: "🇲🇰", MMK: "🇲🇲", MNT: "🇲🇳", MOP: "🇲🇴", MUR: "🇲🇺", MVR: "🇲🇻", MWK: "🇲🇼",
+    MXN: "🇲🇽", MYR: "🇲🇾", NAD: "🇳🇦", NGN: "🇳🇬", NIO: "🇳🇮", NOK: "🇳🇴", NPR: "🇳🇵",
+    NZD: "🇳🇿", OMR: "🇴🇲", PEN: "🇵🇪", PGK: "🇵🇬", PHP: "🇵🇭", PKR: "🇵🇰", PLN: "🇵🇱",
+    PYG: "🇵🇾", QAR: "🇶🇦", RON: "🇷🇴", RSD: "🇷🇸", RUB: "🇷🇺", RWF: "🇷🇼", SAR: "🇸🇦",
+    SCR: "🇸🇨", SEK: "🇸🇪", SGD: "🇸🇬", SLL: "🇸🇱", SOS: "🇸🇴", SRD: "🇸🇷", STD: "🇸🇹",
+    SVC: "🇸🇻", SZL: "🇸🇿", THB: "🇹🇭", TND: "🇹🇳", TOP: "🇹🇴", TRY: "🇹🇷", TTD: "🇹🇹",
+    TWD: "🇹🇼", TZS: "🇹🇿", UAH: "🇺🇦", UGX: "🇺🇬", USD: "🇺🇸", UYU: "🇺🇾", UZS: "🇺🇿",
+    VND: "🇻🇳", VUV: "🇻🇺", WST: "🇼🇸", XAF: "🇨🇫", XCD: "🇦🇬", XOF: "🇸🇳", XPF: "🇵🇫",
+    YER: "🇾🇪", ZAR: "🇿🇦", ZMW: "🇿🇲"
+  };
+
+  const currencySymbols = {
+    AED: "د.إ", ALL: "Lek", AMD: "֏", ANG: "ƒ", AOA: "Kz", ARS: "$", AUD: "$",
+    AWG: "ƒ", AZN: "₼", BAM: "KM", BBD: "$", BDT: "৳", BGN: "лв", BMD: "$",
+    BND: "$", BOB: "Bs.", BRL: "R$", BSD: "$", BWP: "P", BZD: "$", CAD: "$",
+    CHF: "CHF", CLP: "$", CNY: "¥", COP: "$", CRC: "₡", CUP: "$", CZK: "Kč",
+    DKK: "kr", DOP: "$", DZD: "د.ج", EGP: "E£", ETB: "Br", EUR: "€", FJD: "$",
+    GBP: "£", GHS: "₵", GMD: "D", GTQ: "Q", GYD: "$", HKD: "$", HRK: "kn",
+    HUF: "Ft", IDR: "Rp", ILS: "₪", INR: "₹", ISK: "kr", JMD: "$", JOD: "JD",
+    JPY: "¥", KES: "KSh", KHR: "៛", KWD: "KD", KYD: "$", KZT: "₸", LAK: "₭",
+    LBP: "ل.ل", LKR: "Rs", LRD: "$", LTL: "Lt", MAD: "د.م.", MDL: "L", MGA: "Ar",
+    MKD: "ден", MMK: "K", MNT: "₮", MOP: "P", MUR: "₨", MVR: "Rf", MWK: "MK",
+    MXN: "$", MYR: "RM", NAD: "$", NGN: "₦", NIO: "C$", NOK: "kr", NPR: "₨",
+    NZD: "$", OMR: "ر.ع.", PEN: "S/", PGK: "K", PHP: "₱", PKR: "₨", PLN: "zł",
+    PYG: "₲", QAR: "ر.ق", RON: "lei", RSD: "дин", RUB: "₽", RWF: "FRw", SAR: "ر.س",
+    SCR: "₨", SEK: "kr", SGD: "$", SLL: "Le", SOS: "Sh", SRD: "$", STD: "Db",
+    SVC: "$", SZL: "L", THB: "฿", TND: "د.ت", TOP: "T$", TRY: "₺", TTD: "$",
+    TWD: "$", TZS: "Sh", UAH: "₴", UGX: "USh", USD: "$", UYU: "$", UZS: "soʻm",
+    VND: "₫", VUV: "Vt", WST: "T", XAF: "FCFA", XCD: "$", XOF: "CFA", XPF: "₣",
+    YER: "﷼", ZAR: "R", ZMW: "ZK"
+  };  const safeCurrency = supportedCurrencies.includes(storeCurrency) ? storeCurrency : "USD";
   
   return (
     <>
