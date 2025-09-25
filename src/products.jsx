@@ -316,8 +316,10 @@ export default function ProductCatalog() {
               <div className="p-4">
                 <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{product.name}</h3>
                 <div className="mt-3 flex justify-between items-center">
-                  <p className={`font-bold text-lg ${darkMode ? 'text-indigo-300' : 'text-gray-800'}`}>{new Intl.NumberFormat('en-US', { style: 'currency', currency: safeCurrency }).format(product.price)}</p>
-                  <span className={`px-2 py-1 text-xs rounded-full font-medium ${product.inStock ? (darkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800') : (darkMode ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800')}`}>{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
+                <p className={`font-bold text-lg ${darkMode ? 'text-indigo-300' : 'text-gray-800'}`}>
+  {currencySymbols[safeCurrency] || safeCurrency}
+  {product.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+</p>                  <span className={`px-2 py-1 text-xs rounded-full font-medium ${product.inStock ? (darkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800') : (darkMode ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800')}`}>{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
                 </div>
                 <div className="mt-4 flex justify-end space-x-2">
                   <button onClick={() => handleEditProduct(product)} className={`px-4 py-1.5 rounded font-semibold transition text-sm ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}>Edit</button>

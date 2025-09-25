@@ -31,24 +31,33 @@ const ProductSkeleton = ({ layout }) => {
   );
 };
 
-// IMPORTANT: Ensure your Route uses key={slug} for full component remount per store.
 const ViewSite = () => {
-  // Helper to get the currency symbol for a given code using Intl.NumberFormat
+  const currencySymbols = {
+    AED: "د.إ", ALL: "Lek", AMD: "֏", ANG: "ƒ", AOA: "Kz", ARS: "$", AUD: "$",
+    AWG: "ƒ", AZN: "₼", BAM: "KM", BBD: "$", BDT: "৳", BGN: "лв", BMD: "$",
+    BND: "$", BOB: "Bs.", BRL: "R$", BSD: "$", BWP: "P", BZD: "$", CAD: "$",
+    CHF: "CHF", CLP: "$", CNY: "¥", COP: "$", CRC: "₡", CUP: "$", CZK: "Kč",
+    DKK: "kr", DOP: "$", DZD: "د.ج", EGP: "E£", ETB: "Br", EUR: "€", FJD: "$",
+    GBP: "£", GHS: "₵", GMD: "D", GTQ: "Q", GYD: "$", HKD: "$", HRK: "kn",
+    HUF: "Ft", IDR: "Rp", ILS: "₪", INR: "₹", ISK: "kr", JMD: "$", JOD: "JD",
+    JPY: "¥", KES: "KSh", KHR: "៛", KWD: "KD", KYD: "$", KZT: "₸", LAK: "₭",
+    LBP: "ل.ل", LKR: "Rs", LRD: "$", LTL: "Lt", MAD: "د.م.", MDL: "L", MGA: "Ar",
+    MKD: "ден", MMK: "K", MNT: "₮", MOP: "P", MUR: "₨", MVR: "Rf", MWK: "MK",
+    MXN: "$", MYR: "RM", NAD: "$", NGN: "₦", NIO: "C$", NOK: "kr", NPR: "₨",
+    NZD: "$", OMR: "ر.ع.", PEN: "S/", PGK: "K", PHP: "₱", PKR: "₨", PLN: "zł",
+    PYG: "₲", QAR: "ر.ق", RON: "lei", RSD: "дин", RUB: "₽", RWF: "FRw", SAR: "ر.س",
+    SCR: "₨", SEK: "kr", SGD: "$", SLL: "Le", SOS: "Sh", SRD: "$", STD: "Db",
+    SVC: "$", SZL: "L", THB: "฿", TND: "د.ت", TOP: "T$", TRY: "₺", TTD: "$",
+    TWD: "$", TZS: "Sh", UAH: "₴", UGX: "USh", USD: "$", UYU: "$", UZS: "soʻm",
+    VND: "₫", VUV: "Vt", WST: "T", XAF: "FCFA", XCD: "$", XOF: "CFA", XPF: "₣",
+    YER: "﷼", ZAR: "R", ZMW: "ZK"
+  };
+
   function getCurrencySymbol(currencyCode) {
-    try {
-      const parts = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: currencyCode,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).formatToParts(0);
-      const symbolPart = parts.find((part) => part.type === "currency");
-      return symbolPart ? symbolPart.value : "";
-    } catch (e) {
-      // fallback to $
-      return "$";
-    }
+    // Fallback to the code itself if the symbol is not found
+    return currencySymbols[currencyCode] || currencyCode;
   }
+
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
