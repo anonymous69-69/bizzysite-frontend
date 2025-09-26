@@ -112,8 +112,8 @@ const ViewSite = () => {
           const data = await res.json();
           setBusiness(data);
           setStoreCurrency(data.defaultCurrency || "USD");
-          // Update slug in state if we used pathSlug
-          // Slug comes from URL; no need to update it in state
+          setTextColor(data.customize?.textColor || "white"); // ✅ ADD THIS LINE
+
         }
       } catch (err) {
         console.error("[ViewSite] Error loading store:", err);
@@ -126,7 +126,6 @@ const ViewSite = () => {
     fetchBusiness();
   }, [slug]);
 
-  // Add to cart function (syncs to localStorage per-store cart)
   const addToCart = (product) => {
     console.log(
       "[Cart] Operation:",
