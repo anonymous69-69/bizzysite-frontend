@@ -8510,6 +8510,11 @@ react-hot-toast@^2.5.2:
     csstype "^3.1.3"
     goober "^2.1.16"
 
+react-icons@^5.5.0:
+  version "5.5.0"
+  resolved "https://registry.npmjs.org/react-icons/-/react-icons-5.5.0.tgz"
+  integrity sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw==
+
 react-image-crop@^11.0.10:
   version "11.0.10"
   resolved "https://registry.npmjs.org/react-image-crop/-/react-image-crop-11.0.10.tgz"
@@ -8637,7 +8642,7 @@ react-type-animation@^3.2.0:
   resolved "https://registry.npmjs.org/react-type-animation/-/react-type-animation-3.2.0.tgz"
   integrity sha512-WXTe0i3rRNKjmggPvT5ntye1QBt0ATGbijeW6V3cQe2W0jaMABXXlPPEdtofnS9tM7wSRHchEvI9SUw+0kUohw==
 
-"react@^0.14.0 || ^15.0.0 || ^16 || ^17 || ^18 || ^19", "react@^18 || ^19", "react@^18.0.0 || ^19.0.0", react@^18.2.0, "react@>= 15.0.0", "react@>= 16", react@>=16, react@>=16.13.1, react@>=18, react@18.2.0:
+react@*, "react@^0.14.0 || ^15.0.0 || ^16 || ^17 || ^18 || ^19", "react@^18 || ^19", "react@^18.0.0 || ^19.0.0", react@^18.2.0, "react@>= 15.0.0", "react@>= 16", react@>=16, react@>=16.13.1, react@>=18, react@18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
