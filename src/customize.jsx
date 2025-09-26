@@ -58,7 +58,7 @@ export default function CustomizeStore() {
 
       if (response.ok) {
         const data = await response.json();
-        const customization = data?.business?.customize || {};
+        const customization = data?.customize || {};
 
         setPrimaryColor(customization.primaryColor || "#3b82f6");
         setSecondaryColor(customization.secondaryColor || "#8b5cf6");
