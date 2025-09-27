@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://bizzysite.shop/</loc>
+  </url>
+
+  <url>
+    <loc>https://bizzysite.shop/storefront</loc>
+  </url>
+
+  <url>
+    <loc>https://bizzysite.shop/products</loc>
+  </url>
+
+  <url>
+    <loc>https://bizzysite.shop/orders</loc>
+  </url>
+
+  <url>
+    <loc>https://bizzysite.shop/customize</loc>
+  </url>
+
+  <url>
+    <loc>https://bizzysite.shop/navview</loc>
+  </url>
+  
+  <url>
+    <loc>https://bizzysite.shop/payment</loc>
+  </url>
+
+</urlset>
