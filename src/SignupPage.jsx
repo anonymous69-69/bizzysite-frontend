@@ -18,13 +18,21 @@ const SectionLoader = () => <div className="h-screen w-full flex items-center ju
 export default function SignupPage() {
   // Initialize Rellax for parallax effects
   useEffect(() => {
-    const rellax = new Rellax('.rellax', {
+    // FIX: Store the instance in a variable
+    const rellaxInstance = new Rellax('.rellax', {
       center: true,
     });
-    return () => rellax.destroy();
+    
+    // FIX: The cleanup function now checks if the instance exists before destroying it
+    return () => {
+      if (rellaxInstance) {
+        rellaxInstance.destroy();
+      }
+    };
   }, []);
 
   return (
+
     <>
       {/* This component is now just the content of the landing page */}
       <HeroSection onGetStartedClick={() => { /* This will be handled by the Header in the layout */ }} />
