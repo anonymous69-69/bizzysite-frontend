@@ -18,14 +18,14 @@ const SectionLoader = () => <div className="h-screen w-full flex items-center ju
 export default function SignupPage() {
   // Initialize Rellax for parallax effects
   useEffect(() => {
-    // FIX: Store the instance in a variable
     const rellaxInstance = new Rellax('.rellax', {
       center: true,
     });
     
-    // FIX: The cleanup function now checks if the instance exists before destroying it
+    // ✅ This is the corrected, more robust cleanup function
     return () => {
-      if (rellaxInstance) {
+      // We must check if the instance is valid AND has the destroy method
+      if (rellaxInstance && typeof rellaxInstance.destroy === 'function') {
         rellaxInstance.destroy();
       }
     };
