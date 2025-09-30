@@ -315,13 +315,7 @@ const handleSubmit = async (e) => {
           name: business?.business?.name || "BizzySite Store",
           description: `Payment for Order #${dbOrderId}`,
           order_id: razorpayOrderData.id,
-          method: {
-            card: true,
-            upi: isIndianCurrency,
-            netbanking: isIndianCurrency,
-            wallet: isIndianCurrency,
-            paypal: !isIndianCurrency,
-          },
+          
           handler: async function (response) {
               const verificationPayload = {
                   razorpay_order_id: response.razorpay_order_id,
