@@ -7,33 +7,35 @@ import { motion, useScroll, useTransform, AnimatePresence, useReducedMotion } fr
 import Orb from "./Orb";
 import BlurText from "./BlurText";
 import Rellax from "rellax";
+import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
 
-//=================================================================
-// CUSTOM HOOK: usePinnedAnimation
-//=================================================================
-const usePinnedAnimation = (numItems) => {
-  const targetRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: targetRef,
-    offset: ["start start", "end end"],
-  });
-  const activeIndex = useTransform(scrollYProgress, [0, 1], [0, numItems]);
-  return { targetRef, activeIndex, scrollYProgress };
-};
+// GSAP library for the new animated section
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
+
+// NEW: Import Lenis for smooth scrolling
+import Lenis from '@studio-freight/lenis'
+
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger, SplitText);
+
 
 //=================================================================
 // SUB-COMPONENT: Header
 //=================================================================
 const Header = ({ onLoginClick, onSignUpClick }) => {
   return (
-    <header className="fixed w-full bg-gray-900/80 backdrop-blur-md shadow-sm z-30 border-b border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16 sm:h-20">
-        <div>
-          <img src="/bizzysitelogo.svg" alt="BizzySite Logo" className="h-12 sm:h-14 w-auto"/>
-        </div>
-        <div className="flex gap-4 items-center">
-          <button onClick={onLoginClick} className="px-4 py-2 text-gray-300 font-medium hover:text-indigo-400 transition-colors">Login</button>
-          <button onClick={onSignUpClick} className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-md hover:opacity-90 transition-all shadow-md">Sign Up</button>
+    <header className="fixed top-6 left-1/2 -translate-x-1/2 max-w-lg w-full z-30 px-4 sm:px-6 lg:px-8">
+      <div className="bg-gray-900/40 backdrop-blur-xl rounded-full border border-gray-700/50 shadow-2xl">
+        <div className="flex justify-between items-center h-14 px-6">
+          <div>
+            <img src="/bizzysitelogo.svg" alt="BizzySite Logo" className="h-8 w-auto"/>
+          </div>
+          <div className="flex gap-2 items-center">
+            <button onClick={onLoginClick} className="px-3 py-1.5 text-sm text-gray-300 font-medium hover:text-indigo-400 transition-colors rounded-full">Login</button>
+            <button onClick={onSignUpClick} className="px-4 py-1.5 text-sm bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-full hover:opacity-90 transition-all shadow-md">Sign Up</button>
+          </div>
         </div>
       </div>
     </header>
@@ -118,37 +120,202 @@ const PinnedFeaturesSection = () => {
 };
 
 //=================================================================
-// COMPONENT for the hanging shapes animation
+// SUB-COMPONENT: TestimonialCard
 //=================================================================
-const HangingShape = ({ scrollYProgress, className, shapeClassName, speed = 1 }) => {
-    const y = useTransform(scrollYProgress, [0, 1], ['0%', `${-200 * speed}%`]);
-
-    return (
-        <motion.div style={{ y }} className={`absolute ${className}`}>
-            {/* UPDATED: Increased string length from h-64 to h-96 */}
-            <div className="mx-auto h-96 w-px bg-gray-500/50" />
-            <div className={`mx-auto ${shapeClassName}`} />
-        </motion.div>
-    );
+const TestimonialCard = ({ text, author, role }) => {
+  return (
+    <div className="flex-shrink-0 w-80 sm:w-96 bg-gray-900/60 backdrop-blur-md p-8 rounded-xl border border-gray-700/50 text-center mx-4">
+      <div className="text-4xl mb-4 text-indigo-400">“</div>
+      <p className="mb-6 text-lg text-gray-300">{text}</p>
+      <div className="font-semibold text-xl text-white">{author}</div>
+      <div className="text-indigo-400">{role}</div>
+    </div>
+  );
 };
 
 //=================================================================
-// SECTION 2: PINNED TESTIMONIALS COMPONENT (UPDATED)
+// SUB-COMPONENT: Aurora Background
+//=================================================================
+const VERT = `#version 300 es
+in vec2 position;
+void main() {
+  gl_Position = vec4(position, 0.0, 1.0);
+}
+`;
+
+const FRAG = `#version 300 es
+precision highp float;
+uniform float uTime;
+uniform float uAmplitude;
+uniform vec3 uColorStops[3];
+uniform vec2 uResolution;
+uniform float uBlend;
+out vec4 fragColor;
+vec3 permute(vec3 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
+float snoise(vec2 v){
+  const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+  vec2 i  = floor(v + dot(v, C.yy));
+  vec2 x0 = v - i + dot(i, C.xx);
+  vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i = mod(i, 289.0);
+  vec3 p = permute( permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+  vec3 m = max(0.5 - vec3(dot(x0, x0), dot(x12.xy, x12.xy), dot(x12.zw, x12.zw)), 0.0);
+  m = m * m;
+  m = m * m;
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+}
+struct ColorStop { vec3 color; float position; };
+#define COLOR_RAMP(colors, factor, finalColor) { \
+  int index = 0; \
+  for (int i = 0; i < 2; i++) { \
+    ColorStop currentColor = colors[i]; \
+    bool isInBetween = currentColor.position <= factor; \
+    index = int(mix(float(index), float(i), float(isInBetween))); \
+  } \
+  ColorStop currentColor = colors[index]; \
+  ColorStop nextColor = colors[index + 1]; \
+  float range = nextColor.position - currentColor.position; \
+  float lerpFactor = (factor - currentColor.position) / range; \
+  finalColor = mix(currentColor.color, nextColor.color, lerpFactor); \
+}
+void main() {
+  vec2 uv = gl_FragCoord.xy / uResolution;
+  ColorStop colors[3];
+  colors[0] = ColorStop(uColorStops[0], 0.0);
+  colors[1] = ColorStop(uColorStops[1], 0.5);
+  colors[2] = ColorStop(uColorStops[2], 1.0);
+  vec3 rampColor;
+  COLOR_RAMP(colors, uv.x, rampColor);
+  float height = snoise(vec2(uv.x * 2.0 + uTime * 0.1, uTime * 0.25)) * 0.5 * uAmplitude;
+  height = exp(height);
+  height = (uv.y * 2.0 - height + 0.2);
+  float intensity = 0.6 * height;
+  float midPoint = 0.20;
+  float auroraAlpha = smoothstep(midPoint - uBlend * 0.5, midPoint + uBlend * 0.5, intensity);
+  vec3 auroraColor = intensity * rampColor;
+  fragColor = vec4(auroraColor * auroraAlpha, auroraAlpha);
+}
+`;
+
+const Aurora = (props) => {
+  const { colorStops = ['#5227FF', '#7cff67', '#5227FF'], amplitude = 1.0, blend = 0.5, speed = 1.0 } = props;
+  const propsRef = useRef(props);
+  propsRef.current = props;
+
+  const ctnDom = useRef(null);
+
+  useEffect(() => {
+    const ctn = ctnDom.current;
+    if (!ctn) return;
+
+    const renderer = new Renderer({ alpha: true, premultipliedAlpha: true, antialias: true });
+    const gl = renderer.gl;
+    gl.clearColor(0, 0, 0, 0);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.canvas.style.backgroundColor = 'transparent';
+
+    let program;
+
+    function resize() {
+      if (!ctn) return;
+      const width = ctn.offsetWidth;
+      const height = ctn.offsetHeight;
+      renderer.setSize(width, height);
+      if (program) {
+        program.uniforms.uResolution.value = [width, height];
+      }
+    }
+    window.addEventListener('resize', resize);
+
+    const geometry = new Triangle(gl);
+    if (geometry.attributes.uv) {
+      delete geometry.attributes.uv;
+    }
+
+    const colorStopsArray = colorStops.map(hex => {
+      const c = new Color(hex);
+      return [c.r, c.g, c.b];
+    });
+
+    program = new Program(gl, {
+      vertex: VERT,
+      fragment: FRAG,
+      uniforms: {
+        uTime: { value: 0 },
+        uAmplitude: { value: amplitude },
+        uColorStops: { value: colorStopsArray },
+        uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
+        uBlend: { value: blend }
+      }
+    });
+
+    const mesh = new Mesh(gl, { geometry, program });
+    ctn.appendChild(gl.canvas);
+
+    let animateId = 0;
+    const update = t => {
+      animateId = requestAnimationFrame(update);
+      const { time = t * 0.01, speed = 1.0 } = propsRef.current;
+      program.uniforms.uTime.value = time * speed * 0.1;
+      program.uniforms.uAmplitude.value = propsRef.current.amplitude ?? 1.0;
+      program.uniforms.uBlend.value = propsRef.current.blend ?? blend;
+      const stops = propsRef.current.colorStops ?? colorStops;
+      program.uniforms.uColorStops.value = stops.map(hex => {
+        const c = new Color(hex);
+        return [c.r, c.g, c.b];
+      });
+      renderer.render({ scene: mesh });
+    };
+    animateId = requestAnimationFrame(update);
+
+    resize();
+
+    return () => {
+      cancelAnimationFrame(animateId);
+      window.removeEventListener('resize', resize);
+      if (ctn && gl.canvas.parentNode === ctn) {
+        ctn.removeChild(gl.canvas);
+      }
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+    };
+  }, [amplitude, blend, colorStops]);
+
+  return <div ref={ctnDom} className="w-full h-full" />;
+}
+
+//=================================================================
+// SECTION 2: PINNED AUTO-SCROLLING TESTIMONIALS
 //=================================================================
 const PinnedTestimonialsSection = () => {
   const testimonials = [
     { text: "BizzySite helped us launch our online store in just a few minutes. The setup was incredibly simple!", author: "candy crochet", role: "Crochet store" },
     { text: "Our sales increased by 40% after switching to BizzySite. The beautiful storefront really makes a difference.", author: "siya", role: "SiyaCakes" },
+    { text: "The support team is amazing and the platform is genuinely free. Highly recommend!", author: "mark", role: "Custom Tees" },
+    { text: "A powerful, easy-to-use platform that helped me quit my day job.", author: "diana", role: "Vintage Finds" },
+    { text: "Incredibly intuitive and the results are professional. I got my first sale the day I launched.", author: "leo", role: "Art Prints" },
+    { text: "Finally, a platform that doesn't nickel and dime you. The 3% commission is fair and transparent.", author: "sara", role: "Handmade Jewelry" },
   ];
-  const { targetRef, activeIndex, scrollYProgress } = usePinnedAnimation(testimonials.length);
+  
+  const loopedTestimonials = [...testimonials, ...testimonials];
   const shouldReduceMotion = useReducedMotion();
 
   if (shouldReduceMotion) {
     return (
-      <div className="bg-gradient-to-br from-indigo-700 to-purple-800 py-20 px-4">
+      <div className="bg-gray-900 py-20 px-4">
          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-12 text-center">Trusted by Thousands</h2>
          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-            {testimonials.map(testimonial => (
+            {testimonials.slice(0, 4).map(testimonial => (
                <div key={testimonial.author} className="bg-gray-800 p-8 rounded-xl border border-gray-700 text-center">
                   <p className="mb-6 text-lg text-gray-300">"{testimonial.text}"</p>
                   <div className="font-semibold text-xl text-white">{testimonial.author}</div>
@@ -159,52 +326,36 @@ const PinnedTestimonialsSection = () => {
       </div>
     );
   }
-  
-  return (
-    <div ref={targetRef} className="relative h-[400vh] bg-gradient-to-br from-indigo-700 to-purple-800">
-      <div className="sticky top-0 h-screen flex flex-col items-center justify-center text-white px-4 overflow-hidden">
-        
-        {/* UPDATED: Added more varied, larger, and layered hanging shapes */}
-        {/* Deep Background Shapes (large, slow, low z-index) */}
-        <HangingShape scrollYProgress={scrollYProgress} speed={0.7} className="top-0 left-[10%] w-40 z-0" shapeClassName="h-48 w-48 bg-purple-500/20 rounded-full blur-sm" />
-        <HangingShape scrollYProgress={scrollYProgress} speed={0.8} className="top-0 right-[10%] w-40 z-0" shapeClassName="h-40 w-40 bg-indigo-500/20 rounded-2xl blur-sm" />
 
-        {/* Midground Shapes */}
-        <HangingShape scrollYProgress={scrollYProgress} speed={0.9} className="top-0 left-[25%] w-40 z-10" shapeClassName="h-24 w-24 bg-purple-400/40 rounded-lg" />
-        <HangingShape scrollYProgress={scrollYProgress} speed={1.1} className="top-0 right-[25%] w-40 z-10" shapeClassName="h-28 w-28 bg-indigo-400/40 rounded-full" />
-        
-        {/* Foreground Shapes (small, fast, high z-index) */}
-        <HangingShape scrollYProgress={scrollYProgress} speed={1.5} className="top-0 left-[40%] w-24 z-20" shapeClassName="h-10 w-10 bg-indigo-400 rounded-lg" />
-        <HangingShape scrollYProgress={scrollYProgress} speed={1.8} className="top-0 right-[40%] w-24 z-20" shapeClassName="h-8 w-8 bg-purple-400 rounded-full" />
-        <HangingShape scrollYProgress={scrollYProgress} speed={1.6} className="top-0 left-[55%] w-16 z-20" shapeClassName="h-8 w-8 bg-purple-400/80 rounded-full" />
-        <HangingShape scrollYProgress={scrollYProgress} speed={1.7} className="top-0 right-[55%] w-16 z-20" shapeClassName="h-6 w-6 bg-indigo-400/80 rounded-lg" />
-        
-        <h2 className="text-3xl sm:text-4xl font-bold mb-16 text-center relative z-10">Trusted by Thousands of Businesses</h2>
-        <div className="relative w-full max-w-2xl h-72 z-10">
-          {testimonials.map((testimonial, index) => (
-            <TestimonialCard key={index} index={index} {...testimonial} activeIndex={activeIndex} />
-          ))}
+  return (
+    <section className="relative h-[200vh] bg-gray-900">
+      <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <Aurora speed={0.5} colorStops={['#111827', '#4338ca', '#111827']} />
+        </div>
+        <div className="relative z-10 flex w-full flex-col items-center">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-16 text-center px-4">
+              Trusted by Thousands of Businesses
+            </h2>
+            <motion.div
+              className="flex gap-4"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{
+                ease: "linear",
+                duration: 60,
+                repeat: Infinity,
+                repeatType: "loop",
+              }}
+            >
+              {loopedTestimonials.map((testimonial, index) => (
+                <TestimonialCard key={index} {...testimonial} />
+              ))}
+            </motion.div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
-
-const TestimonialCard = ({ index, text, author, role, activeIndex }) => {
-  const opacity = useTransform(activeIndex, [index - 0.5, index, index + 0.5], [0, 1, 0]);
-  const x = useTransform(activeIndex, [index - 0.5, index, index + 0.5], ["25%", "0%", "-25%"]);
-  return (
-    <motion.div style={{ opacity, x, willChange: 'transform, opacity' }} className="absolute inset-0 flex items-center justify-center">
-      <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 max-w-md text-center">
-        <div className="text-4xl mb-4 text-indigo-400">“</div>
-        <p className="mb-6 text-lg text-gray-300">{text}</p>
-        <div className="font-semibold text-xl text-white">{author}</div>
-        <div className="text-indigo-400">{role}</div>
-      </div>
-    </motion.div>
-  );
-};
-
 
 //=================================================================
 // How It Works Section
@@ -255,6 +406,97 @@ const RellaxDemoSection = () => {
 };
 
 //=================================================================
+// NEW SECTION: Video Grow Animation
+//=================================================================
+const VideoGrowSection = () => {
+  const sectionRef = useRef(null);
+  const videoRef = useRef(null);
+  const imageRef = useRef(null);
+  const titleRef = useRef(null);
+
+  useEffect(() => {
+    // A safe way to create and clean up GSAP animations in React
+    let ctx = gsap.context(() => {
+      // Using SplitText to break the title into characters for the animation
+      const titleChars = new SplitText(titleRef.current, { type: "chars" }).chars;
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top center",
+          end: "bottom bottom+=100%",
+          invalidateOnRefresh: true,
+          scrub: 1, // Makes the animation follow the scrollbar
+        },
+      });
+
+      tl.fromTo(
+        titleChars,
+        { scale: 0, rotation: () => Math.random() * 360 - 180 },
+        { scale: 1, duration: 0.2, rotation: 0, ease: "expo.out", stagger: { each: 0.05, from: "random" } }
+      );
+
+      tl.fromTo(
+        videoRef.current,
+        { clipPath: "inset(10% 50% 10% 50%)", yPercent: 100 },
+        { ease: "power3", clipPath: "inset(0% 0% 0% 0%)", duration: 1, yPercent: 0 },
+        ".3"
+      );
+
+      tl.fromTo(
+        videoRef.current,
+        { scale: 0.5 },
+        { ease: "back.inOut(0.2)", scale: 1, duration: 0.8 },
+        "<"
+      );
+      
+      tl.fromTo(
+        imageRef.current,
+        { scale: 2.8, yPercent: 40 },
+        { scale: 1.2, duration: 0.8, delay: 0.2, yPercent: 0 },
+        "<"
+      );
+
+      tl.to(videoRef.current, { scale: 0.9, ease: "linear" });
+      tl.to(imageRef.current, { scale: 0.5, ease: "linear" }, "<");
+
+    }, sectionRef);
+
+    // Cleanup function to revert all animations when the component unmounts
+    return () => ctx.revert(); 
+  }, []);
+
+  return (
+    <section ref={sectionRef} className="relative flex flex-col items-center justify-start min-h-[400svh] py-24 bg-black text-white">
+        {/* This div is sticky, so it stays in place while the 400svh section scrolls "behind" it */}
+      <div className="sticky top-0 flex items-center justify-center w-full h-screen px-4">
+        <div className="relative flex flex-col items-center justify-center w-full max-w-7xl gap-6">
+          {/* We add a custom font style here for 'Anton' since it's not in the default Tailwind config */}
+          <style>{`@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');`}</style>
+          <div ref={titleRef} className="uppercase text-[17vw] leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
+            GET STARTED NOW
+          </div>
+          <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+            <div ref={videoRef} className="w-[70%] h-[29rem] max-w-7xl rounded-md overflow-clip pointer-events-auto">
+              <div
+                ref={imageRef}
+                className="flex items-center justify-center w-full h-full p-8 text-center bg-white text-black"
+              >
+                <h2 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl" style={{ fontFamily: "'Anton', sans-serif" }}>
+                    Your website<br/>
+                    your business<br/>
+                    your freedom
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+//=================================================================
 // SUB-COMPONENT: Footer
 //=================================================================
 const Footer = () => {
@@ -265,8 +507,49 @@ const Footer = () => {
     );
 };
 
+// NEW: Add the CustomCursor component here
 //=================================================================
-// SECTION 3: MAIN PAGE COMPONENT
+// SUB-COMPONENT: Custom Cursor
+//=================================================================
+const CustomCursor = () => {
+  const cursorRef = useRef(null);
+
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      const { clientX, clientY } = e;
+      const target = e.target;
+      
+      if (cursorRef.current) {
+        // Base transform
+        let transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
+
+        // Add scale effect on hover
+        if (target.closest('button, a, [data-cursor-hover]')) {
+          transform += ' scale(2.5)';
+        }
+        
+        cursorRef.current.style.transform = transform;
+      }
+    };
+    
+    window.addEventListener("mousemove", onMouseMove);
+    
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+    };
+  }, []);
+
+  return (
+    <div 
+      ref={cursorRef} 
+      className="fixed top-0 left-0 w-3 h-3 bg-indigo-400 rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 z-[1000] transition-transform duration-200 ease-out"
+    />
+  );
+};
+
+
+//=================================================================
+// MAIN PAGE COMPONENT
 //=================================================================
 export default function LoginPage() {
   const [showModal, setShowModal] = useState(false);
@@ -276,11 +559,29 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // NEW: Lenis setup for smooth scrolling
+    const lenis = new Lenis({
+      duration: 1.2, // speed
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easing function
+    });
+
+    // NEW: Connect Lenis to GSAP ScrollTrigger
+    lenis.on('scroll', ScrollTrigger.update)
+    gsap.ticker.add((time)=>{
+      lenis.raf(time * 1000)
+    })
+    gsap.ticker.lagSmoothing(0)
+
+    // NEW: Rellax setup
     const rellax = new Rellax('.rellax', {
       center: true,
     });
+    
     return () => {
       rellax.destroy();
+      // NEW: Clean up Lenis and GSAP ticker
+      gsap.ticker.remove(lenis.raf);
+      lenis.destroy();
     };
   }, []);
 
@@ -293,9 +594,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative bg-black text-white">
+    <div className="min-h-screen bg-black text-white">
+      {/* NEW: Add the custom cursor component */}
+      <CustomCursor /> 
+
       <motion.div className="fixed top-0 left-0 right-0 h-1 bg-indigo-500 origin-left z-50" style={{ scaleX: scrollYProgress, willChange: 'transform' }} />
-      <motion.div className="fixed top-0 left-0 w-full h-screen z-0 overflow-hidden pointer-events-none flex items-center justify-center" style={{ y: useTransform(scrollYProgress, [0, 1], ["0%", "50%"]) }}>
+      <motion.div className="fixed top-0 left-0 w-full h-screen z-0 overflow-hidden pointer-events-none flex items-center justify-center" style={{ y: useTransform(scrollYProgress, [0, 1], ["0%", "55%"]) }}>
         <div className="absolute inset-0 flex items-center justify-center"><motion.div className="relative w-[70vmin] aspect-square" style={{ scale: useTransform(scrollYProgress, [0, 0.5], [1, 1.3]) }}><Orb hue={2} hoverIntensity={0.6} rotateOnHover={true} forceHoverState={false} /></motion.div></div>
       </motion.div>
       <Header onLoginClick={openLoginModal} onSignUpClick={openSignUpModal} />
@@ -304,6 +608,7 @@ export default function LoginPage() {
         <PinnedFeaturesSection />
         <PinnedTestimonialsSection />
         <RellaxDemoSection />
+        <VideoGrowSection />
       </main>
       <Footer />
       <AnimatePresence>
@@ -356,9 +661,6 @@ const AuthModal = ({ isLogin, setIsLogin, onClose, onSuccess, onForgotPasswordCl
 
             if (!isLogin) {
               try {
-                  // ✅ REMOVED: The business creation is already handled by the server's signup endpoint
-                  // ✅ We only need to send the welcome email here
-                  
                   await fetch("https://bizzysite.onrender.com/api/send-welcome-email", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
