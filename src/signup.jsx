@@ -49,9 +49,14 @@ const HeroSection = ({ onGetStartedClick }) => {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center pt-24 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
       <div className="max-w-4xl mx-auto text-center mb-12">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-4xl sm:text-6xl font-extrabold text-white mb-6 leading-tight text-center">
-          <BlurText text="Build Your Online Store" animateBy="words" direction="top" className="leading-tight font-story" delay={600} stepDuration={1} />
-          <BlurText text="For Free" animateBy="words" direction="top" className="leading-tight font-story" delay={600} stepDuration={1} />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          {/* MODIFIED PART STARTS HERE */}
+          <h1 className="text-4xl sm:text-6xl font-extrabold text-white mb-6 leading-tight text-center font-story">
+            Build Your Online Store
+            <br />
+            For Free
+          </h1>
+          {/* MODIFIED PART ENDS HERE */}
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }}>
           <div className="min-h-[72px] sm:min-h-[60px] flex justify-center items-center">

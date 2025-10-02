@@ -1,7 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import TestimonialCard from './TestimonialCard';
-import Aurora from './Aurora';
+
+// 1. Lazily import the Aurora component
+const Aurora = lazy(() => import('./Aurora'));
+
+// 2. Custom hook to check screen size
+const useMediaQuery = (query) => {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+    const listener = () => {
+      setMatches(media.matches);
+    };
+    media.addListener(listener);
+    return () => media.removeListener(listener);
+  }, [matches, query]);
+
+  return matches;
+};
 
 const PinnedTestimonialsSection = () => {
   const testimonials = [
@@ -15,6 +36,9 @@ const PinnedTestimonialsSection = () => {
   
   const loopedTestimonials = [...testimonials, ...testimonials];
   const shouldReduceMotion = useReducedMotion();
+  
+  // 3. Use the hook to check if it's a desktop screen (wider than 768px)
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   if (shouldReduceMotion) {
     return (
@@ -36,9 +60,14 @@ const PinnedTestimonialsSection = () => {
   return (
     <section className="relative h-[200vh] bg-gray-900">
       <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Aurora speed={0.5} colorStops={['#111827', '#4338ca', '#111827']} />
-        </div>
+        {/* 4. Only render the Aurora component on desktop screens */}
+        {isDesktop && (
+          <Suspense fallback={<div className="absolute inset-0 bg-gray-900" />}>
+            <div className="absolute inset-0 z-0">
+              <Aurora speed={0.5} colorStops={['#111827', '#4338ca', '#111827']} />
+            </div>
+          </Suspense>
+        )}
         <div className="relative z-10 flex w-full flex-col items-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-16 text-center px-4">
               Trusted by Thousands of Businesses
@@ -64,3 +93,4 @@ const PinnedTestimonialsSection = () => {
 };
 
 export default PinnedTestimonialsSection;
+
