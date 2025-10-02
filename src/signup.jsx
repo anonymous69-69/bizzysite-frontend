@@ -3,13 +3,13 @@ import { TypeAnimation } from "react-type-animation";
 import { useNavigate } from "react-router-dom";
 import { auth, provider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
-import { motion, useScroll, useTransform, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Orb from "./Orb";
 import BlurText from "./BlurText";
 import Rellax from "rellax";
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
-
-// GSAP library for the new animated section
+import PinnedTestimonialsSection from './components/landing/PinnedTestimonialsSection';
+import VideoGrowSection from './components/landing/VideoGrowSection';
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -127,16 +127,7 @@ const PinnedFeaturesSection = () => {
 //=================================================================
 // SUB-COMPONENT: TestimonialCard
 //=================================================================
-const TestimonialCard = ({ text, author, role }) => {
-  return (
-    <div className="flex-shrink-0 w-80 sm:w-96 bg-gray-900/60 backdrop-blur-md p-8 rounded-xl border border-gray-700/50 text-center mx-4">
-      <div className="text-4xl mb-4 text-indigo-400">“</div>
-      <p className="mb-6 text-lg text-gray-300">{text}</p>
-      <div className="font-semibold text-xl text-white">{author}</div>
-      <div className="text-indigo-400">{role}</div>
-    </div>
-  );
-};
+
 
 //=================================================================
 // SUB-COMPONENT: Aurora Background
@@ -299,68 +290,7 @@ const Aurora = (props) => {
   return <div ref={ctnDom} className="w-full h-full" />;
 }
 
-//=================================================================
-// SECTION 2: PINNED AUTO-SCROLLING TESTIMONIALS
-//=================================================================
-const PinnedTestimonialsSection = () => {
-  const testimonials = [
-    { text: "BizzySite helped us launch our online store in just a few minutes. The setup was incredibly simple!", author: "candy crochet", role: "Crochet store" },
-    { text: "Our sales increased by 40% after switching to BizzySite. The beautiful storefront really makes a difference.", author: "siya", role: "SiyaCakes" },
-    { text: "The support team is amazing and the platform is genuinely free. Highly recommend!", author: "mark", role: "Custom Tees" },
-    { text: "A powerful, easy-to-use platform that helped me quit my day job.", author: "diana", role: "Vintage Finds" },
-    { text: "Incredibly intuitive and the results are professional. I got my first sale the day I launched.", author: "leo", role: "Art Prints" },
-    { text: "Finally, a platform that doesn't nickel and dime you. The 3% commission is fair and transparent.", author: "sara", role: "Handmade Jewelry" },
-  ];
-  
-  const loopedTestimonials = [...testimonials, ...testimonials];
-  const shouldReduceMotion = useReducedMotion();
-
-  if (shouldReduceMotion) {
-    return (
-      <div className="bg-gray-900 py-20 px-4">
-         <h2 className="text-3xl sm:text-4xl font-bold text-white mb-12 text-center">Trusted by Thousands</h2>
-         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-            {testimonials.slice(0, 4).map(testimonial => (
-               <div key={testimonial.author} className="bg-gray-800 p-8 rounded-xl border border-gray-700 text-center">
-                  <p className="mb-6 text-lg text-gray-300">"{testimonial.text}"</p>
-                  <div className="font-semibold text-xl text-white">{testimonial.author}</div>
-                  <div className="text-indigo-400">{testimonial.role}</div>
-               </div>
-            ))}
-         </div>
-      </div>
-    );
-  }
-
-  return (
-    <section className="relative h-[200vh] bg-gray-900">
-      <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Aurora speed={0.5} colorStops={['#111827', '#4338ca', '#111827']} />
-        </div>
-        <div className="relative z-10 flex w-full flex-col items-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-16 text-center px-4">
-              Trusted by Thousands of Businesses
-            </h2>
-            <motion.div
-              className="flex gap-4"
-              animate={{ x: ["0%", "-50%"] }}
-              transition={{
-                ease: "linear",
-                duration: 60,
-                repeat: Infinity,
-                repeatType: "loop",
-              }}
-            >
-              {loopedTestimonials.map((testimonial, index) => (
-                <TestimonialCard key={index} {...testimonial} />
-              ))}
-            </motion.div>
-        </div>
-      </div>
-    </section>
-  );
-};
+//====================================================   
 
 //=================================================================
 // How It Works Section
@@ -409,99 +339,6 @@ const RellaxDemoSection = () => {
     </section>
   );
 };
-
-//=================================================================
-// NEW SECTION: Video Grow Animation
-//=================================================================
-const VideoGrowSection = () => {
-  const sectionRef = useRef(null);
-  const videoRef = useRef(null);
-  const imageRef = useRef(null);
-  const titleRef = useRef(null);
-
-  useEffect(() => {
-    // A safe way to create and clean up GSAP animations in React
-    let ctx = gsap.context(() => {
-      // Using SplitText to break the title into characters for the animation
-      const titleChars = new SplitText(titleRef.current, { type: "chars" }).chars;
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top center",
-          end: "bottom bottom+=100%",
-          invalidateOnRefresh: true,
-          scrub: 1, // Makes the animation follow the scrollbar
-        },
-      });
-
-      tl.fromTo(
-        titleChars,
-        { scale: 0, rotation: () => Math.random() * 360 - 180 },
-        { scale: 1, duration: 0.2, rotation: 0, ease: "expo.out", stagger: { each: 0.05, from: "random" } }
-      );
-
-      tl.fromTo(
-        videoRef.current,
-        { clipPath: "inset(10% 50% 10% 50%)", yPercent: 100 },
-        { ease: "power3", clipPath: "inset(0% 0% 0% 0%)", duration: 1, yPercent: 0 },
-        ".3"
-      );
-
-      tl.fromTo(
-        videoRef.current,
-        { scale: 0.5 },
-        { ease: "back.inOut(0.2)", scale: 1, duration: 0.8 },
-        "<"
-      );
-      
-      tl.fromTo(
-        imageRef.current,
-        { scale: 2.8, yPercent: 40 },
-        { scale: 1.2, duration: 0.8, delay: 0.2, yPercent: 0 },
-        "<"
-      );
-
-      tl.to(videoRef.current, { scale: 0.9, ease: "linear" });
-      tl.to(imageRef.current, { scale: 0.5, ease: "linear" }, "<");
-
-    }, sectionRef);
-
-    // Cleanup function to revert all animations when the component unmounts
-    return () => ctx.revert(); 
-  }, []);
-
-  return (
-    <section ref={sectionRef} className="relative flex flex-col items-center justify-start min-h-[400svh] py-24 bg-black text-white">
-        {/* This div is sticky, so it stays in place while the 400svh section scrolls "behind" it */}
-      <div className="sticky top-0 flex items-center justify-center w-full h-screen px-4">
-        <div className="relative flex flex-col items-center justify-center w-full max-w-7xl gap-6">
-          {/* We add a custom font style here for 'Anton' since it's not in the default Tailwind config */}
-          <style>{`@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');`}</style>
-          <div ref={titleRef} className="uppercase text-[17vw] leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
-            GET STARTED NOW
-          </div>
-          <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-            <div ref={videoRef} className="w-[70%] h-[29rem] max-w-7xl rounded-md overflow-clip pointer-events-auto">
-              <div
-                ref={imageRef}
-                className="flex items-center justify-center w-full h-full p-8 text-center bg-white text-black"
-              >
-                <h2 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl" style={{ fontFamily: "'Anton', sans-serif" }}>
-                    Your website<br/>
-                    your business<br/>
-                    your freedom
-                </h2>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-//=================================================================
 // SUB-COMPONENT: Footer (ENHANCED VERSION)
 //=================================================================
 const Footer = ({ onSignUpClick }) => { // <-- MODIFICATION: Added onSignUpClick prop
@@ -749,12 +586,12 @@ export default function LoginPage() {
       </motion.div>
       <Header onLoginClick={openLoginModal} onSignUpClick={openSignUpModal} />
       <main>
-        <HeroSection onGetStartedClick={openSignUpModal} />
-        <PinnedFeaturesSection />
-        <PinnedTestimonialsSection />
-        <RellaxDemoSection />
-        <VideoGrowSection />
-      </main>
+    <HeroSection onGetStartedClick={openSignUpModal} />
+    <PinnedFeaturesSection />
+    <PinnedTestimonialsSection />  {/* <-- This uses the imported component */}
+    <RellaxDemoSection />
+    <VideoGrowSection />
+</main>
       {/* MODIFICATION: Passed the openSignUpModal function to the Footer */}
       <Footer onSignUpClick={openSignUpModal} />
       <AnimatePresence>

@@ -1,28 +1,35 @@
+// PinnedTestimonialsSection.jsx
+
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import TestimonialCard from './TestimonialCard';
 
-// 1. Lazily import the Aurora component
+// Lazily import the Aurora component so it only loads on desktop
 const Aurora = lazy(() => import('./Aurora'));
 
-// 2. Custom hook to check screen size
+// The reliable hook to check screen size
 const useMediaQuery = (query) => {
-  const [matches, setMatches] = useState(false);
+  const [matches, setMatches] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.matchMedia(query).matches;
+    }
+    return false;
+  });
 
   useEffect(() => {
-    const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
-    const listener = () => {
-      setMatches(media.matches);
+    const mediaQueryList = window.matchMedia(query);
+    const listener = (event) => {
+      setMatches(event.matches);
     };
-    media.addListener(listener);
-    return () => media.removeListener(listener);
-  }, [matches, query]);
+    mediaQueryList.addEventListener('change', listener);
+    return () => {
+      mediaQueryList.removeEventListener('change', listener);
+    };
+  }, [query]);
 
   return matches;
 };
+
 
 const PinnedTestimonialsSection = () => {
   const testimonials = [
@@ -36,10 +43,9 @@ const PinnedTestimonialsSection = () => {
   
   const loopedTestimonials = [...testimonials, ...testimonials];
   const shouldReduceMotion = useReducedMotion();
-  
-  // 3. Use the hook to check if it's a desktop screen (wider than 768px)
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
+  // Fallback for users who prefer reduced motion
   if (shouldReduceMotion) {
     return (
       <div className="bg-gray-900 py-20 px-4">
@@ -60,17 +66,28 @@ const PinnedTestimonialsSection = () => {
   return (
     <section className="relative h-[200vh] bg-gray-900">
       <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
-        {/* 4. Only render the Aurora component on desktop screens */}
-        {isDesktop && (
+        
+        {/* === CONDITIONAL BACKGROUND LOGIC === */}
+        {isDesktop ? (
+          // On Desktop: Show the animated Aurora
           <Suspense fallback={<div className="absolute inset-0 bg-gray-900" />}>
             <div className="absolute inset-0 z-0">
               <Aurora speed={0.5} colorStops={['#111827', '#4338ca', '#111827']} />
             </div>
           </Suspense>
+        ) : (
+          // On Mobile: Show the static CSS gradient
+          <div 
+            className="absolute inset-0 z-0 bg-gray-900"
+            style={{
+              backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(129, 140, 248, 0.3), transparent)'
+            }}
+          ></div>
         )}
+        
         <div className="relative z-10 flex w-full flex-col items-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-16 text-center px-4">
-              Trusted by Thousands of Businesses
+              Trusted by Hundreds of Businesses
             </h2>
             <motion.div
               className="flex gap-4"
@@ -93,4 +110,3 @@ const PinnedTestimonialsSection = () => {
 };
 
 export default PinnedTestimonialsSection;
-

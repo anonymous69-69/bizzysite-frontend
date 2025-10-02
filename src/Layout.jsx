@@ -231,33 +231,7 @@ export default function Layout() {
             </motion.div>
           </AnimatePresence>
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer className={`py-8 sm:py-12 px-4 sm:px-6 mt-12 ${darkMode ? 'bg-black/80' : 'bg-gray-800'}`}>
-        <div className="max-w-7xl mx-auto text-white">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">BizzySite</h3>
-              <p className="text-gray-300 text-sm sm:text-base">
-                Empowering small businesses to succeed online with simple, powerful tools.
-              </p>
-            </div>
-            <div>
-              {/* Intentionally blank */}
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-gray-300 text-sm sm:text-base">
-                <li>Email: your-store@bizzysite.shop</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm sm:text-base text-gray-400">
-            <p>© {new Date().getFullYear()} BizzySite. Made with ❤️ for small businesses.</p>
-          </div>
-        </div>
-      </footer>
+      </main>      
     </div>
   );
 }

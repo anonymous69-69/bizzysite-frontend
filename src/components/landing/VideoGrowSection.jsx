@@ -15,6 +15,11 @@ const VideoGrowSection = () => {
     let ctx = gsap.context(() => {
       const titleChars = new SplitText(titleRef.current, { type: "chars" }).chars;
 
+      // --- KEY CHANGE #1: HIDE THE TEXT IMMEDIATELY ---
+      // This command makes the characters invisible right away, before the user can see them.
+      // We use autoAlpha which handles both opacity and visibility.
+      gsap.set(titleChars, { autoAlpha: 0, scale: 0, rotation: () => Math.random() * 360 - 180 });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -25,12 +30,21 @@ const VideoGrowSection = () => {
         },
       });
 
-      tl.fromTo(
+      // --- KEY CHANGE #2: UPDATE THE ANIMATION ---
+      // Animate TO the visible state from the hidden state we just set.
+      tl.to(
         titleChars,
-        { scale: 0, rotation: () => Math.random() * 360 - 180 },
-        { scale: 1, duration: 0.2, rotation: 0, ease: "expo.out", stagger: { each: 0.05, from: "random" } }
+        { 
+          autoAlpha: 1,
+          scale: 1, 
+          duration: 0.2, 
+          rotation: 0, 
+          ease: "expo.out", 
+          stagger: { each: 0.05, from: "random" }
+        }
       );
 
+      // --- All other animations remain the same ---
       tl.fromTo(
         videoRef.current,
         { clipPath: "inset(10% 50% 10% 50%)", yPercent: 100 },
@@ -57,28 +71,37 @@ const VideoGrowSection = () => {
 
     }, sectionRef);
 
-    return () => ctx.revert(); 
+    // This refresh is still important to ensure the trigger point is calculated correctly
+    const refreshTimeout = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 300); // Increased delay slightly to be safer
+
+    return () => {
+      ctx.revert(); 
+      clearTimeout(refreshTimeout);
+    }; 
   }, []);
 
+  // The JSX for the component remains unchanged
   return (
     <section ref={sectionRef} className="relative flex flex-col items-center justify-start min-h-[400svh] py-24 bg-black text-white">
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');`}</style>
       <div className="sticky top-0 flex items-center justify-center w-full h-screen px-4">
         <div className="relative flex flex-col items-center justify-center w-full max-w-7xl gap-6">
-          <style>{`@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');`}</style>
-          <div ref={titleRef} className="uppercase text-[17vw] leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
-            GET STARTED NOW
-          </div>
+        <div ref={titleRef} className="uppercase text-[17vw] leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
+  GET STARTED{' '}
+  <span style={{ display: 'inline-block' }}>NOW</span>
+</div>
           <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
             <div ref={videoRef} className="w-[70%] h-[29rem] max-w-7xl rounded-md overflow-clip pointer-events-auto">
-              <div
-                ref={imageRef}
-                className="flex items-center justify-center w-full h-full p-8 text-center bg-white text-black"
-              >
-                <h2 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl" style={{ fontFamily: "'Anton', sans-serif" }}>
-                    Your website<br/>
-                    your business<br/>
-                    your freedom
-                </h2>
+              <div ref={imageRef} className="flex items-center justify-center w-full h-full p-8 text-center bg-white text-black">
+              <h2 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl" style={{ fontFamily: "'Anton', sans-serif" }}>
+    your business<br/>
+    <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+      your website
+    </span><br/>
+    your freedom
+</h2>
               </div>
             </div>
           </div>
