@@ -7,6 +7,9 @@ import { motion } from 'framer-motion';
 import { ThemeProvider } from './ThemeContext';
 import { AppNavProvider } from './AppNavContext';
 
+// CORRECTED PATH: Points to the components folder
+import FramerSpinner from './components/FramerSpinner';
+
 // --- Lazy-load all the page components ---
 const Storefront = lazy(() => import('./storefront'));
 const Customize = lazy(() => import('./customize'));
@@ -24,26 +27,6 @@ const Settings = lazy(() => import('./settings'));
 const AdminOrders = lazy(() => import('./AdminOrders'));
 const Layout = lazy(() => import('./Layout'));
 
-// --- Animated Loading Spinner Component ---
-const FramerSpinner = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#000' }}>
-    <motion.div
-      style={{
-        width: 40,
-        height: 40,
-        border: '4px solid rgba(255, 255, 255, 0.2)',
-        borderTop: '4px solid #6366f1', // Indigo color from your theme
-        borderRadius: '50%',
-      }}
-      animate={{ rotate: 360 }}
-      transition={{
-        loop: Infinity,
-        ease: "linear",
-        duration: 1,
-      }}
-    />
-  </div>
-);
 
 // --- Private Route Component ---
 const PrivateRoute = ({ children }) => {
@@ -124,3 +107,4 @@ function App() {
 }
 
 export default App;
+
