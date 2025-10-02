@@ -888,7 +888,6 @@ const ViewSite = () => {
                 <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
                   BizzySite
                 </h3>
-                // AFTER
 <p className="text-gray-300 mb-4 text-sm sm:text-base">
   Made with <a href="https://bizzysite.shop/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">BizzySite</a>. A free website builder for small businesses.
 </p>
@@ -903,7 +902,7 @@ const ViewSite = () => {
               </div>
             </div>
             <div className="border-t border-gray-700 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
-            // AFTER
+            
             <p>© 2025 <a href="https://bizzysite.shop/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">BizzySite</a>. Made with ❤️ for small businesses.</p>            </div>
           </div>
         </footer>

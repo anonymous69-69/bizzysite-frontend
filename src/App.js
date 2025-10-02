@@ -1,11 +1,13 @@
 import React, { lazy, Suspense } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
+// Import Context Providers
 import { ThemeProvider } from './ThemeContext';
 import { AppNavProvider } from './AppNavContext';
 
-// Lazy-load all the page components
+// --- Lazy-load all the page components ---
 const Storefront = lazy(() => import('./storefront'));
 const Customize = lazy(() => import('./customize'));
 const Products = lazy(() => import('./products'));
@@ -22,18 +24,34 @@ const Settings = lazy(() => import('./settings'));
 const AdminOrders = lazy(() => import('./AdminOrders'));
 const Layout = lazy(() => import('./Layout'));
 
-// A simple loading component to show while pages are loading
-const PageLoader = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#000', color: '#fff' }}>
-    <h1>Loading...</h1>
+// --- Animated Loading Spinner Component ---
+const FramerSpinner = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#000' }}>
+    <motion.div
+      style={{
+        width: 40,
+        height: 40,
+        border: '4px solid rgba(255, 255, 255, 0.2)',
+        borderTop: '4px solid #6366f1', // Indigo color from your theme
+        borderRadius: '50%',
+      }}
+      animate={{ rotate: 360 }}
+      transition={{
+        loop: Infinity,
+        ease: "linear",
+        duration: 1,
+      }}
+    />
   </div>
 );
 
+// --- Private Route Component ---
 const PrivateRoute = ({ children }) => {
   const userId = localStorage.getItem('userId');
   return userId ? children : <Navigate to="/signup" replace />;
 };
 
+// --- Main App Component ---
 function App() {
   return (
     <ThemeProvider>
@@ -62,8 +80,7 @@ function App() {
             }}
           />
 
-          {/* Wrap the Routes component with Suspense */}
-          <Suspense fallback={<PageLoader />}>
+          <Suspense fallback={<FramerSpinner />}>
             <Routes>
               {/* --- Public Routes --- */}
               <Route path="/" element={<Signup />} />
@@ -96,8 +113,8 @@ function App() {
                 <Route path="/admin/orders" element={<AdminOrders />} />
               </Route>
 
-              {/* Catch-all route for any page that doesn't exist */}
-              <Route path="*" element={<div className="flex items-center justify-center h-screen text-xl font-semibold">404: Page Not Found</div>} />
+              {/* --- Catch-all 404 Route --- */}
+              <Route path="*" element={<div className="flex items-center justify-center h-screen text-xl font-semibold bg-black text-white">404: Page Not Found</div>} />
             </Routes>
           </Suspense>
         </Router>
@@ -107,4 +124,3 @@ function App() {
 }
 
 export default App;
-
