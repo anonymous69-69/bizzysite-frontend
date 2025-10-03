@@ -1,3 +1,28 @@
-# https://www.robotstxt.org/robotstxt.html
+# ===============================================================
+# Rules for All Search Engine Crawlers
+# This configuration allows AI bots to access your site
+# while blocking non-public and low-value pages for SEO.
+# ===============================================================
 User-agent: *
-Disallow:
+
+# Disallow private user-specific and backend directories
+Disallow: /admin/
+Disallow: /account/
+Disallow: /orders/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /payment/
+
+# Disallow internal utility pages and search results
+Disallow: /search/
+Disallow: /customize/
+Disallow: /navview/
+
+# Block URLs with parameters to avoid duplicate content
+Disallow: /*?
+
+# ===============================================================
+# Sitemap Location
+# Help crawlers find all your important pages.
+# ===============================================================
+Sitemap: https://bizzysite.shop/sitemap.xml

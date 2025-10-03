@@ -91,7 +91,7 @@ const PinnedTestimonialsSection = () => {
             </h2>
             <motion.div
               className="flex gap-4"
-              animate={{ x: ["0%", "-50%"] }}
+              animate={{ x: ["0%", "-20%"] }}
               transition={{
                 ease: "linear",
                 duration: 60,

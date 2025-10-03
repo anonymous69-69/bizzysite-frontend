@@ -3,7 +3,6 @@ import { Toaster } from 'react-hot-toast';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-// Import Context Providers
 import { ThemeProvider } from './ThemeContext';
 import { AppNavProvider } from './AppNavContext';
 
@@ -12,6 +11,8 @@ import FramerSpinner from './components/FramerSpinner';
 
 // --- Lazy-load all the page components ---
 const Storefront = lazy(() => import('./storefront'));
+const BlogPage = lazy(() => import('./pages/Blog.jsx'));
+const ShopifyVsBizzySitePage = lazy(() => import('./pages/page1.jsx')); // ADD THIS LINE
 const Customize = lazy(() => import('./customize'));
 const Products = lazy(() => import('./products'));
 const Orders = lazy(() => import('./orders'));
@@ -80,6 +81,8 @@ function App() {
               <Route path="/order/:slug" element={<OrderForm />} />
               <Route path="/:slug" element={<ViewSite />} />
               <Route path="/preview" element={<ViewSite />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/shopify-vs-bizzysite" element={<ShopifyVsBizzySitePage />} /> {/* ADD THIS LINE */}
 
               {/* --- Private Routes Wrapped by Layout --- */}
               <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
@@ -107,4 +110,3 @@ function App() {
 }
 
 export default App;
-

@@ -13,10 +13,9 @@ import VideoGrowSection from './components/landing/VideoGrowSection';
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-
-// NEW: Import Lenis for smooth scrolling
+import { Link } from "react-router-dom";
 import Lenis from '@studio-freight/lenis'
-
+import FAQ from './components/landing/FAQ';
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -444,8 +443,7 @@ const Footer = ({ onSignUpClick }) => { // <-- MODIFICATION: Added onSignUpClick
                          <ul className="space-y-3 text-gray-400">
                              {/* MODIFICATION: Updated links */}
                              <li><a href="#features-section" className="hover:text-indigo-400 transition-colors" data-cursor-hover>Features</a></li>
-                             <li><a href="#" className="hover:text-indigo-400 transition-colors" data-cursor-hover>Blog</a></li>
-                         </ul>
+                             <li><Link to="/blog" className="hover:text-indigo-400 transition-colors" data-cursor-hover>Blog</Link></li>                         </ul>
                     </motion.div>
 
                     {/* Column 3: Contact */}
@@ -591,6 +589,7 @@ export default function LoginPage() {
     <PinnedTestimonialsSection />  {/* <-- This uses the imported component */}
     <RellaxDemoSection />
     <VideoGrowSection />
+    <FAQ />
 </main>
       {/* MODIFICATION: Passed the openSignUpModal function to the Footer */}
       <Footer onSignUpClick={openSignUpModal} />
