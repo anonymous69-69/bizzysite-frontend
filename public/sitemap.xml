@@ -29,4 +29,12 @@
     <loc>https://bizzysite.shop/payment</loc>
   </url>
 
+  <url>
+    <loc>https://bizzysite.shop/blog</loc>
+  </url>
+
+  <url>
+    <loc>https://bizzysite.shop/blog/shopify-vs-bizzysite</loc>
+  </url>
+
 </urlset>
