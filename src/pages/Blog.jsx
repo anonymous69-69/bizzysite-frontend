@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom"; // Use Link for navigation
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet-async";
 
 // Import Lenis for smooth scrolling, same as the signup page
 import Lenis from '@studio-freight/lenis';
@@ -225,11 +226,6 @@ const Footer = () => {
 export default function BlogPage() {
     
 
-    useEffect(() => {
-        document.title = 'BizzySite Blog - Insights for Small Businesses';
-    }, []);
-
-    
     // Lenis smooth scrolling setup
     useEffect(() => {
         const lenis = new Lenis({
@@ -270,6 +266,18 @@ export default function BlogPage() {
 
     return (
         <div className="min-h-screen bg-black text-white antialiased">
+            <Helmet>
+              <title>BizzySite Blog — Insights for Entrepreneurs & Small Businesses</title>
+              <meta
+                name="description"
+                content="Read the latest articles from the BizzySite Blog. Learn about online business, website building, marketing, and comparisons like Shopify vs BizzySite."
+              />
+              <meta property="og:title" content="BizzySite Blog — Insights for Entrepreneurs & Small Businesses" />
+              <meta
+                property="og:description"
+                content="Discover tips, tutorials, and comparisons for growing your online business with BizzySite."
+              />
+            </Helmet>
             <CustomCursor />
             <BlogHeader />
 

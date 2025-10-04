@@ -6,6 +6,8 @@ import Lenis from '@studio-freight/lenis';
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import { Helmet } from "react-helmet-async";
+
 // Assuming Orb is in src/
 import Orb from "../Orb";
 
@@ -69,6 +71,18 @@ export default function LoginPage() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <div className="min-h-screen bg-black text-white">
+        <Helmet>
+          <title>Login or Sign Up | BizzySite</title>
+          <meta
+            name="description"
+            content="Access your BizzySite account or sign up for free to create your website easily. Manage your store, blogs, and payments from one dashboard."
+          />
+          <meta property="og:title" content="Login or Sign Up | BizzySite" />
+          <meta
+            property="og:description"
+            content="Log in or sign up to BizzySite — the easiest way to build your online store and manage your business in one place."
+          />
+        </Helmet>
         <CustomCursor /> 
 
         <motion.div className="fixed top-0 left-0 right-0 h-1 bg-indigo-500 origin-left z-50" style={{ scaleX: scrollYProgress, willChange: 'transform' }} />

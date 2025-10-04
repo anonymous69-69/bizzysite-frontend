@@ -16,6 +16,7 @@ import { SplitText } from "gsap/SplitText";
 import { Link } from "react-router-dom";
 import Lenis from '@studio-freight/lenis'
 import FAQ from './components/landing/FAQ';
+import { Helmet } from "react-helmet-async";
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -575,6 +576,18 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <Helmet>
+        <title>BizzySite — Build Your Online Store for Free</title>
+        <meta
+          name="description"
+          content="Create your online store for free with BizzySite. No coding, no monthly fees. Launch your ecommerce website in minutes and start selling globally."
+        />
+        <meta property="og:title" content="BizzySite — Build Your Online Store for Free" />
+        <meta
+          property="og:description"
+          content="Start your free online store with BizzySite. The fastest and easiest way to launch your ecommerce business — no coding or upfront costs."
+        />
+      </Helmet>
       {/* NEW: Add the custom cursor component */}
       <CustomCursor /> 
 
@@ -584,13 +597,13 @@ export default function LoginPage() {
       </motion.div>
       <Header onLoginClick={openLoginModal} onSignUpClick={openSignUpModal} />
       <main>
-    <HeroSection onGetStartedClick={openSignUpModal} />
-    <PinnedFeaturesSection />
-    <PinnedTestimonialsSection />  {/* <-- This uses the imported component */}
-    <RellaxDemoSection />
-    <VideoGrowSection />
-    <FAQ />
-</main>
+        <HeroSection onGetStartedClick={openSignUpModal} />
+        <PinnedFeaturesSection />
+        <PinnedTestimonialsSection />  {/* <-- This uses the imported component */}
+        <RellaxDemoSection />
+        <VideoGrowSection />
+        <FAQ />
+      </main>
       {/* MODIFICATION: Passed the openSignUpModal function to the Footer */}
       <Footer onSignUpClick={openSignUpModal} />
       <AnimatePresence>

@@ -294,7 +294,7 @@ export default function Storefront() {
 
           <div>
             <label htmlFor="shippingCharge" className={`block text-sm font-medium mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-              Shipping Charge (₹)
+              Shipping Charge
             </label>
             <input
               type="number"

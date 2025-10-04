@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Lenis from '@studio-freight/lenis';
+import { Helmet } from "react-helmet-async";
 
 //=================================================================
 // Reusable Components (Header, Footer, Cursor)
@@ -61,11 +62,6 @@ const Footer = () => {
 //=================================================================
 export default function ShopifyVsBizzySitePage() {
 
-    useEffect(() => {
-        document.title = 'Shopify vs BizzySite: Which is Right for You in 2025? - BizzySite Blog';
-    }, []);
-
-
     // Lenis smooth scrolling setup
     useEffect(() => {
         const lenis = new Lenis();
@@ -88,6 +84,18 @@ export default function ShopifyVsBizzySitePage() {
 
     return (
         <div className="min-h-screen bg-black text-white antialiased">
+            <Helmet>
+              <title>Shopify vs BizzySite 2025 | BizzySite Blog</title>
+              <meta
+                name="description"
+                content="Compare Shopify vs BizzySite for 2025 — pricing, features, speed, and which platform is best for your online store."
+              />
+              <meta property="og:title" content="Shopify vs BizzySite 2025 | BizzySite Blog" />
+              <meta
+                property="og:description"
+                content="An honest 2025 comparison between Shopify and BizzySite for small businesses and entrepreneurs."
+              />
+            </Helmet>
             <CustomCursor />
             <BlogHeader />
 
