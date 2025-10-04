@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { HelmetProvider } from 'react-helmet-async';
 
 import { ThemeProvider } from './ThemeContext';
 import { AppNavProvider } from './AppNavContext';
@@ -12,7 +12,7 @@ import FramerSpinner from './components/FramerSpinner';
 // --- Lazy-load all the page components ---
 const Storefront = lazy(() => import('./storefront'));
 const BlogPage = lazy(() => import('./pages/Blog.jsx'));
-const ShopifyVsBizzySitePage = lazy(() => import('./pages/page1.jsx')); // ADD THIS LINE
+const ShopifyVsBizzySitePage = lazy(() => import('./pages/page1.jsx'));
 const Customize = lazy(() => import('./customize'));
 const Products = lazy(() => import('./products'));
 const Orders = lazy(() => import('./orders'));
@@ -38,74 +38,76 @@ const PrivateRoute = ({ children }) => {
 // --- Main App Component ---
 function App() {
   return (
-    <ThemeProvider>
-      <AppNavProvider>
-        <Router>
-          <Toaster 
-            position="top-right" 
-            reverseOrder={false} 
-            toastOptions={{
-              style: {
-                background: '#363636',
-                color: '#fff',
-                zIndex: 9999,
-              },
-              duration: 5000,
-              success: {
-                duration: 3000,
-                theme: {
-                  primary: 'green',
-                  secondary: 'black',
+    <HelmetProvider>
+      <ThemeProvider>
+        <AppNavProvider>
+          <Router>
+            <Toaster 
+              position="top-right" 
+              reverseOrder={false} 
+              toastOptions={{
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                  zIndex: 9999,
                 },
-              },
-              error: {
-                duration: 4000,
-              },
-            }}
-          />
+                duration: 5000,
+                success: {
+                  duration: 3000,
+                  theme: {
+                    primary: 'green',
+                    secondary: 'black',
+                  },
+                },
+                error: {
+                  duration: 4000,
+                },
+              }}
+            />
 
-          <Suspense fallback={<FramerSpinner />}>
-            <Routes>
-              {/* --- Public Routes --- */}
-              <Route path="/" element={<Signup />} />
-              <Route path="/admin-login" element={<Signup />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/site/:storeId" element={<ViewSite />} />
-              <Route path="/product/:id" element={<InProduct />} />
-              <Route path="/orderform" element={<OrderForm />} />
-              <Route path="/shop/:storeId/product/:id" element={<InProduct />} />
-              <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
-              <Route path="/:slug/product/:productId" element={<InProduct />} />
-              <Route path="/reset-password/:token" element={<ResetPassword />} />
-              <Route path="/store/:slug" element={<ViewSite />} />
-              <Route path="/order/:slug" element={<OrderForm />} />
-              <Route path="/:slug" element={<ViewSite />} />
-              <Route path="/preview" element={<ViewSite />} />
-              <Route path="/blog" element={<BlogPage />} />
-              <Route path="/blog/shopify-vs-bizzysite" element={<ShopifyVsBizzySitePage />} /> {/* ADD THIS LINE */}
+            <Suspense fallback={<FramerSpinner />}>
+              <Routes>
+                {/* --- Public Routes --- */}
+                <Route path="/" element={<Signup />} />
+                <Route path="/admin-login" element={<Signup />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/site/:storeId" element={<ViewSite />} />
+                <Route path="/product/:id" element={<InProduct />} />
+                <Route path="/orderform" element={<OrderForm />} />
+                <Route path="/shop/:storeId/product/:id" element={<InProduct />} />
+                <Route path="/shop/:storeId/orderform" element={<OrderForm />} />
+                <Route path="/:slug/product/:productId" element={<InProduct />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                <Route path="/store/:slug" element={<ViewSite />} />
+                <Route path="/order/:slug" element={<OrderForm />} />
+                <Route path="/:slug" element={<ViewSite />} />
+                <Route path="/preview" element={<ViewSite />} />
+                <Route path="/blog" element={<BlogPage />} />
+                <Route path="/blog/shopify-vs-bizzysite" element={<ShopifyVsBizzySitePage />} />
 
-              {/* --- Private Routes Wrapped by Layout --- */}
-              <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
-                <Route path="/storefront" element={<Storefront />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/payment" element={<Payment />} />
-                <Route path="/customize" element={<Customize />} />
-                <Route path="/navview" element={<NavView />} />
-                
-                {/* --- Admin Route (also uses the layout) --- */}
-                <Route path="/admin/orders" element={<AdminOrders />} />
-              </Route>
+                {/* --- Private Routes Wrapped by Layout --- */}
+                <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
+                  <Route path="/storefront" element={<Storefront />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/payment" element={<Payment />} />
+                  <Route path="/customize" element={<Customize />} />
+                  <Route path="/navview" element={<NavView />} />
+                  
+                  {/* --- Admin Route (also uses the layout) --- */}
+                  <Route path="/admin/orders" element={<AdminOrders />} />
+                </Route>
 
-              {/* --- Catch-all 404 Route --- */}
-              <Route path="*" element={<div className="flex items-center justify-center h-screen text-xl font-semibold bg-black text-white">404: Page Not Found</div>} />
-            </Routes>
-          </Suspense>
-        </Router>
-      </AppNavProvider>
-    </ThemeProvider>
+                {/* --- Catch-all 404 Route --- */}
+                <Route path="*" element={<div className="flex items-center justify-center h-screen text-xl font-semibold bg-black text-white">404: Page Not Found</div>} />
+              </Routes>
+            </Suspense>
+          </Router>
+        </AppNavProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 
