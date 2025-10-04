@@ -614,7 +614,6 @@ const ViewSite = () => {
                   const cartItem = cart.find((item) => item._id === product._id);
 
                   return (
-                    // FIX: Converted the product card to a flex container to manage content height.
                     <div
                       key={product._id}
                       className={`bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow animate-slideIn ${
@@ -649,12 +648,9 @@ const ViewSite = () => {
                         )}
                       </button>
                       
-                      {/* FIX: This inner container now grows to fill available space, pushing the button to the bottom. */}
                       <div className={`flex flex-col flex-grow p-4 ${productLayout === 'List' ? 'sm:w-2/3' : ''}`}>
                         
-                        {/* This div will take up all available vertical space */}
                         <div className="flex-grow">
-                          {/* FIX: Font weight changed from semibold to medium */}
                           <h3 className="text-lg font-medium mb-2">
                             {product.name || "Product Name"}
                           </h3>
@@ -663,33 +659,37 @@ const ViewSite = () => {
                           )}
                         </div>
                         
-                        {/* This div will be pushed to the bottom */}
-                        <div className="flex justify-between items-center mt-4">
-                          <span className="font-bold" style={{ color: primaryColor }}>
-                            {getCurrencySymbol(storeCurrency)}
-                            {(product.price || 0).toFixed(2)}
-                          </span>
+                        {/* MODIFIED: This entire block is new. It separates price and buttons. */}
+                        <div className="mt-auto pt-4">
+                          {/* Price */}
+                          <div className="mb-3">
+                            <span className="font-bold text-lg" style={{ color: primaryColor }}>
+                              {getCurrencySymbol(storeCurrency)}
+                              {(product.price || 0).toFixed(2)}
+                            </span>
+                          </div>
 
+                          {/* Action Buttons */}
                           {product.inStock ? (
                             cartItem ? (
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center justify-center space-x-4">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     updateQuantity(product._id, cartItem.quantity - 1);
                                   }}
-                                  className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center border rounded"
+                                  className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center border rounded-full"
                                   style={{ borderColor: primaryColor }}
                                 >
                                   -
                                 </button>
-                                <span>{cartItem.quantity}</span>
+                                <span className="font-semibold text-lg">{cartItem.quantity}</span>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     updateQuantity(product._id, cartItem.quantity + 1);
                                   }}
-                                  className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center border rounded"
+                                  className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center border rounded-full"
                                   style={{ borderColor: primaryColor }}
                                 >
                                   +
@@ -701,7 +701,7 @@ const ViewSite = () => {
                                   e.stopPropagation();
                                   addToCart(product);
                                 }}
-                                className={`px-2 py-1 text-xs sm:px-3 sm:py-1 sm:text-sm md:px-4 md:py-2 md:text-base rounded-md font-medium hover:opacity-90 ${
+                                className={`w-full py-2 rounded-md font-medium text-center hover:opacity-90 ${
                                   textColor === "white" ? "text-white" : "text-black"
                                 }`}
                                 style={{ backgroundColor: primaryColor }}
@@ -712,7 +712,7 @@ const ViewSite = () => {
                           ) : (
                             <button
                               disabled
-                              className="px-3 py-1 text-sm rounded-md text-gray-400 font-medium md:px-4 md:py-2 md:text-base cursor-not-allowed"
+                              className="w-full py-2 rounded-md text-gray-400 font-medium text-center cursor-not-allowed"
                               style={{ backgroundColor: secondaryColor }}
                             >
                               Out of Stock

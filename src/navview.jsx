@@ -72,8 +72,11 @@ export default function NavView() {
       toast.error('Your store needs a name to create a shareable link.');
       return;
     }
+    
+    // MODIFIED: Use the current window's origin for the link
+    const baseUrl = window.location.origin;
+    const link = `${baseUrl}/${storeSlug}`;
 
-    const link = `https://bizzysite.shop/${storeSlug}`;
     navigator.clipboard.writeText(link)
       .then(() => toast.success('Store link copied to clipboard!'))
       .catch(() => toast.error('Failed to copy link.'));
@@ -84,7 +87,12 @@ export default function NavView() {
       toast.error('Your store needs a name before it can be viewed.');
       return;
     }
-    window.open(`https://bizzysite.shop/${storeSlug}`, "_blank");
+
+    // MODIFIED: Use the current window's origin for the preview
+    const baseUrl = window.location.origin;
+    const previewUrl = `${baseUrl}/${storeSlug}`;
+    
+    window.open(previewUrl, "_blank");
   };
 
   return (
@@ -155,7 +163,8 @@ export default function NavView() {
               </button>
               {storeSlug && (
                 <p className={`mt-3 text-xs break-words ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Your URL: <strong>https://bizzysite.shop/{storeSlug}</strong>
+                  {/* MODIFIED: Display the dynamic URL */}
+                  Your URL: <strong>{`${window.location.origin}/${storeSlug}`}</strong>
                 </p>
               )}
             </div>
