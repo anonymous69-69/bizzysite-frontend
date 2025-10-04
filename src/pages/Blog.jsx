@@ -8,6 +8,8 @@ import Lenis from '@studio-freight/lenis';
 //=================================================================
 // MOCK DATA: Blog Posts
 //=================================================================
+
+
 const blogPosts = [
 
 
@@ -221,6 +223,12 @@ const Footer = () => {
 // MAIN BLOG PAGE COMPONENT
 //=================================================================
 export default function BlogPage() {
+    
+
+    useEffect(() => {
+        document.title = 'BizzySite Blog - Insights for Small Businesses';
+    }, []);
+
     
     // Lenis smooth scrolling setup
     useEffect(() => {

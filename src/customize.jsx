@@ -22,6 +22,12 @@ export default function CustomizeStore() {
     toast.success("Colors reset to default.");
   };
 
+
+  useEffect(() => {
+    document.title = 'Customize your website with millions of colors';
+}, []);
+
+
   useEffect(() => {
     const savedStoreId = localStorage.getItem("storeId");
     const userId = localStorage.getItem("userId");

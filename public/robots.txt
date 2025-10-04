@@ -4,6 +4,7 @@
 # while blocking non-public and low-value pages for SEO.
 # ===============================================================
 User-agent: *
+Allow: /
 
 # Disallow private user-specific and backend directories
 Disallow: /admin/
@@ -19,7 +20,7 @@ Disallow: /customize/
 Disallow: /navview/
 
 # Block URLs with parameters to avoid duplicate content
-Disallow: /*?
+Disallow: /*?ref=
 
 # ===============================================================
 # Sitemap Location

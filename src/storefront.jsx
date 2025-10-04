@@ -24,6 +24,10 @@ export default function Storefront() {
   const nameInputRef = useRef(null);
 
   useEffect(() => {
+    document.title = 'Choose the name of your business';
+  }, []); 
+
+  useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);

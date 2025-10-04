@@ -61,6 +61,11 @@ const Footer = () => {
 //=================================================================
 export default function ShopifyVsBizzySitePage() {
 
+    useEffect(() => {
+        document.title = 'Shopify vs BizzySite: Which is Right for You in 2025? - BizzySite Blog';
+    }, []);
+
+
     // Lenis smooth scrolling setup
     useEffect(() => {
         const lenis = new Lenis();
