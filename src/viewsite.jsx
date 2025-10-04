@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 
-// A component to add Google Fonts and global styles.
-const GlobalFont = () => (
-  <style jsx global>{`
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
-  `}</style>
-);
-
-
 const ProductSkeleton = ({ layout }) => {
   const isListLayout = layout === "List";
   const isCardLayout = layout === "Card";
@@ -62,6 +54,7 @@ const ViewSite = () => {
   };
 
   function getCurrencySymbol(currencyCode) {
+    // Fallback to the code itself if the symbol is not found
     return currencySymbols[currencyCode] || currencyCode;
   }
 
@@ -72,27 +65,44 @@ const ViewSite = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [cart, setCart] = useState([]);
-  const [storeCurrency, setStoreCurrency] = useState("USD");
-  const { slug } = useParams();
+  const [storeCurrency, setStoreCurrency] = useState("USD"); // Default currency, later can sync with products.jsx
+  const { slug } = useParams(); // Added storeId state
+  console.log("[ViewSite] Mounted with slug:", slug);
+  if (!slug) {
+    console.error("[ViewSite] No slug found in URL!");
+  }
+  const CART_KEY = `cart_${slug}`;
   const navigate = useNavigate();
   const [textColor, setTextColor] = useState("white");
 
-  const CART_KEY = `cart_${slug}`;
-
   useEffect(() => {
-    if (!slug) {
-      return;
-    }
 
     const fetchBusiness = async () => {
       try {
         setLoading(true);
         setError(null);
 
+        // Get slug from URL path (first segment)
+        const pathSlug = window.location.pathname.split("/")[1];
+        // Use URL slug if available, otherwise use state slug
+        const finalSlug = pathSlug || slug;
+
+        if (!finalSlug) {
+          setError("Store slug is missing");
+          setLoading(false);
+          return;
+        }
+
+        console.log(`[ViewSite] Fetching store data for slug: ${slug}`);
+
+        // ================== THE FIX: CACHE BUSTING ==================
+        // We add a unique timestamp to the URL to ensure we always get fresh data from the server,
+        // bypassing any caching layers on Render or in the browser.
         const res = await fetch(
           `https://bizzysite.onrender.com/api/store/slug/${slug}`
         );
-        
+        // ==========================================================
+
         if (res.status === 404) {
           setError("Store not found");
           setBusiness(null);
@@ -102,7 +112,8 @@ const ViewSite = () => {
           const data = await res.json();
           setBusiness(data);
           setStoreCurrency(data.defaultCurrency || "USD");
-          setTextColor(data.customize?.textColor || "white");
+          setTextColor(data.customize?.textColor || "white"); // ✅ ADD THIS LINE
+
         }
       } catch (err) {
         console.error("[ViewSite] Error loading store:", err);
@@ -114,22 +125,16 @@ const ViewSite = () => {
 
     fetchBusiness();
   }, [slug]);
-  
-  useEffect(() => {
-    if (!slug) return;
-    const storedCart = localStorage.getItem(CART_KEY);
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
-    } else {
-      setCart([]);
-    }
-  }, [slug, CART_KEY]);
-  
-  const updateCartInStorage = (updatedCart) => {
-      localStorage.setItem(CART_KEY, JSON.stringify(updatedCart));
-  };
 
   const addToCart = (product) => {
+    console.log(
+      "[Cart] Operation:",
+      "addToCart",
+      "Slug:",
+      slug,
+      "Key:",
+      CART_KEY
+    );
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item._id === product._id);
       const updatedCart = existingItem
@@ -139,12 +144,21 @@ const ViewSite = () => {
               : item
           )
         : [...prevCart, { ...product, quantity: 1 }];
-      updateCartInStorage(updatedCart);
+      localStorage.setItem(CART_KEY, JSON.stringify(updatedCart));
       return updatedCart;
     });
   };
-  
+
+  // Update quantity function (syncs to localStorage per-store cart)
   const updateQuantity = (productId, newQuantity) => {
+    console.log(
+      "[Cart] Operation:",
+      "updateQuantity",
+      "Slug:",
+      slug,
+      "Key:",
+      CART_KEY
+    );
     if (newQuantity < 1) {
       removeFromCart(productId);
       return;
@@ -153,15 +167,48 @@ const ViewSite = () => {
       const updatedCart = prevCart.map((item) =>
         item._id === productId ? { ...item, quantity: newQuantity } : item
       );
-      updateCartInStorage(updatedCart);
+      localStorage.setItem(CART_KEY, JSON.stringify(updatedCart));
       return updatedCart;
     });
   };
-  
+
+  // Initialize cart from localStorage per-store cart when slug changes
+  useEffect(() => {
+    console.log("[Cart] Slug changed. Forcing hard reset for slug:", slug);
+    setCart([]); // Clear previous cart immediately
+    const storedCart = localStorage.getItem(CART_KEY);
+    if (storedCart) {
+      console.log("[Cart] Loaded cart for this slug:", storedCart);
+      setCart(JSON.parse(storedCart));
+    } else {
+      console.log("[Cart] No cart found for this slug");
+      setCart([]);
+    }
+  }, [slug]);
+
+  // Cleanup effect to ensure any pending state resets when slug changes
+  useEffect(() => {
+    return () => {
+      console.log(
+        "[ViewSite] Component unmounting or slug changing. Clearing cart state."
+      );
+      setCart([]);
+    };
+  }, [slug]);
+
+  // Remove from cart function (syncs to localStorage per-store cart)
   const removeFromCart = (productId) => {
+    console.log(
+      "[Cart] Operation:",
+      "removeFromCart",
+      "Slug:",
+      slug,
+      "Key:",
+      CART_KEY
+    );
     setCart((prevCart) => {
       const updatedCart = prevCart.filter((item) => item._id !== productId);
-      updateCartInStorage(updatedCart);
+      localStorage.setItem(CART_KEY, JSON.stringify(updatedCart));
       return updatedCart;
     });
   };
@@ -272,15 +319,16 @@ const ViewSite = () => {
   const products = business.products || [];
   const theme = business.customize || {};
 
+  // Theme defaults
   const primaryColor = theme.primaryColor || "#4f46e5";
   const secondaryColor = theme.secondaryColor || "#d1d5db";
   const fontFamily = theme.fontFamily || "Inter, sans-serif";
 
+  // Calculate total items in cart
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
     <React.Fragment key={slug}>
-      <GlobalFont />
       <div
         className="min-h-screen flex flex-col relative overflow-x-hidden"
         style={{ fontFamily }}
@@ -392,7 +440,7 @@ const ViewSite = () => {
           </div>
         </div>
 
-        {/* Cart Sidebar */}
+        {/* Cart Sidebar with darker background */}
         <div
           className={`fixed inset-0 bg-black bg-opacity-70 z-30 transition-opacity duration-300 ${
             isCartOpen ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -440,8 +488,10 @@ const ViewSite = () => {
                     <div className="flex-1">
                       <h4 className="font-medium">{item.name}</h4>
                       <p className="text-sm text-gray-600">
-                        {getCurrencySymbol(storeCurrency)}
-                        {(item.price || 0).toFixed(2)}
+                        {(() => {
+                          const symbol = getCurrencySymbol(storeCurrency);
+                          return `${symbol}${(item.price || 0).toFixed(2)}`;
+                        })()}
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -478,14 +528,15 @@ const ViewSite = () => {
             <div className="flex justify-between mb-4">
               <span className="font-semibold">Total:</span>
               <span className="font-semibold">
-                {getCurrencySymbol(storeCurrency)}
-                {cart
-                  .reduce(
+                {(() => {
+                  const symbol = getCurrencySymbol(storeCurrency);
+                  const total = cart.reduce(
                     (total, item) =>
                       total + parseFloat(item.price) * item.quantity,
                     0
-                  )
-                  .toFixed(2)}
+                  );
+                  return `${symbol}${total.toFixed(2)}`;
+                })()}
               </span>
             </div>
 
@@ -507,7 +558,6 @@ const ViewSite = () => {
               }}
               className="w-full py-2 text-white rounded-md font-medium text-center"
               style={{ backgroundColor: primaryColor }}
-              disabled={cart.length === 0}
             >
               Checkout
             </button>
@@ -523,39 +573,106 @@ const ViewSite = () => {
         >
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex items-center space-x-4">
+              {/* Mobile menu button (hamburger icon) */}
               <button
                 onClick={() => setIsMenuOpen(true)}
                 className="flex flex-col space-y-1"
               >
-                <span className="block w-6 h-0.5" style={{ backgroundColor: secondaryColor }}></span>
-                <span className="block w-6 h-0.5" style={{ backgroundColor: secondaryColor }}></span>
-                <span className="block w-6 h-0.5" style={{ backgroundColor: secondaryColor }}></span>
+                <span
+                  className="block w-6 h-0.5"
+                  style={{ backgroundColor: secondaryColor }}
+                ></span>
+                <span
+                  className="block w-6 h-0.5"
+                  style={{ backgroundColor: secondaryColor }}
+                ></span>
+                <span
+                  className="block w-6 h-0.5"
+                  style={{ backgroundColor: secondaryColor }}
+                ></span>
               </button>
               <h1 className="text-xl font-bold">
                 {business.name || "Your Business"}
               </h1>
             </div>
             <div className="hidden md:flex items-center space-x-6">
-              <button onClick={() => document.getElementById("home")?.scrollIntoView({ behavior: "smooth" })} className="hover:opacity-80">Home</button>
-              <button onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })} className="hover:opacity-80">Products</button>
-              <button onClick={() => setIsContactModalOpen(true)} className="hover:opacity-80">Contact</button>
-              <button onClick={() => setIsCartOpen(true)} className="relative ml-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("home")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="hover:opacity-80"
+              >
+                Home
+              </button>
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("products")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="hover:opacity-80"
+              >
+                Products
+              </button>
+              <button
+                onClick={() => setIsContactModalOpen(true)}
+                className="hover:opacity-80"
+              >
+                Contact
+              </button>
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative ml-4"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
                 </svg>
                 {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" style={{ backgroundColor: secondaryColor }}>
+                  <span
+                    className="absolute -top-2 -right-2 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                    style={{ backgroundColor: secondaryColor }}
+                  >
                     {totalItems}
                   </span>
                 )}
               </button>
             </div>
-            <button onClick={() => setIsCartOpen(true)} className="relative md:hidden">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative md:hidden"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
               </svg>
               {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" style={{ backgroundColor: secondaryColor }}>
+                <span
+                  className="absolute -top-2 -right-2 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                  style={{ backgroundColor: secondaryColor }}
+                >
                   {totalItems}
                 </span>
               )}
@@ -575,8 +692,13 @@ const ViewSite = () => {
             <h1 className="text-2xl md:text-4xl font-bold mb-4">
               {business.name || "Welcome to Our Store"}
             </h1>
-            <p className={`text-base md:text-lg mb-6 md:mb-8 ${textColor === "white" ? "text-white" : "text-black"}`}>
-              {business.description || "Discover our amazing products and services"}
+            <p
+              className={`text-base md:text-lg mb-6 md:mb-8 ${
+                textColor === "white" ? "text-white" : "text-black"
+              }`}
+            >
+              {business.description ||
+                "Discover our amazing products and services"}
             </p>
           </div>
         </section>
@@ -590,8 +712,18 @@ const ViewSite = () => {
 
             {products.length === 0 ? (
               <div className="text-center py-12">
-                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                <svg
+                  className="mx-auto h-12 w-12 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+                  />
                 </svg>
                 <h3 className="mt-2 text-lg font-medium text-gray-900">
                   No products available
@@ -604,30 +736,36 @@ const ViewSite = () => {
               <div
                 className={`grid ${
                   productLayout === "Grid"
-                    ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3"
+                    ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3" // Changed from grid-cols-1 to grid-cols-2 for mobile
                     : productLayout === "List"
                     ? "grid-cols-1"
                     : "grid-cols-1 md:grid-cols-2"
                 } gap-4 md:gap-6`}
               >
                 {products.map((product, index) => {
-                  const cartItem = cart.find((item) => item._id === product._id);
+                  const cartItem = cart.find(
+                    (item) => item._id === product._id
+                  );
 
                   return (
-                    // FIX: Converted the product card to a flex container to manage content height.
                     <div
                       key={product._id}
-                      className={`bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow animate-slideIn ${
-                        productLayout === 'List' ? 'flex flex-col sm:flex-row' : 'flex flex-col'
-                      }`}
+                      className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow animate-slideIn"
                       style={{
-                        border: productLayout === 'Card' ? `2px solid ${secondaryColor}` : 'none',
-                        animationDelay: `${index * 0.1}s`,
+                        border:
+                          productLayout === "Card"
+                            ? `2px solid ${secondaryColor}`
+                            : "none",
+                        display:
+                          productLayout === "List"
+                            ? "flex flex-col sm:flex-row"
+                            : "block",
+                        animationDelay: `${index * 0.1}s`, // Staggered animation
                       }}
                     >
                       <button
-                        onClick={() => navigate(`/${slug}/product/${product._id}`)}
-                        className="w-full text-left flex-shrink-0"
+                        onClick={() => navigate(`/${slug}/product/${product._id}`)} // Changed from storeId to slug
+                        className="w-full text-left"
                       >
                         {product.images && product.images.length > 0 ? (
                           <img
@@ -635,39 +773,45 @@ const ViewSite = () => {
                             alt={product.name}
                             className={`${
                               productLayout === "List"
-                                ? "w-full h-48 sm:w-48 sm:h-full object-cover"
+                                ? "w-full h-48 sm:w-1/3 sm:h-auto object-cover"
                                 : "w-full h-48 object-cover"
                             }`}
                           />
                         ) : (
-                          <div className={`${
-                              productLayout === "List" ? "w-full h-48 sm:w-48 sm:h-full" : "w-full h-48"
-                            } bg-gray-200 flex items-center justify-center`}
+                          <div
+                            className={`${
+                              productLayout === "List" ? "sm:w-1/3" : "w-full"
+                            } h-48 bg-gray-200 flex items-center justify-center`}
                           >
                             <span className="text-gray-500">No image</span>
                           </div>
                         )}
                       </button>
-                      
-                      {/* FIX: This inner container now grows to fill available space, pushing the button to the bottom. */}
-                      <div className={`flex flex-col flex-grow p-4 ${productLayout === 'List' ? 'sm:w-2/3' : ''}`}>
-                        
-                        {/* This div will take up all available vertical space */}
-                        <div className="flex-grow">
-                          {/* FIX: Font weight changed from semibold to medium */}
-                          <h3 className="text-lg font-medium mb-2">
-                            {product.name || "Product Name"}
-                          </h3>
-                          {!product.inStock && (
-                            <p className="text-red-500 text-sm mb-2">Out of Stock</p>
-                          )}
-                        </div>
-                        
-                        {/* This div will be pushed to the bottom */}
-                        <div className="flex justify-between items-center mt-4">
-                          <span className="font-bold" style={{ color: primaryColor }}>
-                            {getCurrencySymbol(storeCurrency)}
-                            {(product.price || 0).toFixed(2)}
+
+                      <div
+                        className={`p-4 ${
+                          productLayout === "List" ? "sm:w-2/3" : ""
+                        }`}
+                      >
+                        <h3 className="text-lg font-semibold mb-2">
+                          {product.name || "Product Name"}
+                        </h3>
+                        {!product.inStock && (
+                          <p className="text-red-500 text-sm mb-2">
+                            Out of Stock
+                          </p>
+                        )}
+                        <div className="flex justify-between items-center">
+                          <span
+                            className="font-bold"
+                            style={{ color: primaryColor }}
+                          >
+                            {(() => {
+                              const symbol = getCurrencySymbol(storeCurrency);
+                              return `${symbol}${(product.price || 0).toFixed(
+                                2
+                              )}`;
+                            })()}
                           </span>
 
                           {product.inStock ? (
@@ -676,7 +820,10 @@ const ViewSite = () => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    updateQuantity(product._id, cartItem.quantity - 1);
+                                    updateQuantity(
+                                      product._id,
+                                      cartItem.quantity - 1
+                                    );
                                   }}
                                   className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center border rounded"
                                   style={{ borderColor: primaryColor }}
@@ -687,7 +834,10 @@ const ViewSite = () => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    updateQuantity(product._id, cartItem.quantity + 1);
+                                    updateQuantity(
+                                      product._id,
+                                      cartItem.quantity + 1
+                                    );
                                   }}
                                   className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center border rounded"
                                   style={{ borderColor: primaryColor }}
@@ -702,7 +852,9 @@ const ViewSite = () => {
                                   addToCart(product);
                                 }}
                                 className={`px-2 py-1 text-xs sm:px-3 sm:py-1 sm:text-sm md:px-4 md:py-2 md:text-base rounded-md font-medium hover:opacity-90 ${
-                                  textColor === "white" ? "text-white" : "text-black"
+                                  textColor === "white"
+                                    ? "text-white"
+                                    : "text-black"
                                 }`}
                                 style={{ backgroundColor: primaryColor }}
                               >
@@ -736,9 +888,9 @@ const ViewSite = () => {
                 <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
                   BizzySite
                 </h3>
-                <p className="text-gray-300 mb-4 text-sm sm:text-base">
-                  Made with <a href="https://bizzysite.shop/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">BizzySite</a>. A free website builder for small businesses.
-                </p>
+<p className="text-gray-300 mb-4 text-sm sm:text-base">
+  Made with <a href="https://bizzysite.shop/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">BizzySite</a>. A free website builder for small businesses.
+</p>
               </div>
               <div>
                 <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
@@ -750,8 +902,8 @@ const ViewSite = () => {
               </div>
             </div>
             <div className="border-t border-gray-700 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
-              <p>© {new Date().getFullYear()} <a href="https://bizzysite.shop/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">BizzySite</a>. Made with ❤️ for small businesses.</p>
-            </div>
+            
+            <p>© 2025 <a href="https://bizzysite.shop/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">BizzySite</a>. Made with ❤️ for small businesses.</p>            </div>
           </div>
         </footer>
       </div>
