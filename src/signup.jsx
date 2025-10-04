@@ -6,7 +6,7 @@ import { signInWithPopup } from "firebase/auth";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Orb from "./Orb";
 import BlurText from "./BlurText";
-import Rellax from "rellax";
+// Rellax import removed
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
 import PinnedTestimonialsSection from './components/landing/PinnedTestimonialsSection';
 import VideoGrowSection from './components/landing/VideoGrowSection';
@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import Lenis from '@studio-freight/lenis'
 import FAQ from './components/landing/FAQ';
 import { Helmet } from "react-helmet-async";
+
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -50,13 +51,11 @@ const HeroSection = ({ onGetStartedClick }) => {
     <div className="min-h-screen flex flex-col justify-center items-center pt-24 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
       <div className="max-w-4xl mx-auto text-center mb-12">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          {/* MODIFIED PART STARTS HERE */}
           <h1 className="text-4xl sm:text-6xl font-extrabold text-white mb-6 leading-tight text-center font-story">
             Build Your Online Store
             <br />
             For Free
           </h1>
-          {/* MODIFIED PART ENDS HERE */}
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }}>
           <div className="min-h-[72px] sm:min-h-[60px] flex justify-center items-center">
@@ -97,8 +96,7 @@ const PinnedFeaturesSection = () => {
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 
-          className="rellax text-3xl sm:text-4xl font-bold text-white mb-4"
-          data-rellax-speed="1"
+          className="text-3xl sm:text-4xl font-bold text-white mb-4"
         >
           Everything You Need to Succeed Online
         </h2>
@@ -110,8 +108,7 @@ const PinnedFeaturesSection = () => {
           {features.map((feature, index) => (
             <div
               key={feature.title}
-              className="rellax w-full md:w-1/3 bg-gray-900/50 backdrop-blur-sm p-8 rounded-2xl border border-gray-700 text-center"
-              data-rellax-speed={index + 2}
+              className="w-full md:w-1/3 bg-gray-900/50 backdrop-blur-sm p-8 rounded-2xl border border-gray-700 text-center"
             >
               <div className="text-5xl mb-4">{feature.icon}</div>
               <h3 className="text-2xl font-semibold mb-3 text-white">{feature.title}</h3>
@@ -289,46 +286,44 @@ const Aurora = (props) => {
 
   return <div ref={ctnDom} className="w-full h-full" />;
 }
-
-//====================================================   
-
+   
 //=================================================================
-// How It Works Section
+// How It Works Section (Formerly RellaxDemoSection)
 //=================================================================
-const RellaxDemoSection = () => {
+const HowItWorksSection = () => {
   return (
-    <section className="relative min-h-screen items-center justify-center overflow-hidden bg-black py-24 px-4 sm:px-6 lg:px-8">
-      <div className="rellax absolute top-10 right-20 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-500/10 to-purple-500/20 blur-2xl" data-rellax-speed="6"></div>
-      <div className="rellax absolute bottom-20 left-20 h-24 w-24 rounded-full bg-gradient-to-br from-purple-500/10 to-indigo-500/20 blur-2xl" data-rellax-speed="-4"></div>
+    <section className="relative items-center justify-center overflow-hidden bg-black py-24 px-4 sm:px-6 lg:px-8">
+      <div className="absolute top-10 right-20 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-500/10 to-purple-500/20 blur-2xl"></div>
+      <div className="absolute bottom-20 left-20 h-24 w-24 rounded-full bg-gradient-to-br from-purple-500/10 to-indigo-500/20 blur-2xl"></div>
       <div className="z-10 mx-auto max-w-4xl text-center">
-        <h2 className="rellax text-4xl font-bold tracking-tight sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-20" data-rellax-speed="1">
+        <h2 className="text-4xl font-bold tracking-tight sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-20">
           How To Get Started
         </h2>
         <div className="grid md:grid-cols-3 gap-8 mb-24 text-left">
-          <div className="rellax rounded-xl border border-gray-800 bg-gray-900/50 p-6" data-rellax-speed="1">
+          <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6">
             <div className="text-3xl font-bold text-indigo-400 mb-3">1.</div>
             <h3 className="text-xl font-semibold mb-2">Add Your Info</h3>
             <p className="text-gray-400">Provide your name, email, and phone number to create your free account.</p>
           </div>
-          <div className="rellax rounded-xl border border-gray-800 bg-gray-900/50 p-6" data-rellax-speed="3">
+          <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6">
             <div className="text-3xl font-bold text-indigo-400 mb-3">2.</div>
             <h3 className="text-xl font-semibold mb-2">Upload Products</h3>
             <p className="text-gray-400">Add product photos, set your price, and define shipping costs for each item.</p>
           </div>
-          <div className="rellax rounded-xl border border-gray-800 bg-gray-900/50 p-6" data-rellax-speed="5">
+          <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6">
             <div className="text-3xl font-bold text-indigo-400 mb-3">3.</div>
             <h3 className="text-xl font-semibold mb-2">Customize & Launch</h3>
             <p className="text-gray-400">Choose your website's colors and fonts. Now you're ready to go!</p>
           </div>
         </div>
         <div className="max-w-2xl mx-auto">
-          <div className="rellax" data-rellax-speed="1">
+          <div>
             <h3 className="text-2xl font-semibold text-indigo-400 mb-2">A Truly Free Platform</h3>
             <p className="text-lg text-gray-300 mb-8">
               Yes. You can build, launch, and manage your online store without any monthly fees or hidden costs. We believe in empowering businesses to start and grow without financial barriers.
             </p>
           </div>
-          <div className="rellax" data-rellax-speed="2">
+          <div>
             <h3 className="text-2xl font-semibold text-indigo-400 mb-2">We Only Succeed When You Do</h3>
             <p className="text-lg text-gray-300">
               Our business model is designed to be a partnership. Instead of monthly fees, we earn a small 3% commission per transaction. This ensures we're always motivated to provide you with the best tools to help your business thrive.
@@ -339,9 +334,11 @@ const RellaxDemoSection = () => {
     </section>
   );
 };
-// SUB-COMPONENT: Footer (ENHANCED VERSION)
+
 //=================================================================
-const Footer = ({ onSignUpClick }) => { // <-- MODIFICATION: Added onSignUpClick prop
+// SUB-COMPONENT: Footer
+//=================================================================
+const Footer = ({ onSignUpClick }) => {
     const footerRef = useRef(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
@@ -385,7 +382,6 @@ const Footer = ({ onSignUpClick }) => { // <-- MODIFICATION: Added onSignUpClick
                 '--mouse-y': `${mousePosition.y}px`,
             }}
         >
-            {/* Spotlight Effect */}
             <div 
                 className="pointer-events-none absolute inset-0 transition-opacity duration-500 opacity-0 group-hover:opacity-100"
                 style={{
@@ -393,7 +389,6 @@ const Footer = ({ onSignUpClick }) => { // <-- MODIFICATION: Added onSignUpClick
                 }}
             />
 
-            {/* Pre-footer CTA */}
             <div className="relative border-b border-gray-800 py-20 px-4 sm:px-6 lg:px-8 text-center">
                  <motion.h2 
                     initial={{ opacity: 0, y: 20 }}
@@ -419,7 +414,6 @@ const Footer = ({ onSignUpClick }) => { // <-- MODIFICATION: Added onSignUpClick
                     transition={{ duration: 0.5, delay: 0.2, type: 'spring', stiffness: 150 }}
                     viewport={{ once: true, amount: 0.5 }}
                 >
-                    {/* MODIFICATION: Added onClick handler to the button */}
                      <button 
                         onClick={onSignUpClick}
                         className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-xl shadow-indigo-500/20"
@@ -429,25 +423,21 @@ const Footer = ({ onSignUpClick }) => { // <-- MODIFICATION: Added onSignUpClick
                 </motion.div>
             </div>
             
-            {/* Main Footer Content */}
             <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                    {/* Column 1: Brand */}
                     <motion.div custom={0} initial="hidden" whileInView="visible" variants={staggerVariants} viewport={{ once: true, amount: 0.5 }}>
                         <h3 className="text-xl font-bold mb-4">BizzySite</h3>
                         <p className="text-gray-400 text-sm">Empowering small businesses to succeed online.</p>
                     </motion.div>
 
-                    {/* Column 2: Links */}
                     <motion.div custom={1} initial="hidden" whileInView="visible" variants={staggerVariants} viewport={{ once: true, amount: 0.5 }}>
                          <h4 className="text-lg font-semibold mb-4">Product</h4>
                          <ul className="space-y-3 text-gray-400">
-                             {/* MODIFICATION: Updated links */}
                              <li><a href="#features-section" className="hover:text-indigo-400 transition-colors" data-cursor-hover>Features</a></li>
-                             <li><Link to="/blog" className="hover:text-indigo-400 transition-colors" data-cursor-hover>Blog</Link></li>                         </ul>
+                             <li><Link to="/blog" className="hover:text-indigo-400 transition-colors" data-cursor-hover>Blog</Link></li>
+                         </ul>
                     </motion.div>
 
-                    {/* Column 3: Contact */}
                     <motion.div custom={2} initial="hidden" whileInView="visible" variants={staggerVariants} viewport={{ once: true, amount: 0.5 }}>
                         <h4 className="text-lg font-semibold mb-4">Contact</h4>
                         <ul className="space-y-3 text-gray-400">
@@ -455,11 +445,9 @@ const Footer = ({ onSignUpClick }) => { // <-- MODIFICATION: Added onSignUpClick
                         </ul>
                     </motion.div>
 
-                     {/* Column 4: Social */}
                     <motion.div custom={3} initial="hidden" whileInView="visible" variants={staggerVariants} viewport={{ once: true, amount: 0.5 }}>
                          <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
                          <div className="flex space-x-4">
-                            {/* MODIFICATION: Replaced text with SVG icons and correct links */}
                             <a href="https://x.com/BizzySiteShop" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-indigo-400 transition-colors" data-cursor-hover>
                                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
@@ -487,8 +475,6 @@ const Footer = ({ onSignUpClick }) => { // <-- MODIFICATION: Added onSignUpClick
     );
 };
 
-
-// NEW: Add the CustomCursor component here
 //=================================================================
 // SUB-COMPONENT: Custom Cursor
 //=================================================================
@@ -501,10 +487,8 @@ const CustomCursor = () => {
       const target = e.target;
       
       if (cursorRef.current) {
-        // Base transform
         let transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
 
-        // Add scale effect on hover
         if (target.closest('button, a, [data-cursor-hover]')) {
           transform += ' scale(2.5)';
         }
@@ -540,27 +524,20 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // NEW: Lenis setup for smooth scrolling
     const lenis = new Lenis({
-      duration: 1.2, // speed
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easing function
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
 
-    // NEW: Connect Lenis to GSAP ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update)
     gsap.ticker.add((time)=>{
       lenis.raf(time * 1000)
     })
     gsap.ticker.lagSmoothing(0)
-
-    // NEW: Rellax setup
-    const rellax = new Rellax('.rellax', {
-      center: true,
-    });
+    
+    // Rellax setup has been removed
     
     return () => {
-      rellax.destroy();
-      // NEW: Clean up Lenis and GSAP ticker
       gsap.ticker.remove(lenis.raf);
       lenis.destroy();
     };
@@ -588,7 +565,6 @@ export default function LoginPage() {
           content="Start your free online store with BizzySite. The fastest and easiest way to launch your ecommerce business — no coding or upfront costs."
         />
       </Helmet>
-      {/* NEW: Add the custom cursor component */}
       <CustomCursor /> 
 
       <motion.div className="fixed top-0 left-0 right-0 h-1 bg-indigo-500 origin-left z-50" style={{ scaleX: scrollYProgress, willChange: 'transform' }} />
@@ -599,12 +575,11 @@ export default function LoginPage() {
       <main>
         <HeroSection onGetStartedClick={openSignUpModal} />
         <PinnedFeaturesSection />
-        <PinnedTestimonialsSection />  {/* <-- This uses the imported component */}
-        <RellaxDemoSection />
+        <PinnedTestimonialsSection />
+        <HowItWorksSection /> {/* <-- Updated component name */}
         <VideoGrowSection />
         <FAQ />
       </main>
-      {/* MODIFICATION: Passed the openSignUpModal function to the Footer */}
       <Footer onSignUpClick={openSignUpModal} />
       <AnimatePresence>
         {showModal && (

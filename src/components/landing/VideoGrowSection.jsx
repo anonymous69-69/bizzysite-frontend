@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useLayoutEffect } from 'react'; // Import useLayoutEffect
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -11,13 +11,12 @@ const VideoGrowSection = () => {
   const imageRef = useRef(null);
   const titleRef = useRef(null);
 
-  useEffect(() => {
+  // --- KEY CHANGE: Use useLayoutEffect instead of useEffect ---
+  useLayoutEffect(() => {
     let ctx = gsap.context(() => {
+      // Your existing GSAP logic remains the same
       const titleChars = new SplitText(titleRef.current, { type: "chars" }).chars;
-
-      // --- KEY CHANGE #1: HIDE THE TEXT IMMEDIATELY ---
-      // This command makes the characters invisible right away, before the user can see them.
-      // We use autoAlpha which handles both opacity and visibility.
+      
       gsap.set(titleChars, { autoAlpha: 0, scale: 0, rotation: () => Math.random() * 360 - 180 });
 
       const tl = gsap.timeline({
@@ -30,8 +29,6 @@ const VideoGrowSection = () => {
         },
       });
 
-      // --- KEY CHANGE #2: UPDATE THE ANIMATION ---
-      // Animate TO the visible state from the hidden state we just set.
       tl.to(
         titleChars,
         { 
@@ -44,7 +41,6 @@ const VideoGrowSection = () => {
         }
       );
 
-      // --- All other animations remain the same ---
       tl.fromTo(
         videoRef.current,
         { clipPath: "inset(10% 50% 10% 50%)", yPercent: 100 },
@@ -71,16 +67,16 @@ const VideoGrowSection = () => {
 
     }, sectionRef);
 
-    // This refresh is still important to ensure the trigger point is calculated correctly
+    // This refresh is still useful
     const refreshTimeout = setTimeout(() => {
       ScrollTrigger.refresh();
-    }, 300); // Increased delay slightly to be safer
+    }, 300);
 
     return () => {
       ctx.revert(); 
       clearTimeout(refreshTimeout);
     }; 
-  }, []);
+  }, []); // The dependency array remains empty
 
   // The JSX for the component remains unchanged
   return (
@@ -89,19 +85,19 @@ const VideoGrowSection = () => {
       <div className="sticky top-0 flex items-center justify-center w-full h-screen px-4">
         <div className="relative flex flex-col items-center justify-center w-full max-w-7xl gap-6">
         <div ref={titleRef} className="uppercase text-[17vw] leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
-  GET STARTED{' '}
-  <span style={{ display: 'inline-block' }}>NOW</span>
-</div>
+          GET STARTED{' '}
+          <span style={{ display: 'inline-block' }}>NOW</span>
+        </div>
           <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
             <div ref={videoRef} className="w-[70%] h-[29rem] max-w-7xl rounded-md overflow-clip pointer-events-auto">
               <div ref={imageRef} className="flex items-center justify-center w-full h-full p-8 text-center bg-white text-black">
               <h2 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl" style={{ fontFamily: "'Anton', sans-serif" }}>
-    your business<br/>
-    <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-      your website
-    </span><br/>
-    your freedom
-</h2>
+                  your business<br/>
+                  <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+                    your website
+                  </span><br/>
+                  your freedom
+              </h2>
               </div>
             </div>
           </div>
