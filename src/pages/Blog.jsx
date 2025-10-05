@@ -13,6 +13,18 @@ import Lenis from '@studio-freight/lenis';
 
 const blogPosts = [
 
+    {
+        id: 8,
+        slug: "small-business-growth-guide", // Matches the route in App.js
+        category: "Marketing",
+        title: "From Social Media to Success: A Complete Growth Guide for Small Creative Businesses",
+        excerpt: "Transform your passion into profit with proven strategies for makers and bakers, complete with low-cost startup investment estimates.",
+        imageUrl: "/guide.png", // Use a relevant image URL
+        author: "BizzySite Team",
+        date: "Sep 28, 2025",
+    },
+
+
 
     {
         id: 7, // New post

@@ -13,6 +13,8 @@ import FramerSpinner from './components/FramerSpinner';
 const Storefront = lazy(() => import('./storefront'));
 const BlogPage = lazy(() => import('./pages/Blog.jsx'));
 const ShopifyVsBizzySitePage = lazy(() => import('./pages/page1.jsx'));
+const GrowthGuidePage = lazy(() => import('./pages/page2.jsx'));
+
 const Customize = lazy(() => import('./customize'));
 const Products = lazy(() => import('./products'));
 const Orders = lazy(() => import('./orders'));
@@ -84,6 +86,8 @@ function App() {
                 <Route path="/preview" element={<ViewSite />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/shopify-vs-bizzysite" element={<ShopifyVsBizzySitePage />} />
+                <Route path="/blog/small-business-growth-guide" element={<GrowthGuidePage />} />
+
 
                 {/* --- Private Routes Wrapped by Layout --- */}
                 <Route element={<PrivateRoute><Layout /></PrivateRoute>}>

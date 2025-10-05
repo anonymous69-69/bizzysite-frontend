@@ -529,6 +529,7 @@ export default function LoginPage() {
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
 
+    lenis.scrollTo(0, { immediate: true }); 
     lenis.on('scroll', ScrollTrigger.update)
     gsap.ticker.add((time)=>{
       lenis.raf(time * 1000)

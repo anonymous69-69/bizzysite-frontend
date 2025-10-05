@@ -210,7 +210,7 @@ export default function ShopifyVsBizzySitePage() {
                         </p>
                         <p className="text-xl">
                             Ready to build your dream business without the financial burden? 
-                            <Link to="/#" className="font-bold text-indigo-400 hover:text-indigo-300 transition-colors ml-2"> 
+                            <Link to="/" className="font-bold text-indigo-400 hover:text-indigo-300 transition-colors ml-2"> 
                                 Get started with BizzySite today!
                             </Link>
                         </p>
