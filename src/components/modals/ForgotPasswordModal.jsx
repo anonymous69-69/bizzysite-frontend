@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
-const ForgotPasswordModal = ({ onClose }) => {
+// Added onBackToLogin prop
+const ForgotPasswordModal = ({ onClose, onBackToLogin }) => {
     const [resetEmail, setResetEmail] = useState("");
     const [isSendingReset, setIsSendingReset] = useState(false);
     const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
+    const [error, setError] = useState(""); // State is correctly present
 
     const handleResetRequest = async () => {
         if (!resetEmail) {
@@ -24,6 +25,7 @@ const ForgotPasswordModal = ({ onClose }) => {
             });
             const data = await response.json();
             if (!response.ok) {
+                // Display specific API error if available
                 throw new Error(data.message || 'Failed to send reset link.');
             }
             setMessage("If an account with that email exists, a password reset link has been sent.");
@@ -56,7 +58,16 @@ const ForgotPasswordModal = ({ onClose }) => {
                         </div>
                         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
                         <div className="flex gap-3 pt-4">
-                            <button type="button" onClick={onClose} className="flex-1 py-2.5 bg-gray-700 text-white font-medium rounded-md hover:bg-gray-600 transition-colors" disabled={isSendingReset}>Cancel</button>
+                            {/* Use onBackToLogin if provided, otherwise fallback to Cancel */}
+                            {onBackToLogin ? (
+                                <button type="button" onClick={onBackToLogin} className="flex-1 py-2.5 bg-gray-700 text-white font-medium rounded-md hover:bg-gray-600 transition-colors" disabled={isSendingReset}>
+                                    Back to Login
+                                </button>
+                            ) : (
+                                <button type="button" onClick={onClose} className="flex-1 py-2.5 bg-gray-700 text-white font-medium rounded-md hover:bg-gray-600 transition-colors" disabled={isSendingReset}>
+                                    Cancel
+                                </button>
+                            )}
                             <button type="button" onClick={handleResetRequest} className="flex-1 py-2.5 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition-colors disabled:bg-indigo-400" disabled={isSendingReset}>{isSendingReset ? "Sending..." : "Send Reset Link"}</button>
                         </div>
                     </div>

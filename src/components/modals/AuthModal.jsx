@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { auth, provider } from '../../firebase';
 import { signInWithPopup } from 'firebase/auth';
+// You might need to install 'lucide-react' or replace these with your preferred icon components
+import { Eye, EyeOff } from 'lucide-react'; 
 
 const AuthModal = ({ isLogin, setIsLogin, onClose, onSuccess, onForgotPasswordClick }) => {
     const [email, setEmail] = useState("");
@@ -9,11 +11,12 @@ const AuthModal = ({ isLogin, setIsLogin, onClose, onSuccess, onForgotPasswordCl
     const [name, setName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-
+    const [showPassword, setShowPassword] = useState(false); // NEW: Password visibility state
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(""); // Clear previous errors
+
         if (!isLogin && (!name || !email || !password)) {
             setError("Please fill in all fields.");
             return;
@@ -29,7 +32,22 @@ const AuthModal = ({ isLogin, setIsLogin, onClose, onSuccess, onForgotPasswordCl
             const url = `https://bizzysite.onrender.com/api/${isLogin ? "login" : "signup"}`;
             const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
             const data = await response.json();
-            if (!response.ok) { throw new Error(data.message || "Request failed"); }
+
+            if (!response.ok) { 
+                let errorMessage = data.message || "Request failed";
+                
+                // Enhanced error handling for user feedback
+                if (response.status === 401 && isLogin) {
+                    errorMessage = "Invalid email or password. Please try again.";
+                } else if (response.status === 409 && !isLogin) {
+                    // Assuming 409 Conflict for existing account during signup
+                    errorMessage = "An account with this email already exists. Please sign in instead.";
+                } else if (isLogin && errorMessage.toLowerCase().includes("credentials")) {
+                    errorMessage = "Invalid email or password. Please try again.";
+                }
+
+                throw new Error(errorMessage); 
+            }
             
             const userId = String(data.userId || data._id || "").trim();
             if (!userId) { throw new Error("Invalid user ID received."); }
@@ -113,7 +131,25 @@ const AuthModal = ({ isLogin, setIsLogin, onClose, onSuccess, onForgotPasswordCl
                     </div>
                     <div>
                         <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">Password</label>
-                        <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-2 border border-gray-700 rounded-md bg-gray-800/70 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+                        <div className="relative">
+                            <input 
+                                type={showPassword ? "text" : "password"} 
+                                id="password" 
+                                value={password} 
+                                onChange={(e) => setPassword(e.target.value)} 
+                                className="w-full px-4 py-2 border border-gray-700 rounded-md bg-gray-800/70 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-10" // Add pr-10 for the icon
+                                required 
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors"
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                                {/* Using placeholder icons, replace with actual imported ones */}
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />} 
+                            </button>
+                        </div>
                     </div>
                     {error && <p className="text-red-400 text-sm text-center">{error}</p>}
                     {isLogin && (<div className="text-right"><button type="button" onClick={onForgotPasswordClick} className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">Forgot Password?</button></div>)}
