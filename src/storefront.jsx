@@ -154,6 +154,14 @@ export default function Storefront() {
       setNavLocked(false);
 
     } catch (err) {
+
+      if (err.message.includes('already taken')) {
+        setNameInputError(err.message + ' 😔'); // Set field-specific error
+        setNavLocked(true); // Re-lock navigation
+        nameInputRef.current?.focus(); // Focus on the input
+     } else {
+        setNameInputError(''); // Clear any previous field error
+     }
       setError(`Save failed: ${err.message}`);
       toast.error(`Save failed: ${err.message}`, { id: toastId });
     } finally {
