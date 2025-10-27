@@ -28,7 +28,8 @@ const faqData = [
   }
 ];
 
-const FaqItem = ({ question, answer }) => {
+// MODIFIED: FaqItem now accepts an 'index' prop for staggered animation
+const FaqItem = ({ question, answer, index }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const variants = {
@@ -37,7 +38,14 @@ const FaqItem = ({ question, answer }) => {
   };
 
   return (
-    <div className="border-b border-gray-800">
+    // WRAPPED: The entire item in motion.div for the pop-up effect
+    <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 + index * 0.1, ease: "easeOut" }} // Staggered delay
+        viewport={{ once: true, amount: 0.3 }} // Trigger when 30% of the item is visible
+        className="border-b border-gray-800"
+    >
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex justify-between items-center w-full py-5 text-left text-lg font-medium text-gray-200 hover:text-indigo-400 transition-colors focus:outline-none"
@@ -66,29 +74,45 @@ const FaqItem = ({ question, answer }) => {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };
 
 const FAQ = () => {
   return (
     <section className="relative bg-black py-24 sm:py-32 overflow-hidden">
-        {/* Decorative Gradient Blurs */}
+        {/* Decorative Gradient Blurs (no change) */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full filter blur-3xl opacity-50 animate-pulse"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full filter blur-3xl opacity-50 animate-pulse animation-delay-4000"></div>
 
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center">
-                <h2 className="text-4xl sm:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-6">
+                {/* MODIFIED: Changed h2 to motion.h2 and added scroll animation props */}
+                <motion.h2 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    viewport={{ once: true, amount: 0.5 }}
+                    className="text-4xl sm:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-6"
+                >
                     Frequently Asked Questions
-                </h2>
-                <p className="text-xl text-gray-400 mb-12">
+                </motion.h2>
+                
+                {/* MODIFIED: Changed p to motion.p and added scroll animation props */}
+                <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+                    viewport={{ once: true, amount: 0.5 }}
+                    className="text-xl text-gray-400 mb-12"
+                >
                     Have questions? We've got answers. If you can't find what you're looking for, feel free to reach out.
-                </p>
+                </motion.p>
             </div>
             <div className="space-y-4">
+                {/* MODIFIED: Passed 'index' to FaqItem to enable staggered pop-up */}
                 {faqData.map((faq, index) => (
-                    <FaqItem key={index} question={faq.question} answer={faq.answer} />
+                    <FaqItem key={index} question={faq.question} answer={faq.answer} index={index} />
                 ))}
             </div>
         </div>
